@@ -13,7 +13,7 @@
 - 升压充电模块*1
 
 ## 2.安装Keil5(MDK) 
-- 参考链接进行安装：https://blog.csdn.net/weixin_42911200/article/details/81590158 
+- 参考链接进行安装：https://blog.csdn.net/weixin_42911200/article/details/81590158
 - 注意要安装Keil.STM32F1xx_DFP.2.3.0.pack支持包，因为我们要用STM32F103C8T6芯片的库函数编写。
 
 ## 3.新建工程 
