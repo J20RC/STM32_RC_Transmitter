@@ -4,7 +4,7 @@
 
 ## 1.材料清单 
 - STM32F103C8T6蓝色开发板1（黑色板也可以） 
-![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/bullpill.jpg)
+![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/bluepill.jpg)
 - USB转TTL模块1 
 - ST-LINK V2仿真器下载器1（调试STM32性价比极高）
 - OLED屏幕（4管脚）1 
