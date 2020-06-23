@@ -3,28 +3,28 @@
  基于STM32F103C8T6和MDK开发航模遥控器
 
 ## 1.材料清单 
-- STM32F103C8T6蓝色开发板1（黑色板也可以） 
+- STM32F103C8T6蓝色开发板*1（黑色板也可以） 
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/bluepill.jpg)
 
-- USB转TTL模块1 
+- USB转TTL模块*1 
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/usbttl.png)
 
-- ST-LINK V2仿真器下载器1（调试STM32性价比极高）
+- ST-LINK V2仿真器下载器*1（调试STM32性价比极高）
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/stlink.png)
 
-- OLED屏幕（4管脚）1 
+- OLED屏幕（4管脚）*1 
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/oled.png)
 
-- NRF24L01模块
+- NRF24L01模块*1
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/NRF24L01.png)
 
-- 航模遥控器所用的遥杆2 (如图遥控器15RMB，使用上面的遥杆即可)
+- 航模遥控器所用的遥杆*2 (如图遥控器15RMB，使用上面的遥杆即可)
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/yg.png)
 
 - 两段/三段钮子开关>=2 
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/kg.png)
 
-- 3.7V锂电池1 
+- 3.7V锂电池*1 
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/bat.png)
 
 - 锂电池充电模块*1
