@@ -1,8 +1,8 @@
 # STM32_RC_Transmitter
 
- 歼20航模遥控器，基于STM32F103C8T6和MDK标准库开发的航模遥控器
+## 歼20航模遥控器，基于STM32F103C8T6和MDK标准库开发的航模遥控器
  项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
- 开发人员（排名不分先后）：
+## 开发人员（排名不分先后）：
  * CaiZi负责基本版遥控器；
  * A-XIN负责OLED菜单显示；
  
