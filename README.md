@@ -1,11 +1,11 @@
-![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/logo.png)
+![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/logo.png)
 # 歼20航模遥控器
  - 基于STM32F103C8T6和MDK标准库开发的航模遥控器
  - 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
 ## 非常感谢项目中所有的开发人员：
- * CaiZi(B站up主)；
+ * CaiZi（B站up主）；
  * A-XIN；
- * ZL_Studio(B站up主)；
+ * ZL_Studio（B站up主）；
  * 小何；
  
 ## 欢迎熟悉STM32开发、AD画图、结构设计、PC端应用程序、Ardroid开发等技术的有识之士加入我们的开源队伍哈~
