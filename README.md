@@ -1,5 +1,5 @@
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/logo.png)
-# 歼20航模遥控器
+# J-20航模遥控器
  - 基于STM32F103C8T6和MDK标准库开发的航模遥控器
  - 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
 ## 非常感谢项目中所有的开发人员：
