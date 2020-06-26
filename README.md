@@ -29,7 +29,7 @@
 - 待更新
 
 ## 非常感谢项目中所有的开发人员：
- * CaiZi（B站up主）；
+ * 蔡子CaiZi（B站up主）@Cai-Zi（https://github.com/Cai-Zi/Cai-Zi.github.io）；
  * A-XIN；
  * 小何；
  * ZL_Studio（B站up主）；
