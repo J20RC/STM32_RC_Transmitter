@@ -1,10 +1,12 @@
-# STM32_RC_Transmitter
-
-## 歼20航模遥控器，基于STM32F103C8T6和MDK标准库开发的航模遥控器
- 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
-## 开发人员（排名不分先后）：
- * CaiZi负责基本版遥控器；
- * A-XIN负责OLED菜单显示；
+![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/logo.png)
+# 歼20航模遥控器
+ - 基于STM32F103C8T6和MDK标准库开发的航模遥控器
+ - 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
+## 非常感谢项目中所有的开发人员：
+ * CaiZi(B站up主)；
+ * A-XIN；
+ * ZL_Studio(B站up主)；
+ * 小何；
  
 ## 欢迎熟悉STM32开发、AD画图、结构设计、PC端应用程序、Ardroid开发等技术的有识之士加入我们的开源队伍哈~
  - QQ群：1091996634，密码：歼20
@@ -27,5 +29,8 @@
 
 ## 3.新建工程 
 - 新建keil库函数工程，参考链接 https://www.cnblogs.com/zeng-1995/p/11308622.html
+
+## 版本说明
+- 待更新
 
 
