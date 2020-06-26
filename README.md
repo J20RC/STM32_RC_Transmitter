@@ -31,8 +31,8 @@
 ## 非常感谢项目中所有的开发人员：
  * CaiZi（B站up主）；
  * A-XIN；
- * ZL_Studio（B站up主）；
  * 小何；
+ * ZL_Studio（B站up主）；
  * 王天天@WangTiantian139（https://wangtiantian139.github.io/）；
 
 
