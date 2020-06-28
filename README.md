@@ -28,11 +28,14 @@
 ## 版本说明
 - 待更新
 
-## 非常感谢项目中所有的开发人员：
+## 非常感谢项目中所有的贡献者：
  * 蔡子CaiZi（B站up主）@Cai-Zi  https://cai-zi.github.io/
- * A-XIN；
- * 小何；
- * ZL_Studio（B站up主）；
+ * A-XIN;
+ * 小何;
+ * ZL_Studio（B站up主）;
  * 王天天@WangTiantian139  https://wangtiantian139.github.io/
+ * 刘桶桶;
+ * 简繁;
+ * 王博;
 
 
