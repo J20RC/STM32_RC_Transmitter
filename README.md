@@ -1,5 +1,5 @@
 ![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/logo.png)
-# J-20航模遥控器
+# :airplane: J-20航模遥控器
  - 基于STM32和MDK标准库开发的航模遥控器
  - 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
  - Bilibili宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
