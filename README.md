@@ -1,4 +1,4 @@
-![Alt text](https://github.com/Cai-Zi/STM32_RC_Transmitter/blob/master/images/logo.png)
+![Alt text](./images/logo.png)
 # :airplane: J-20航模遥控器
  - 基于STM32和MDK标准库开发的航模遥控器
  - 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
@@ -12,9 +12,9 @@
 
 ## 1.材料清单 
 | 器件名称        			| 数量   	| 上传图片名称  		| 备注 |
-| ------------- 			|:------:	| 	:-------------:		|------|
-| STM32F103C8T6蓝色开发板 	| 1 		| images/bluepill.jpg 	| |
-| USB转TTL模块			 	| 1 		| images/usbttl.png 	| |
+| ------------- 			| :------:	| :-------------:		|------|
+| STM32F103C8T6蓝色开发板 	| 1 		| images/bluepill.jpg 	|
+| USB转TTL模块			 	| 1 		| images/usbttl.png 	|
 | ST-LINK V2仿真器下载器 	| 1 		| images/stlink.png 	|调试STM32性价比极高|
 | OLED屏幕（7管脚）		 	| 1 		| images/OLED.png	 	|
 | NRF24L01模块			 	| 2 		| images/NRF24L01.png 	|
