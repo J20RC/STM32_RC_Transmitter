@@ -4,7 +4,7 @@
  - 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
  - Bilibili项目宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
  - 我们的开源宗旨：自由 协调 开放 合作 共享
- - 和一群志同道合的人，做自己所热爱的事
+ - 和一群志同道合的人，做自己所热爱的事！
 ## 拥抱开源，我们期待你的加入！
  - 欢迎熟悉STM32开发、PCB设计、结构设计、UI设计、PC端应用程序、Ardroid开发等技术的有识之士加入我们的开源队伍哈~
  - QQ群：1091996634，密码：歼20
