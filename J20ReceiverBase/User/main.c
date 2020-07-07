@@ -46,6 +46,7 @@ int main()
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM3_PWM_Init(19999,71);//预分频72，频率1MHz，周期1us；自动装载值20 000，故PWM周期1us*20 000
+	TIM2_PWM_Init(19999,71);
 	TIM4_Counter_Init(9,71); //预分频1MHz，周期1us，自动装载值10，故最小计数单位10us
 	RTC_Init();	  	//RTC初始化
 	LED_Init();		//LED初始化
@@ -74,12 +75,19 @@ int main()
 				PWMvalue[i] = ((u16)chPacket[startIndex] << 8) | ((u16)(chPacket[startIndex+1]));// 合并u8为u16
 				startIndex = startIndex+2;
 			}
-			TIM_SetCompare2(TIM3,PWMvalue[0]);//输出给PWM-PB5
-			//printf("%d\n",PWMvalue[0]);//printf("\n");
+			TIM_SetCompare1(TIM2,PWMvalue[0]);//输出给PWM-PA0
+			TIM_SetCompare2(TIM2,PWMvalue[1]);//输出给PWM-PA1
+			TIM_SetCompare3(TIM2,PWMvalue[2]);//输出给PWM-PA2
+			TIM_SetCompare4(TIM2,PWMvalue[3]);//输出给PWM-PA3
+			TIM_SetCompare1(TIM3,PWMvalue[4]);//输出给PWM-PA6
+			TIM_SetCompare2(TIM3,PWMvalue[5]);//输出给PWM-PA7
+			TIM_SetCompare3(TIM3,PWMvalue[6]);//输出给PWM-PB0
+			TIM_SetCompare4(TIM3,PWMvalue[7]);//输出给PWM-PB1
+			//printf("%d\t%d\t%d\t%d\t%d\n",PWMvalue[0],PWMvalue[1],PWMvalue[2],PWMvalue[3],PWMvalue[4]);
 			LED = 0;
 			lastTime = nowTime;
-			if(PWMvalue[1]>1800) testPin = 1;
-			else testPin = 0;
+//			if(PWMvalue[1]>1800) testPin = 1;
+//			else testPin = 0;
 		}
 //		printf("%d\t%d\n",nowTime,lastTime);
 		if(nowTime-lastTime>100*2000)//距离上次接收时间大于2s，则说明失去信号

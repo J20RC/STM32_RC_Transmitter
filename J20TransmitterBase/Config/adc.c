@@ -88,18 +88,21 @@ void  DMA1_Channel1_IRQHandler(void)
 		DMA_ClearITPendingBit(DMA1_IT_TC1);//清除标志
 	}
 }
-//GPIO配置，PA0-5
+//GPIO配置，PA0-7,PB0-1
 void GPIOA_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	  //使能GPIOA时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB, ENABLE);	  //使能GPIOA时钟
 
-	//PA0-5 作为模拟通道输入引脚   
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5;
+	//PA0-7 PB0-1作为模拟通道输入引脚   
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);  
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_Init(GPIOB, &GPIO_InitStructure); 
 }
 
 //初始化ADC
@@ -127,10 +130,14 @@ void  Adc_Init(void)
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 4, ADC_SampleTime_239Cycles5);		//配置ADC1通道3为239.5个采样周期
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 5, ADC_SampleTime_239Cycles5);		//配置ADC1通道4为239.5个采样周期
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 6, ADC_SampleTime_239Cycles5);		//配置ADC1通道5为239.5个采样周期
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 7, ADC_SampleTime_239Cycles5);		//配置ADC1通道6为239.5个采样周期
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 8, ADC_SampleTime_239Cycles5);		//配置ADC1通道7为239.5个采样周期
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 9, ADC_SampleTime_239Cycles5);		//配置ADC1通道8为239.5个采样周期
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_9, 10, ADC_SampleTime_239Cycles5);		//配置ADC1通道9为239.5个采样周期
 	
-	//使能ADC、DMA
-	ADC_DMACmd(ADC1,ENABLE);
-	ADC_Cmd(ADC1,ENABLE);
+	
+	ADC_DMACmd(ADC1,ENABLE);//ADC向DMA发出请求，请求DMA传输数据
+	ADC_Cmd(ADC1,ENABLE);//使能ADC
  
 	ADC_ResetCalibration(ADC1);				//复位校准寄存器
 	while(ADC_GetResetCalibrationStatus(ADC1));	//等待校准寄存器复位完成

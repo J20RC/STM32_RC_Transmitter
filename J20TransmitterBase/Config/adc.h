@@ -2,7 +2,7 @@
 #define __CONFIG_H
 #include "stm32f10x.h" //记得添加此头文件，因为config.c用到GPIO相关函数等
 #include "sys.h"
-#define chNum 6		//采样通道数
+#define chNum 10		//采样通道数
 #define sampleNum 10 //每个通道采样次数
 extern u16 chValue[chNum*10];//ADC采样值
 extern u16 PWMvalue[chNum];//控制PWM占空比
