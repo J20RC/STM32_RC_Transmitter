@@ -1,26 +1,32 @@
 /*
-=============J20航模遥控器遥控器端-基础版V1.0==============
-	芯片STM32F103C8T6，使用ADC读取电位器的电压采样值，0~4095转换到1000~2000，赋值给PWM输出。
-					 TIM2定时触发ADC采样，通过DMA传输给变量ch1Value，取10次进行均值滤波。
-	控制舵机的PWM：周期20ms，高电平时间0.5ms~2.5ms变化，可控制舵机0~180°的角度变化，
-				   但航模舵面的实际控制中，不可能有180°变化，所以通用的高电平宽度其实是1ms~2ms
-	电位器：GND - PA0 - 3.3V
+=============J20航模遥控器接收端-基础版V1.0==============
+	芯片STM32F103C8T6，实现了NRF24L01无线接收和10个通道的PWM输出
+	NRF24L01模块：
+				GND   	电源地
+				VCC		接3.3V电源
+				CSN		PB12
+				SCK		PB13
+				MISO	PB14
+				MOSI	PB15
+				CE		PA8
+				IRQ		PA9
+	PWM输出：PA0-3，PA6-7，PB0-1
 	OLED显示屏：
-				GND   电源地
-				VCC   接3.3v电源
-				SCL   接PB8（SCL）
-				SDA   接PB9（SDA）
+				GND   	电源地
+				VCC   	接3.3V电源
+				SCL   	接PB8（SCL）
+				SDA   	接PB9（SDA）
 	串口USB-TTL接法：	
-				GND   电源地
-				3V3   接3.3v
-				TXD   接PB7
-				RXD   接PB6
+				GND   	电源地
+				3V3   	接3.3V
+				TXD   	接PB7
+				RXD   	接PB6
 	ST-LINK V2接法：
-				GND   电源地
-				3V3   接3.3v
-				SWCLK 接DCLK
-				SWDIO 接DIO
-	PWM输出：PB5
+				GND   	电源地
+				3V3   	接3.3V
+				SWCLK 	接DCLK
+				SWDIO 	接DIO
+	
 	by Bilibili 蔡子CaiZi
 */
 #include "pwm.h"
