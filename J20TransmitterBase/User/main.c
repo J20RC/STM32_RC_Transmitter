@@ -27,7 +27,7 @@
 				SWCLK 	接DCLK
 				SWDIO 	接DIO
 	
-	by Bilibili 蔡子CaiZi
+	by J20开发团队
 */
 #include "adc.h"
 #include "delay.h"
