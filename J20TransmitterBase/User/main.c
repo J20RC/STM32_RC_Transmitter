@@ -1,16 +1,31 @@
 /*
-=============J20航模遥控器遥控器端-基础版V1.0==============
-	芯片STM32F103C8T6，实现了NRF24L01无线发射和10个通道的ADC采样
+=============J20航模遥控器遥控器端-基础版V1.1==============
+	开发板：STM32F103C8T6蓝色板
 	NRF24L01模块：
 				GND   	电源地
 				VCC		接3.3V电源
-				CSN		PB12
-				SCK		PB13
-				MISO	PB14
-				MOSI	PB15
-				CE		PA8
-				IRQ		PA9
-	ADC采样：PA0-7、PB0-1
+				CSN		接PB12
+				SCK		接PB13
+				MISO	接PB14
+				MOSI	接PB15
+				CE		接PA8
+				IRQ		接PA9
+	ADC采样：PA0-7
+	电池电压检测：PB0
+	蜂鸣器：PA10
+	6个按键：
+				CH1Left 接PB5
+				CH1Right接PB4
+				CH2Up	接PA15
+				CH2Down	接PB3
+				CH4Left	接PA12
+				CH4Right接PA11
+	旋转编码器模块：
+				GND   	电源地
+				VCC   	接3.3V电源
+				SW		接PB11
+				DT		接PB10
+				CLK		接PB1
 	OLED显示屏：
 				GND   	电源地
 				VCC   	接3.3V电源
@@ -32,27 +47,37 @@
 #include "adc.h"
 #include "delay.h"
 #include "usart.h"
+#include "rtc.h"
 #include "stm32f10x.h"
 #include "oled.h"
 #include "stdio.h"
 #include "string.h"
 #include "nrf24l01.h"
 #include "led.h"
+#include "key.h"
+
 int main()
 {
 	u16 t=0, tNum=0;
 	u8 chPacket[32];
-//	u8 txt[16]={0};
+	for(int i=0;i<chNum;i++)
+	{
+		chLower[i] 	= 0;	//遥杆的最小值
+		chMiddle[i] = 2047;	//遥杆的中值
+		chUpper[i] 	= 4095;	//遥杆的最大值
+		chReverse[i] = 1;	//通道的正反，1为正常，0为反转
+	}
 	delay_init();//初始化延时函数
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(115200);//初始化串口1，波特率为115200
-	TIM2_Init(499,71);//1MHz，每500us采集一次；可设置9us以上，但过小影响OLED显示
+	TIM2_Init(499,71);//1MHz，每500us进行ADC采样一次；
+	TIM3_Init(19999,71);//1MHz，每20ms检测按键一次；
 	DMA1_Init();	//DMA初始化
-	GPIOA_Init();	//PA初始化
 	Adc_Init();		//ADC初始化
-	//RTC_Init();	  	//RTC初始化
+	RTC_Init();		//RTC初始化
 	LED_Init();		//LED初始化
-	OLED_Init();	//初始化OLED  
+	KEY_Init();		//KEY初始化
+	OLED_Init();	//初始化OLED,这一步仿真耗时6s
 	OLED_Clear();
 	NRF24L01_Init();//初始化NRF24L01
 	while(NRF24L01_Check())
@@ -61,6 +86,7 @@ int main()
 	}
 	NRF24L01_TX_Mode();
 	while (1){
+		
 		if(NRF24L01_TxPacket(chPacket)==TX_OK)
 		{
 			//printf("%d\n",PWMvalue[1]);
@@ -86,6 +112,8 @@ int main()
 		}
 		if(tNum > 500)
 		{
+			if(batVoltSignal==1) Beeper = !Beeper;//蜂鸣器间断鸣叫，报警
+			else Beeper = 0;//不报警
 			LED = !LED;// LED闪烁表示正在发送数据
 			tNum = 0;
 		}	

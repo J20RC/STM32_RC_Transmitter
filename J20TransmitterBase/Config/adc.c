@@ -5,6 +5,13 @@
 #include "rtc.h" 
 u16 chValue[chNum*10];//ADC采样值
 u16 PWMvalue[chNum];//控制PWM占空比
+u16 chLower[chNum];//遥杆的最小值
+u16 chMiddle[chNum];//遥杆的中值
+u16 chUpper[chNum];//遥杆的最大值
+u16 chReverse[chNum];//通道的正反，1为正常，0为反转
+float batVolt,warnBatVolt=4.0;//电池电压，报警电压
+u8 batVoltSignal=0;//是否报警，1为报警，0为正常
+
 #define ADC1_DR_Address    ((u32)0x4001244C)		//ADC1的地址
 //通用定时器2中断初始化
 //这里时钟选择为APB1的2倍，而APB1为36M
@@ -70,46 +77,50 @@ void DMA1_Init(void)
 	DMA_Cmd(DMA1_Channel1,ENABLE);
 }
 
-//中断处理函数
+//DMA中断处理函数
 void  DMA1_Channel1_IRQHandler(void)
 {
 	int chResult[chNum],i;
 	if(DMA_GetITStatus(DMA1_IT_TC1)!=RESET){
+		
 		//中断处理代码
-		for(i=0; i<chNum; i++)
+		for(i=0; i<chNum-1; i++)
 		{
 			chResult[i] = GetMedianNum(chValue,i);//中值滤波
-			PWMvalue[i] = (int)map(chResult[i],0,4092,1000,2000);//数值映射
+			PWMvalue[i] = mapChValue(chResult[i], chLower[i], chMiddle[i], chUpper[i], chReverse[i]);//数值映射
 //			printf("%d\t",PWMvalue[i]);
 		}
-//		printf("\n");
-//		printf("当前时间：%d:%d:%d\r\n",calendar.hour,calendar.min,calendar.sec);
+		
+		batVolt = GetMedianNum(chValue,8)*3.3*3/4095;//电池电压采样
+		if(batVolt < warnBatVolt) batVoltSignal = 1;// 报警信号
+		else batVoltSignal = 0;
+//		printf("%f,%f,%d\n",batVolt,warnBatVolt,batVoltSignal);
+//		printf("\n当前时间：%d:%d:%d\r\n",calendar.hour,calendar.min,calendar.sec);
 		
 		DMA_ClearITPendingBit(DMA1_IT_TC1);//清除标志
 	}
 }
-//GPIO配置，PA0-7,PB0-1
+//GPIO配置模拟输入，PA0-7,PB0
 void GPIOA_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB, ENABLE);	  //使能GPIOA时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB, ENABLE);	  //使能GPIOA B时钟
 
-	//PA0-7 PB0-1作为模拟通道输入引脚   
+	//PA0-7 PB0作为模拟通道输入引脚   
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);  
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	GPIO_Init(GPIOB, &GPIO_InitStructure); 
 }
 
-//初始化ADC
-//这里我们仅以规则通道为例
-//我们默认将开启通道0~3																	   
+//初始化ADC															   
 void  Adc_Init(void)
 { 	
+	GPIOA_Init();
 	ADC_InitTypeDef ADC_InitStructure;
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	  //使能ADC1通道时钟
@@ -133,7 +144,6 @@ void  Adc_Init(void)
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 7, ADC_SampleTime_239Cycles5);		//配置ADC1通道6为239.5个采样周期
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 8, ADC_SampleTime_239Cycles5);		//配置ADC1通道7为239.5个采样周期
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 9, ADC_SampleTime_239Cycles5);		//配置ADC1通道8为239.5个采样周期
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_9, 10, ADC_SampleTime_239Cycles5);		//配置ADC1通道9为239.5个采样周期
 	
 	
 	ADC_DMACmd(ADC1,ENABLE);//ADC向DMA发出请求，请求DMA传输数据
@@ -149,7 +159,7 @@ void  Adc_Init(void)
 }
 
 //获得ADC值，此函数未使用
-//ch:通道值 0~9
+//ch:通道值 0~8
 u16 Get_Adc(u8 ch)   
 {
   	//设置指定ADC的规则组通道，一个序列，采样时间
@@ -159,7 +169,7 @@ u16 Get_Adc(u8 ch)
 	return ADC_GetConversionValue(ADC1);	//返回最近一次ADC1规则组的转换结果
 }
 
-//ch:通道值 0~9，采样times次后作均值滤波，此函数未使用
+//ch:通道值 0~8，采样times次后作均值滤波，此函数未使用
 u16 Get_Adc_Average(u8 ch,u8 times)
 {
 	u32 temp_val=0;
@@ -173,16 +183,50 @@ u16 Get_Adc_Average(u8 ch,u8 times)
 }
 
 
-/*函数说明：仿Arduino,将一个数字从一个范围重新映射到另一个范围
-也就是说，fromLow的值将映射到toLow，fromlhigh到toHigh的值等等。
+/*函数：float map(float value,float fromLow,float fromHigh,float toLow,float toHigh)
+* 说明：仿Arduino,将一个数字从一个范围重新映射到另一个范围
+		也就是说，fromLow的值将映射到toLow，fromlhigh到toHigh的值等等。
+* 参数：value：待映射的数值；
+		fromLow：原范围的最小值
+		fromHigh：原范围的最大值
+		toLow：要转换的范围的最小值
+		toHigh：要转换的范围的最大值
+* 返回：转换后的数值
 */
 float map(float value,float fromLow,float fromHigh,float toLow,float toHigh)
 {
 	return ((value-fromLow)*(toHigh-toLow)/(fromHigh-fromLow)+toLow);
 }
 
-/*函数说明：对数组进行中值滤波，返回中值
-bArray - 待滤波的数组；ch - 采样通道0~chNum-1；
+/*函数：int mapChValue(int val, int lower, int middle, int upper, int reverse)
+* 说明：将ADC获取的采样值转换到1000~2000，lower~middle~upper适配遥杆的范围，
+		并加入正反开关的控制。
+* 参数：val：该通道ADC当前采样值；
+		lower：该通道遥杆最低位置时的ADC采样值；
+		middle：该通道遥杆回中时的ADC采样值；
+		upper：该通道遥杆最高位置时的ADC采样值；
+		reverse：该通道正反开关状态，1为正常，0为反转
+* 返回：该通道变换后的值(1000~2000)
+*/
+int mapChValue(int val, int lower, int middle, int upper, int reverse)
+{
+	if(val>upper) val = upper;
+	if(val<lower) val = lower;//将val限制在lower~upper范围内
+	if ( val < middle )
+	{
+		val = (int)map(val, lower, middle, 1000, 1500);
+	}
+	else
+	{
+		val = (int)map(val, middle, upper, 1500, 2000);
+	}
+	return ( reverse ? 3000 - val : val );
+ }
+/*函数：int GetMedianNum(volatile u16 * bArray, int ch)
+* 说明：对数组中某个通道的采样值进行中值滤波，使采样值更稳定
+* 参数：bArray：待滤波的数组；
+		ch：采样通道0~chNum-1；
+* 返回：该通道的采样值的中值
 */
 int GetMedianNum(volatile u16 * bArray, int ch)
 {
