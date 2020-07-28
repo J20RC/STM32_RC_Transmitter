@@ -31,6 +31,10 @@
 ## 3.新建工程 
 - 新建keil库函数工程，参考链接 https://www.cnblogs.com/zeng-1995/p/11308622.html
 
+## 4.代码说明
+- 多按键检测(基于有限状态机)：https://blog.csdn.net/weixin_42268054/article/details/107393669
+- 多级菜单(树形拓扑结构、状态机)：https://blog.csdn.net/weixin_42268054/article/details/107613192
+
 ## 版本说明
 - 待更新
 
@@ -45,6 +49,7 @@
  * 王博;
  * 与非门;
  * Talons;
- * 大米粥
+ * 大米粥;
+ * P a S S ||;
 
 
