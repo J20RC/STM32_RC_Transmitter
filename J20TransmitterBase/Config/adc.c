@@ -2,16 +2,19 @@
 #include "delay.h"
 #include "usart.h"
 #include "sys.h"
-#include "rtc.h" 
-u16 chValue[chNum*10];//ADC采样值
-u16 PWMvalue[chNum];//控制PWM占空比
-u16 chLower[chNum];//遥杆的最小值
-u16 chMiddle[chNum];//遥杆的中值
-u16 chUpper[chNum];//遥杆的最大值
-u16 chReverse[chNum];//通道的正反，1为正常，0为反转
-float batVolt,warnBatVolt=4.0;//电池电压，报警电压
-u8 batVoltSignal=0;//是否报警，1为报警，0为正常
+#include "rtc.h"
+#include "flash.h" 
+#include "key.h" 
+#include "nrf24l01.h"
 
+u16 chValue[adcNum*10];//ADC采样值
+u16 PWMvalue[chNum];//控制PWM占空比
+
+float batVolt;//电池电压
+u8 batVoltSignal=0;//是否报警，1为报警，0为正常
+//setData_Union setDataUnion;
+set_Config setData;
+#define setDataSize sizeof(setData)/2 //每个通道采样次数
 #define ADC1_DR_Address    ((u32)0x4001244C)		//ADC1的地址
 //通用定时器2中断初始化
 //这里时钟选择为APB1的2倍，而APB1为36M
@@ -56,7 +59,7 @@ void DMA1_Init(void)
 	DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address;		//指定DMA1的外设地址-ADC1地址
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&chValue; 		//chValue的内存地址
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; 				//方向(从外设到内存)
-	DMA_InitStructure.DMA_BufferSize = chNum*sampleNum; 				//DMA缓存大小，存放60次采样值
+	DMA_InitStructure.DMA_BufferSize = adcNum*sampleNum; 				//DMA缓存大小，存放90次采样值
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; 	//外设地址固定，接收一次数据后，设备地址禁止后移
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; 			//内存地址不固定，接收多次数据后，目标内存地址后移
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord ; //外设数据单位，定义外设数据宽度为16位
@@ -70,7 +73,7 @@ void DMA1_Init(void)
 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
@@ -80,23 +83,25 @@ void DMA1_Init(void)
 //DMA中断处理函数
 void  DMA1_Channel1_IRQHandler(void)
 {
-	int chResult[chNum],i;
+	u16 chResult[chNum],i;
 	if(DMA_GetITStatus(DMA1_IT_TC1)!=RESET){
 		
 		//中断处理代码
-		for(i=0; i<chNum-1; i++)
+		for(i=0; i<chNum; i++)
 		{
 			chResult[i] = GetMedianNum(chValue,i);//中值滤波
-			PWMvalue[i] = mapChValue(chResult[i], chLower[i], chMiddle[i], chUpper[i], chReverse[i]);//数值映射
-//			printf("%d\t",PWMvalue[i]);
+			PWMvalue[i]= setData.PWMadjustValue[i]+mapChValue(chResult[i], 
+														setData.chLower[i], 
+														setData.chMiddle[i], 
+														setData.chUpper[i], 
+														setData.chReverse[i]);//数值映射
 		}
-		
+		sendData();//采集完即发送数据到接收机
 		batVolt = GetMedianNum(chValue,8)*3.3*3/4095;//电池电压采样
-		if(batVolt < warnBatVolt) batVoltSignal = 1;// 报警信号
+		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// 报警信号
 		else batVoltSignal = 0;
 //		printf("%f,%f,%d\n",batVolt,warnBatVolt,batVoltSignal);
 //		printf("\n当前时间：%d:%d:%d\r\n",calendar.hour,calendar.min,calendar.sec);
-		
 		DMA_ClearITPendingBit(DMA1_IT_TC1);//清除标志
 	}
 }
@@ -120,6 +125,23 @@ void GPIOA_Init(void)
 //初始化ADC															   
 void  Adc_Init(void)
 { 	
+	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//从FLASH中读取结构体
+	if(setData.writeFlag==0xFFFF){
+		setData.writeFlag=0x0000;//是否第一次写入
+		setData.dataLen = 0x0000;
+		for(int i=0;i<chNum;i++)
+		{
+			setData.chLower[i] 	= 0;	//遥杆的最小值
+			setData.chMiddle[i] = 2047;	//遥杆的中值
+			setData.chUpper[i] 	= 4095;	//遥杆的最大值
+			setData.PWMadjustValue[i]=0;//微调值
+			setData.chReverse[i] = 1;	//通道的正反，1为正常，0为反转
+		}
+		setData.PWMadjustUnit = 2;//微调单位
+		setData.warnBatVolt = 4.0;//报警电压
+		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//写入FLASH
+	}
+	
 	GPIOA_Init();
 	ADC_InitTypeDef ADC_InitStructure;
 
@@ -131,7 +153,7 @@ void  Adc_Init(void)
 	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;			//开启连续转换模式
 	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T2_CC2;   	//使用外部触发模式ADC_ExternalTrigConvEdge_None
 	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; 		//采集数据右对齐
-	ADC_InitStructure.ADC_NbrOfChannel = chNum; 			//要转换的通道数目
+	ADC_InitStructure.ADC_NbrOfChannel = adcNum; 			//要转换的通道数目
 	ADC_Init(ADC1, &ADC_InitStructure);
 	
 	RCC_ADCCLKConfig(RCC_PCLK2_Div6);				//配置ADC时钟，为PCLK2的6分频，即12MHz
@@ -225,7 +247,7 @@ int mapChValue(int val, int lower, int middle, int upper, int reverse)
 /*函数：int GetMedianNum(volatile u16 * bArray, int ch)
 * 说明：对数组中某个通道的采样值进行中值滤波，使采样值更稳定
 * 参数：bArray：待滤波的数组；
-		ch：采样通道0~chNum-1；
+		ch：采样通道0~adcNum-1；
 * 返回：该通道的采样值的中值
 */
 int GetMedianNum(volatile u16 * bArray, int ch)
@@ -235,7 +257,7 @@ int GetMedianNum(volatile u16 * bArray, int ch)
 	u16 tempArray[sampleNum];
 	for(i=0; i<sampleNum;i++)
 	{
-		tempArray[i] = bArray[ch+chNum*i];
+		tempArray[i] = bArray[ch+adcNum*i];
 	}
 
     // 用冒泡法对数组进行排序
@@ -267,3 +289,5 @@ int GetMedianNum(volatile u16 * bArray, int ch)
 
     return bTemp;
 }
+
+

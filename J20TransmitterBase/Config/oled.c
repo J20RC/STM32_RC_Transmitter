@@ -137,7 +137,7 @@ void fill_picture(unsigned char fill_Data)
 
 
 //坐标设置
-	void OLED_Set_Pos(unsigned char x, unsigned char y) 
+void OLED_Set_Pos(unsigned char x, unsigned char y) 
 { 	OLED_WR_Byte(0xb0+y,OLED_CMD);
 	OLED_WR_Byte(((x&0xf0)>>4)|0x10,OLED_CMD);
 	OLED_WR_Byte((x&0x0f),OLED_CMD); 
@@ -186,8 +186,6 @@ void OLED_Refresh_Gram(void)
 //x:0~127
 //y:0~63
 //t:1 填充 0,清空	
-	 
-
 void OLED_DrawPoint(u8 x,u8 y,u8 t)
 {
 	u8 pos,bx,temp=0;
@@ -197,6 +195,17 @@ void OLED_DrawPoint(u8 x,u8 y,u8 t)
 	temp=1<<(7-bx);
 	if(t)OLED_GRAM[x][pos]|=temp;
 	else OLED_GRAM[x][pos]&=~temp;	    
+}
+//画加号
+//x:1~126，中心坐标的x
+//y:1~62，中心坐标的y
+void OLED_DrawPlusSign(u8 x,u8 y)
+{
+	OLED_DrawPoint(x,y-1,1);
+	OLED_DrawPoint(x,y,1);
+	OLED_DrawPoint(x,y+1,1);
+	OLED_DrawPoint(x-1,y,1);
+	OLED_DrawPoint(x+1,y,1);
 }
 //x1,y1,x2,y2 填充区域的对角坐标
 //确保x1<=x2;y1<=y2 0<=x1<=127 0<=y1<=63	 	 
@@ -279,35 +288,55 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
 //x,y:起点坐标  
 //size:字体大小12/16/24
 //*p:字符串起始地址 
-void OLED_ShowString(u8 x,u8 y, u8 *p,u8 size)
+//mode:0,反白显示;1,正常显示	
+void OLED_ShowString(u8 x,u8 y, u8 *p,u8 size,u8 mode)
 {	
     while((*p<='~')&&(*p>=' '))//判断是不是非法字符!
     {       
         if(x>(128-(size/2))){x=0;y+=size;}
         if(y>(64-size)){y=x=0;OLED_Clear();}
-        OLED_ShowChar(x,y,*p,size,1);	 
+        OLED_ShowChar(x,y,*p,size,mode);	 
         x+=size/2;
         p++;
     }  
 }	 
 
-//显示汉字
-void OLED_ShowCHinese(u8 x,u8 y,u8 no)
-{      			    
-	u8 t,adder=0;
-	OLED_Set_Pos(x,y);	
-    for(t=0;t<16;t++)
+
+//在指定位置，显示一个size*size大小的汉字
+//x:0~127
+//y:0~63
+//index:汉字编号（在字库数组里面的编号）
+//size:选择字体 12/16/24
+//mode:0,反白显示;1,正常显示
+
+void OLED_ShowChinese(u16 x,u16 y,u8 index,u8 size,u8 mode)
+{
+	u8 temp,t,t1;
+	u16 y0=y;
+	u8 *dzk;   
+	u8 csize=(size/8+((size%8)?1:0))*size; //一个24*24的汉字72字节 
+	if(size == 12) dzk=(u8*)Chinese_1212[index];        //得到汉字编号对应的点阵库 
+	else if(size == 16)	dzk=(u8*)Chinese_1616[index];   //得到汉字编号对应的点阵库 
+	else dzk=(u8*)Chinese_2424[index];   //得到汉字编号对应的点阵库 
+	for(t=0;t<csize;t++)
+	{                                                                                                      
+		temp=dzk[t];                                //得到点阵数据                          
+		for(t1=0;t1<8;t1++)                        //按照从高位到低位的顺序画点
 		{
-				OLED_WR_Byte(Hzk[2*no][t],OLED_DATA);
-				adder+=1;
-     }	
-		OLED_Set_Pos(x,y+1);	
-    for(t=0;t<16;t++)
-			{	
-				OLED_WR_Byte(Hzk[2*no+1][t],OLED_DATA);
-				adder+=1;
-      }					
+			if(temp&0x80)OLED_DrawPoint(x,y,mode);
+			else OLED_DrawPoint(x,y,!mode); 
+			temp<<=1;
+			y++;
+			if((y-y0)==size)                        //对y坐标的处理，当y坐标距起始坐标差24个像素点，x坐标加1
+			{
+				y=y0;
+				x++;
+				break;
+			}
+		}           
+	}	  
 }
+
 /***********功能描述：显示显示BMP图片128×64起始点坐标(x,y),x的范围0～127，y为页的范围0～7*****************/
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[])
 { 	
@@ -319,7 +348,7 @@ void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned 
 	for(y=y0;y<y1;y++)
 	{
 		OLED_Set_Pos(x0,y);
-    for(x=x0;x<x1;x++)
+		for(x=x0;x<x1;x++)
 	    {      
 	    	OLED_WR_Byte(BMP[j++],OLED_DATA);	    	
 	    }
@@ -342,7 +371,7 @@ void OLED_Init(void)
  	GPIO_SetBits(GPIOB,GPIO_Pin_8|GPIO_Pin_9);	
 
 
-	delay_ms(800);
+	delay_ms(10);
 	OLED_WR_Byte(0xAE,OLED_CMD);//--显示关闭
 	OLED_WR_Byte(0x00,OLED_CMD);//---设置最小列地址
 	OLED_WR_Byte(0x10,OLED_CMD);//---设置最大列地址
@@ -379,12 +408,14 @@ void OLED_Init(void)
 	OLED_WR_Byte(0xAF,OLED_CMD);//--turn on oled panel
 }  
 
+//num数字，str字符串，radix进制(10)
+//使用举例 u8 txt[16]={0}; itoa(num,txt,10);
 u8 *itoa(int num,u8 *str,int radix)
 {
 	char index[]="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";//索引表
 	unsigned unum;//存放要转换的整数的绝对值,转换的整数可能是负数
 	int i=0,j,k;//i用来指示设置字符串相应位，转换之后i其实就是字符串的长度；转换后顺序是逆序的，有正负的情况，k用来指示调整顺序的开始位置;j用来指示调整顺序时的交换。
- 
+	
 	//获取要转换的整数的绝对值
 	if(radix==10&&num<0)//要转换成十进制数并且是负数
 	{

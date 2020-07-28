@@ -3,10 +3,13 @@
 #include "sys.h" 
 #include "delay.h"
 #include "usart.h"
-
+#include "adc.h"
+#include "flash.h"
 //参考链接https://blog.csdn.net/qq_42679566/article/details/105892105，原文错误已修正
 
 Key_Config Key_Buf[KEY_NUM];	// 创建按键数组
+u16 encoderEvent[4];
+u8 keyEvent=0;
 #define KEY_LONG_DOWN_DELAY 30 	// 设置30个TIM3定时器中断=600ms算长按	
 #define DBGMCU_CR  (*((volatile u32 *)0xE0042004))
 	
@@ -39,20 +42,49 @@ void TIM3_Init(u16 arr,u16 psc)
 	TIM_Cmd(TIM3,ENABLE);
 }
 
-void TIM3_IRQHandler(void)   //TIM3中断
+void TIM3_IRQHandler(void)   //TIM3中断服务函数
 {
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)  //检查TIM3更新中断发生与否
 	{
 		// 中断处理代码
 		ReadKeyStatus();  //调用状态机
-		u8 i,status;
+		volatile u8 i,status,ch;
 		for(i = 0;i < KEY_NUM;i++)
     	{
 			status = Key_Buf[i].Status.KEY_EVENT;
-			//if(status!=KEY_NULL) printf("%d,%d\n",i,status);//事件处理
-			if(status==KEY_DOWN) printf("%d短按\n",i);
-			if(status==KEY_LONG) printf("%d长按\n",i);
+			if(status==KEY_DOWN && i<6) //短按
+			{
+				if(i==0 | i==1) ch = 0;
+				if(i==2 | i==3) ch = 1;
+				if(i==4 | i==5) ch = 3;//第几个通道
+				if(setData.PWMadjustValue[ch]>100-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=100-setData.PWMadjustUnit;//限制微调范围
+				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-100) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-100;//限制微调范围
+				if(i%2==0) setData.PWMadjustValue[ch] -= setData.PWMadjustUnit;//微调减
+				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;//微调加
+				keyEvent = i+1;//有按键按下标志
+			}
+			if(status==KEY_LONG && i<6) //长按
+			{
+				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
+				if(i==0 | i==1) ch = 0;
+				if(i==2 | i==3) ch = 1;
+				if(i==4 | i==5) ch = 3;//第几个通道
+				
+				if(setData.PWMadjustValue[ch]>100-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=100-setData.PWMadjustUnit;//限制微调范围
+				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-100) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-100;//限制微调范围
+				
+				if(i%2==0) setData.PWMadjustValue[ch] -= setData.PWMadjustUnit;
+				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;
+				keyEvent = i+1;//有按键按下标志
+			}
+			if(i==6 && (status==KEY_DOWN | status==KEY_LONG))
+			{
+				encoderEvent[0]=1;//旋转编码器有事件
+				encoderEvent[1]=status; //长按还是短按
+				//printf("%d,%d\n",encoderEvent[0],encoderEvent[1]);
+			}
 		}
+		
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);  //清除TIMx更新中断标志 
 	}
 }
@@ -60,14 +92,16 @@ void TIM3_IRQHandler(void)   //TIM3中断
 //按键初始化函数
 void KEY_Init(void) //IO初始化
 { 
+	encoder_Init();//编码器引脚初始化
 	Key_Init KeyInit[KEY_NUM]=
 	{ 
 		{GPIO_Mode_IPU, GPIOB, GPIO_Pin_5, RCC_APB2Periph_GPIOB}, 	// 初始化按键CH1Left
 		{GPIO_Mode_IPU, GPIOB, GPIO_Pin_4, RCC_APB2Periph_GPIOB}, 	// 初始化按键CH1Right
-		{GPIO_Mode_IPU, GPIOA, GPIO_Pin_15, RCC_APB2Periph_GPIOA}, 	// 初始化按键CH2Up
 		{GPIO_Mode_IPU, GPIOB, GPIO_Pin_3, RCC_APB2Periph_GPIOB}, 	// 初始化按键CH2Down
+		{GPIO_Mode_IPU, GPIOA, GPIO_Pin_15, RCC_APB2Periph_GPIOA}, 	// 初始化按键CH2Up
 		{GPIO_Mode_IPU, GPIOA, GPIO_Pin_12, RCC_APB2Periph_GPIOA}, 	// 初始化按键CH4Left
 		{GPIO_Mode_IPU, GPIOA, GPIO_Pin_11, RCC_APB2Periph_GPIOA}, 	// 初始化按键CH4Right
+		{GPIO_Mode_IPU, GPIOB, GPIO_Pin_11, RCC_APB2Periph_GPIOB}, 	// 初始化旋转编码器SW
 	};
 	Creat_Key(KeyInit); // 调用按键初始化函数
 	
@@ -200,5 +234,44 @@ void ReadKeyStatus(void)
         }
 	}
 }
+//旋转编码器CLK,DT引脚初始化
+void encoder_Init(void)
+{
+	GPIO_InitTypeDef  GPIO_InitStructure;
 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	 //使能PC端口时钟
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_10; //PB1、PB10设置
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; //浮空输入
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure); //初始化 GPIOB
+	
+	EXTI_InitTypeDef EXTI_InitStructure;
+ 	NVIC_InitTypeDef NVIC_InitStructure;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);//外部中断，需要使能AFIO时钟
+	
+	//GPIOB1 中断线以及中断初始化配置
+  	GPIO_EXTILineConfig(GPIO_PortSourceGPIOB,GPIO_PinSource1);
+  	EXTI_InitStructure.EXTI_Line=EXTI_Line1;
+  	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;	
+  	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;//上升沿触发
+  	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  	EXTI_Init(&EXTI_InitStructure);	//根据EXTI_InitStruct中指定的参数初始化外设EXTI寄存器
+
+		
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn; //使能按键所在的外部中断通道
+  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;	//抢占优先级2， 
+  	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;		//子优先级1
+  	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;	//使能外部中断通道
+  	NVIC_Init(&NVIC_InitStructure); 
+}
+
+//中断服务函数，检测旋转编码器的旋转方向
+void EXTI1_IRQHandler(void)
+{
+	delay_ms(1);	//消抖，很重要
+	encoderEvent[0]=1;//编码器有事件
+	if(BM_CLK==1 && BM_DT==1) encoderEvent[1]=BM_up; //顺时针旋转
+	if(BM_CLK==1 && BM_DT==0) encoderEvent[1]=BM_down; //逆时针旋转
+ 	EXTI_ClearITPendingBit(EXTI_Line1);    //清除LINE1上的中断标志位 
+}
 

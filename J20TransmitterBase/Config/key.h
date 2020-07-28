@@ -3,6 +3,11 @@
 #include "sys.h"
 #include "stm32f10x.h"
 #include "stm32f10x_gpio.h" 
+#define BM_CLK PBin(1)// 旋转编码器CLK输入
+#define BM_DT PBin(10)// 旋转编码器DT输入
+#define BM_up 0x10//编码器顺时针旋转
+#define BM_down 0x14//编码器逆时针旋转
+
 typedef struct // 构造按键初始化类
 {
 	GPIOMode_TypeDef GPIO_Mode; // 初始化按键模式
@@ -43,16 +48,19 @@ typedef enum // 按键注册表
 {
 	CH1Left,
 	CH1Right,
-	CH2Up,
 	CH2Down,
+	CH2Up,
 	CH4Left,
 	CH4Right,// 用户添加的按钮名称
+	BM_SW,
 	KEY_NUM, // 必须要有的记录按钮数量，必须在最后
 }KEY_LIST;
 
-
+extern u16 encoderEvent[4];
+extern u8 keyEvent;
 void KEY_Init(void);//IO初始化
 void Creat_Key(Key_Init* Init); // 初始化按钮函数
 void ReadKeyStatus(void); // 状态机函数
 void TIM3_Init(u16 arr,u16 psc);
+void encoder_Init(void);//IO初始化
 #endif

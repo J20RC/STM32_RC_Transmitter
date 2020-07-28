@@ -2,9 +2,11 @@
 #include "delay.h"
 #include "spi.h"
 #include "usart.h"
-    
+#include "adc.h"
+	
 const u8 TX_ADDRESS[TX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01}; //发送地址
 const u8 RX_ADDRESS[RX_ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01};
+u16 sendCount=0;//发送次数计数
 
 /*=======================================================
 * 函  数：void NRF24L01_Init(void)
@@ -231,6 +233,34 @@ void NRF24L01_TX_Mode(void)
 	NRF24L01_CE=1;//CE为高,10us后启动发送
 }
 
+void sendData(void)
+{
+	u8 chPacket[32];//发送的数据包
+	u16 t=0;
+	if(NRF24L01_TxPacket(chPacket)==TX_OK)
+	{
+		
+		for(t=0;t<16;t++)
+		{
+			if(t==0)//加入数据头00
+			{
+				chPacket[2*t]=0x00;
+				chPacket[2*t+1]=0x00;
+			}
+			else if(t<=chNum)
+			{
+				chPacket[2*t] = (u8)(PWMvalue[t-1]>>8)&0xFF; //高8位，把u16拆分成两个u8进行传输
+				chPacket[2*t+1] = (u8)PWMvalue[t-1]&0xFF; //低8位
+			}
+			else 
+			{
+				chPacket[2*t]=0xff;
+				chPacket[2*t+1]=0xff;
+			}
+		} 
+		sendCount ++;
+	}
+}
 
 
 
