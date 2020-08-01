@@ -52,7 +52,7 @@ int main()
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM3_PWM_Init(19999,71);//预分频72，频率1MHz，周期1us；自动装载值20 000，故PWM周期1us*20 000
-	TIM2_PWM_Init(19999,71);
+	TIM2_PWM_Init(19999,71);//PWM输出
 	TIM4_Counter_Init(9,71); //预分频1MHz，周期1us，自动装载值10，故最小计数单位10us
 	RTC_Init();	  	//RTC初始化
 	LED_Init();		//LED初始化

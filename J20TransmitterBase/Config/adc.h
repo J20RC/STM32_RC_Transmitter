@@ -23,6 +23,7 @@ typedef struct _set_Config// 用户设置结构体
 #pragma pack()
 
 extern u16 chValue[adcNum*sampleNum];//ADC采样值
+extern u16 chResult[chNum];//滤波后的ADC采样值
 extern u16 PWMvalue[chNum];//控制PWM占空比
 extern u8 batVoltSignal;//是否报警
 extern set_Config setData;

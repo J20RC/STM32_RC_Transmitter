@@ -336,6 +336,34 @@ void OLED_ShowChinese(u16 x,u16 y,u8 index,u8 size,u8 mode)
 		}           
 	}	  
 }
+//在指定位置，以画点的方式显示图片
+//x,y:起始点坐标x的范围0~127，y为页的范围0~64
+//BMP：图片数组
+//length：图片的像素长0-128
+//height：图片的像素高0-64
+//mode:0,反白显示;1,正常显示	
+void OLED_DrawPointBMP(u8 x,u8 y,unsigned char BMP[],u8 length,u8 height,u8 mode)
+{                   
+    u16 temp,t,t1;
+    u8 y0=y;
+    for(t=0;t<length*height/8;t++)
+    {   
+        temp=BMP[t];                                  
+        for(t1=0;t1<8;t1++)
+        {
+            if(temp&0x80)OLED_DrawPoint(x,y,mode);
+            else OLED_DrawPoint(x,y,!mode);
+            temp<<=1;
+            y++;
+            if((y-y0)==height)
+            {
+                y=y0;
+                x++;
+                break;
+            }
+        }    
+    }          
+}
 
 /***********功能描述：显示显示BMP图片128×64起始点坐标(x,y),x的范围0～127，y为页的范围0～7*****************/
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[])

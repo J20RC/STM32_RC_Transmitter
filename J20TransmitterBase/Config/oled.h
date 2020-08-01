@@ -50,6 +50,7 @@ void OLED_ShowString(u8 x,u8 y, u8 *p,u8 size,u8 mode);
 void OLED_Set_Pos(unsigned char x, unsigned char y);
 void OLED_ShowChinese(u16 x,u16 y,u8 index,u8 size,u8 mode);
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[]);
+void OLED_DrawPointBMP(u8 x,u8 y,unsigned char BMP[],u8 length,u8 width,u8 mode);
 void fill_picture(unsigned char fill_Data);
 void IIC_Start(void);
 void IIC_Stop(void);

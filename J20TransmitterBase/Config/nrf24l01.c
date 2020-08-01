@@ -155,17 +155,17 @@ u8 NRF24L01_TxPacket(u8 *txbuf)
 	//while(NRF24L01_IRQ!=0);//等待发送完成
 	sta=NRF24L01_Read_Reg(STATUS);  //读取状态寄存器的值	   
 	NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,sta); //清除TX_DS或MAX_RT中断标志
-	return TX_OK;//不管发送成功与否，一直发送数据
-//	if(sta&MAX_TX)//达到最大重发次数
-//	{
-//		NRF24L01_Write_Reg(FLUSH_TX,0xff);//清除TX FIFO寄存器 
-//		return MAX_TX; 
-//	}
-//	if(sta&TX_OK)//发送完成
-//	{
-//		return TX_OK;
-//	}
-//	return 0xff;//其他原因发送失败
+	//return TX_OK;//不管发送成功与否，一直发送数据
+	if(sta&MAX_TX)//达到最大重发次数
+	{
+		NRF24L01_Write_Reg(FLUSH_TX,0xff);//清除TX FIFO寄存器 
+		return MAX_TX; 
+	}
+	if(sta&TX_OK)//发送完成
+	{
+		return TX_OK;
+	}
+	return 0xff;//其他原因发送失败
 }
 /*=======================================================
 * 函  数：u8 NRF24L01_RxPacket(u8 *rxbuf)
@@ -233,33 +233,31 @@ void NRF24L01_TX_Mode(void)
 	NRF24L01_CE=1;//CE为高,10us后启动发送
 }
 
-void sendData(void)
+u8 sendDataPacket(void)
 {
 	u8 chPacket[32];//发送的数据包
 	u16 t=0;
-	if(NRF24L01_TxPacket(chPacket)==TX_OK)
+	u8 sendIsOK;//发送成功与否
+	for(t=0;t<16;t++)
 	{
-		
-		for(t=0;t<16;t++)
+		if(t==0)//加入数据头00
 		{
-			if(t==0)//加入数据头00
-			{
-				chPacket[2*t]=0x00;
-				chPacket[2*t+1]=0x00;
-			}
-			else if(t<=chNum)
-			{
-				chPacket[2*t] = (u8)(PWMvalue[t-1]>>8)&0xFF; //高8位，把u16拆分成两个u8进行传输
-				chPacket[2*t+1] = (u8)PWMvalue[t-1]&0xFF; //低8位
-			}
-			else 
-			{
-				chPacket[2*t]=0xff;
-				chPacket[2*t+1]=0xff;
-			}
-		} 
-		sendCount ++;
-	}
+			chPacket[2*t]=0x00;
+			chPacket[2*t+1]=0x00;
+		}
+		else if(t<=chNum)
+		{
+			chPacket[2*t] = (u8)(PWMvalue[t-1]>>8)&0xFF; //高8位，把u16拆分成两个u8进行传输
+			chPacket[2*t+1] = (u8)PWMvalue[t-1]&0xFF; //低8位
+		}
+		else
+		{
+			chPacket[2*t]=0xFF;
+			chPacket[2*t+1]=0xFF;
+		}
+	} 
+	sendIsOK = NRF24L01_TxPacket(chPacket);
+	return sendIsOK;
 }
 
 

@@ -6,8 +6,10 @@
 #include "flash.h" 
 #include "key.h" 
 #include "nrf24l01.h"
+#include "menu.h"
 
-u16 chValue[adcNum*10];//ADC采样值
+u16 chValue[adcNum*sampleNum];//ADC采样值*10
+u16 chResult[chNum];//滤波后的ADC采样值
 u16 PWMvalue[chNum];//控制PWM占空比
 
 float batVolt;//电池电压
@@ -83,7 +85,7 @@ void DMA1_Init(void)
 //DMA中断处理函数
 void  DMA1_Channel1_IRQHandler(void)
 {
-	u16 chResult[chNum],i;
+	u16 i;
 	if(DMA_GetITStatus(DMA1_IT_TC1)!=RESET){
 		
 		//中断处理代码
@@ -96,11 +98,14 @@ void  DMA1_Channel1_IRQHandler(void)
 														setData.chUpper[i], 
 														setData.chReverse[i]);//数值映射
 		}
-		sendData();//采集完即发送数据到接收机
+		if(nowIndex==0){
+			sendDataPacket();//发送数据包,采集完即发送到接收机
+			sendCount++;
+		}
 		batVolt = GetMedianNum(chValue,8)*3.3*3/4095;//电池电压采样
 		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// 报警信号
 		else batVoltSignal = 0;
-//		printf("%f,%f,%d\n",batVolt,warnBatVolt,batVoltSignal);
+		//printf("%f,%f,%d\n",batVolt,setData.warnBatVolt,batVoltSignal);
 //		printf("\n当前时间：%d:%d:%d\r\n",calendar.hour,calendar.min,calendar.sec);
 		DMA_ClearITPendingBit(DMA1_IT_TC1);//清除标志
 	}
@@ -129,7 +134,15 @@ void  Adc_Init(void)
 	if(setData.writeFlag==0xFFFF){
 		setData.writeFlag=0x0000;//是否第一次写入
 		setData.dataLen = 0x0000;
-		for(int i=0;i<chNum;i++)
+		for(int i=0;i<4;i++)
+		{
+			setData.chLower[i] 	= 2047;	//遥杆的最小值
+			setData.chMiddle[i] = 2047;	//遥杆的中值
+			setData.chUpper[i] 	= 2047;	//遥杆的最大值
+			setData.PWMadjustValue[i]=0;//微调值
+			setData.chReverse[i] = 1;	//通道的正反，1为正常，0为反转
+		}
+		for(int i=4;i<chNum;i++)
 		{
 			setData.chLower[i] 	= 0;	//遥杆的最小值
 			setData.chMiddle[i] = 2047;	//遥杆的中值
@@ -138,7 +151,7 @@ void  Adc_Init(void)
 			setData.chReverse[i] = 1;	//通道的正反，1为正常，0为反转
 		}
 		setData.PWMadjustUnit = 2;//微调单位
-		setData.warnBatVolt = 4.0;//报警电压
+		setData.warnBatVolt = 3.7;//报警电压
 		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//写入FLASH
 	}
 	

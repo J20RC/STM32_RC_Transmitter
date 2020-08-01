@@ -9,6 +9,7 @@ typedef struct{
 	u8 up_index;		//存放按下“up（向上）”键时需要跳转到的索引号；
 	u8 enter_index;		//存放按下“enter（进入）”键时需要跳转的索引号；
 	u8 esc_index;		//存放按下“esc（退出）”键时需要跳转的索引号；
+	u8 home_index;		//存放按下“home（主界面）”键时需要跳转的索引号；
 	void (*operate)();	//函数指针变量，存放当前索引号下需要执行的函数的入口地址。
 }Key_index_struct;
 
