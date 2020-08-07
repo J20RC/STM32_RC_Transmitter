@@ -10,8 +10,8 @@
 //参考链接https://blog.csdn.net/qq_42679566/article/details/105892105，原文错误已修正
 
 Key_Config Key_Buf[KEY_NUM];	// 创建按键数组
-u16 menuEvent[4];
-u8 keyEvent=0;
+u16 volatile menuEvent[4];
+u8 volatile keyEvent=0;
 #define KEY_LONG_DOWN_DELAY 30 	// 设置30个TIM3定时器中断=600ms算长按	
 #define DBGMCU_CR  (*((volatile u32 *)0xE0042004))
 	
@@ -54,7 +54,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 		for(i = 0;i < KEY_NUM;i++)
     	{
 			status = Key_Buf[i].Status.KEY_EVENT;
-			if(i<6 && status==KEY_DOWN && nowIndex==0) //短按
+			if(i<6 && status==KEY_DOWN && nowMenuIndex==0) //短按
 			{
 				if(i==0 | i==1) ch = 0;
 				if(i==2 | i==3) ch = 1;
@@ -65,7 +65,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;//微调加
 				keyEvent = i+1;//有按键按下标志
 			}
-			if(i<6 && status==KEY_LONG && nowIndex==0) //长按
+			if(i<6 && status==KEY_LONG && nowMenuIndex==0) //长按
 			{
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
 				if(i==0 | i==1) ch = 0;
@@ -81,7 +81,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			}
 			if(i==4 && status==KEY_LONG){
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
-				if(nowIndex>=5 && nowIndex<=8) 
+				if(nowMenuIndex>=5 && nowMenuIndex<=8) 
 				{	
 					menuEvent[0]=1;//菜单事件
 					menuEvent[1]=NUM_down; //按键CH4Left	【数值-】
@@ -89,33 +89,33 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			}
 			if(i==5 && status==KEY_LONG){
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
-				if(nowIndex>=5 && nowIndex<=8) 
+				if(nowMenuIndex>=5 && nowMenuIndex<=8) 
 				{	
 					menuEvent[0]=1;//菜单事件
 					menuEvent[1]=NUM_up; //按键CH4Right		【数值+】
 				}
 			}
-			if(i==0 && status==KEY_DOWN && nowIndex>0)
+			if(i==0 && status==KEY_DOWN && nowMenuIndex>0)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=KEY_home; //按键CH1Left	【home】
 			}
-			if(i==2 && status==KEY_DOWN && nowIndex>0)
+			if(i==2 && status==KEY_DOWN && nowMenuIndex>0)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=KEY_enter; //按键CH2Down	【确定】
 			}
-			if(i==3 && status==KEY_DOWN && nowIndex>0)
+			if(i==3 && status==KEY_DOWN && nowMenuIndex>0)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=KEY_esc; //按键CH2Up		【返回】
 			}
-			if(i==4 && status==KEY_DOWN && nowIndex>0)
+			if(i==4 && status==KEY_DOWN && nowMenuIndex>0)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=NUM_down; //按键CH4Left	【数值-】
 			}
-			if(i==5 && status==KEY_DOWN && nowIndex>0)
+			if(i==5 && status==KEY_DOWN && nowMenuIndex>0)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=NUM_up; //按键CH4Right		【数值+】
@@ -319,8 +319,8 @@ void EXTI1_IRQHandler(void)
 {
 	delay_ms(1);	//消抖，很重要
 	menuEvent[0]=1;//菜单事件
-	if(BM_CLK==1 && BM_DT==1) menuEvent[1]=BM_up; //顺时针旋转
-	if(BM_CLK==1 && BM_DT==0) menuEvent[1]=BM_down; //逆时针旋转
+	if(BM_CLK==BM_DT) menuEvent[1]=BM_up; //顺时针旋转
+	else menuEvent[1]=BM_down; //逆时针旋转
  	EXTI_ClearITPendingBit(EXTI_Line1);    //清除LINE1上的中断标志位 
 }
 

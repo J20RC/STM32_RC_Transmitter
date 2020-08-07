@@ -36,44 +36,44 @@ Key_index_struct const Key_table[17]=
 	{13, 13, 13, 13, 3, 0,(*subMenu3_1)},//三级界面,menu3选中第1行 通道校准
 };
 
-u8 nowIndex = 0,lastIndex = 0;
+u8 volatile nowMenuIndex = 0;
+u8 volatile lastMenuIndex = 0;
 extern unsigned char logo[];
 extern unsigned char logoR[];
 
 void OLED_display(void){
 	switch(menuEvent[1]){
 		case BM_down: //逆时针旋转，向下
-			nowIndex=Key_table[nowIndex].down_index;
+			nowMenuIndex=Key_table[nowMenuIndex].down_index;
 			break;
 		case BM_up: //顺时针旋转,向上
-			nowIndex=Key_table[nowIndex].up_index;
+			nowMenuIndex=Key_table[nowMenuIndex].up_index;
 			break;
 		case KEY_enter://确定
-			nowIndex=Key_table[nowIndex].enter_index;
+			nowMenuIndex=Key_table[nowMenuIndex].enter_index;
 			break;
 		case KEY_esc://返回
-			nowIndex=Key_table[nowIndex].esc_index;
+			nowMenuIndex=Key_table[nowMenuIndex].esc_index;
 			break;
 		case KEY_home://长按 返回主界面
-			nowIndex=Key_table[nowIndex].home_index;
+			nowMenuIndex=Key_table[nowMenuIndex].home_index;
 			break;
 		case NUM_down:
 			break;
 		case NUM_up:
 			break;
 	}
-	if(nowIndex==0 && lastIndex>0) OLED_Fill(0,0,127,63,0);//清空
-	if(nowIndex>=1 && nowIndex<=4 && (lastIndex>4 | lastIndex<1)) OLED_Fill(0,0,127,63,0);//清空
-	if(nowIndex>=5 && nowIndex<=8 && (lastIndex>8 | lastIndex<5)) OLED_Fill(0,0,127,63,0);//清空
-	if(nowIndex>=9 && nowIndex<=12 && (lastIndex>12 | lastIndex<9)) OLED_Fill(0,0,127,63,0);//清空
-	if(nowIndex>=13 && nowIndex<=13 && (lastIndex<13)) OLED_Fill(0,0,127,63,0);//清空
-	if(nowIndex!=lastIndex)
+//	printf("key:%d, last:%d, now:%d\r\n",menuEvent[1],lastMenuIndex,nowMenuIndex);
+	if(nowMenuIndex==0 && lastMenuIndex>0) OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex>=1 && nowMenuIndex<=4 && (lastMenuIndex>4 | lastMenuIndex<1)) OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex>=5 && nowMenuIndex<=8 && (lastMenuIndex>8 | lastMenuIndex<5)) OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex>=9 && nowMenuIndex<=12 && (lastMenuIndex>12 | lastMenuIndex<9)) OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex>=13 && nowMenuIndex<=13 && (lastMenuIndex<13)) OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex!=lastMenuIndex)
 	{
-		Key_table[nowIndex].operate();
+		Key_table[nowMenuIndex].operate();
 		OLED_Refresh_Gram();//刷新显存
 	}
-	printf("now:%d, last:%d, event:%d\n",nowIndex,lastIndex,menuEvent[1]);
-	lastIndex = nowIndex;
 }
 
 

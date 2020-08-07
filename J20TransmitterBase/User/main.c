@@ -98,7 +98,7 @@ int main()
 	mainWindow();//显示主界面
 	OLED_Refresh_Gram();//刷新显存
 	while (1){
-		if(nowIndex!=0){
+		if(nowMenuIndex!=0){
 			sendDataPacket();//发送数据包
 			sendCount++;
 		}
@@ -111,7 +111,7 @@ int main()
 			lastThrPWM = PWMvalue[2]/20;//将1000量程进行20分频
 		}
 		
-		if(updateWindow[0] && nowIndex==0 && sendCount == 10)//油门更新事件
+		if(updateWindow[0] && nowMenuIndex==0 && sendCount == 10)//油门更新事件
 		{
 			thrNum = (int)(PWMvalue[2]-1000)/16;
 			OLED_Fill(0,63-thrNum,0,63,1);//下部分写1
@@ -123,7 +123,7 @@ int main()
 		if(sendCount > 10) sendCount = 0;
 		if(keyEvent>0)//微调更新事件
 		{
-			if(nowIndex==0)
+			if(nowMenuIndex==0)
 			{
 				if(keyEvent==1|keyEvent==2) 
 				{
@@ -151,42 +151,7 @@ int main()
 			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 			keyEvent = 0;
 		}
-		if(menuEvent[0])//菜单事件
-		{
-			OLED_display();
-			for(int i=0;i<4;i++)
-			{
-				if(setData.PWMadjustValue[i]>100-setData.PWMadjustUnit) setData.PWMadjustValue[i]=100-setData.PWMadjustUnit;//限制微调范围
-				if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-100) setData.PWMadjustValue[i]=setData.PWMadjustUnit-100;//限制微调范围
-			}
-			if(menuEvent[1]==NUM_up)
-			{
-				if(nowIndex==5){setData.PWMadjustValue[0] += setData.PWMadjustUnit;subMenu1_1();}
-				if(nowIndex==6){setData.PWMadjustValue[1] += setData.PWMadjustUnit;subMenu1_2();}
-				if(nowIndex==7){setData.PWMadjustValue[2] += setData.PWMadjustUnit;subMenu1_3();}
-				if(nowIndex==8){setData.PWMadjustValue[3] += setData.PWMadjustUnit;subMenu1_4();}
-				if(nowIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
-				if(nowIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
-				if(nowIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
-				if(nowIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
-				
-			}
-			if(menuEvent[1]==NUM_down)
-			{
-				if(nowIndex==5){setData.PWMadjustValue[0] -= setData.PWMadjustUnit;subMenu1_1();}
-				if(nowIndex==6){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;subMenu1_2();}
-				if(nowIndex==7){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;subMenu1_3();}
-				if(nowIndex==8){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;subMenu1_4();}
-				if(nowIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
-				if(nowIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
-				if(nowIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
-				if(nowIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
-			}
-			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
-			OLED_Refresh_Gram();//刷新显存
-			menuEvent[0] = 0;
-		}
-		if(nowIndex==13)//通道校准
+		if(nowMenuIndex==13)//通道校准
 		{
 			subMenu3_1();
 			OLED_Refresh_Gram();//刷新显存
@@ -197,14 +162,53 @@ int main()
 			}
 			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 		}
-		if(nowIndex==13&& (lastIndex>13 | lastIndex<13))
+		
+		if(menuEvent[0])//菜单事件
 		{
+			OLED_display();
+			if(nowMenuIndex==13 && lastMenuIndex != 13)//通道中立点校准
+			{
+				for(int i=0;i<4;i++)
+				{
+					setData.chMiddle[i]=chResult[i];
+				}
+				STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
+			}
+			
 			for(int i=0;i<4;i++)
 			{
-				setData.chMiddle[i]=chResult[i];
+				if(setData.PWMadjustValue[i]>100-setData.PWMadjustUnit) setData.PWMadjustValue[i]=100-setData.PWMadjustUnit;//限制微调范围
+				if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-100) setData.PWMadjustValue[i]=setData.PWMadjustUnit-100;//限制微调范围
+			}
+			if(menuEvent[1]==NUM_up)
+			{
+				if(nowMenuIndex==5){setData.PWMadjustValue[0] += setData.PWMadjustUnit;subMenu1_1();}
+				if(nowMenuIndex==6){setData.PWMadjustValue[1] += setData.PWMadjustUnit;subMenu1_2();}
+				if(nowMenuIndex==7){setData.PWMadjustValue[2] += setData.PWMadjustUnit;subMenu1_3();}
+				if(nowMenuIndex==8){setData.PWMadjustValue[3] += setData.PWMadjustUnit;subMenu1_4();}
+				if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
+				if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
+				if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
+				if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
+				
+			}
+			if(menuEvent[1]==NUM_down)
+			{
+				if(nowMenuIndex==5){setData.PWMadjustValue[0] -= setData.PWMadjustUnit;subMenu1_1();}
+				if(nowMenuIndex==6){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;subMenu1_2();}
+				if(nowMenuIndex==7){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;subMenu1_3();}
+				if(nowMenuIndex==8){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;subMenu1_4();}
+				if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
+				if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
+				if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
+				if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
 			}
 			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
+			OLED_Refresh_Gram();//刷新显存
+			menuEvent[0] = 0;
+			menuEvent[1] = BM_NULL;
 		}
+		lastMenuIndex = nowMenuIndex;
 	}
 }
 

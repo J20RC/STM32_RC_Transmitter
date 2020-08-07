@@ -27,7 +27,8 @@ typedef struct Lcd_menu{
 	u8 Flag_return; //返回标志
 	void  (*operate)(); //处理函数入口地址
 }Lcd_menu;
-extern u8 nowIndex,lastIndex;
+extern volatile u8 nowMenuIndex;
+extern volatile u8 lastMenuIndex;
 
 void OLED_display(void);
 void mainWindow(void);//主界面

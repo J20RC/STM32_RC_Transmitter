@@ -5,13 +5,14 @@
 #include "stm32f10x_gpio.h" 
 #define BM_CLK PBin(1)// 旋转编码器CLK输入
 #define BM_DT PBin(10)// 旋转编码器DT输入
-#define BM_up 0x05//编码器顺时针旋转
-#define BM_down 0x06//编码器逆时针旋转
-#define KEY_enter 0x07//确定按键事件标志
-#define KEY_esc 0x08//返回按键事件标志
-#define KEY_home 0x09//主界面按键事件标志
-#define NUM_up 0x10//确定按键事件标志
-#define NUM_down 0x11//确定按键事件标志
+#define BM_NULL 	0x05//编码器无事件
+#define BM_up 		0x06//编码器顺时针旋转
+#define BM_down 	0x07//编码器逆时针旋转
+#define KEY_enter 	0x08//确定按键事件标志
+#define KEY_esc		0x09//返回按键事件标志
+#define KEY_home	0x0A//主界面按键事件标志
+#define NUM_up 		0x0B//确定按键事件标志
+#define NUM_down 	0x0C//确定按键事件标志
 
 typedef struct // 构造按键初始化类
 {
@@ -61,8 +62,8 @@ typedef enum // 按键注册表
 	KEY_NUM, // 必须要有的记录按钮数量，必须在最后
 }KEY_LIST;
 
-extern u16 menuEvent[4];
-extern u8 keyEvent;
+extern volatile u16 menuEvent[4];
+extern volatile u8 keyEvent;
 void KEY_Init(void);//IO初始化
 void Creat_Key(Key_Init* Init); // 初始化按钮函数
 void ReadKeyStatus(void); // 状态机函数

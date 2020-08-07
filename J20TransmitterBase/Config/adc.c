@@ -8,14 +8,14 @@
 #include "nrf24l01.h"
 #include "menu.h"
 
-u16 chValue[adcNum*sampleNum];//ADC采样值*10
-u16 chResult[chNum];//滤波后的ADC采样值
-u16 PWMvalue[chNum];//控制PWM占空比
+u16 volatile chValue[adcNum*sampleNum];//ADC采样值*10
+u16 volatile chResult[chNum];//滤波后的ADC采样值
+u16 volatile PWMvalue[chNum];//控制PWM占空比
 
 float batVolt;//电池电压
-u8 batVoltSignal=0;//是否报警，1为报警，0为正常
+u8 volatile batVoltSignal=0;//是否报警，1为报警，0为正常
 //setData_Union setDataUnion;
-set_Config setData;
+volatile set_Config setData;
 #define setDataSize sizeof(setData)/2 //每个通道采样次数
 #define ADC1_DR_Address    ((u32)0x4001244C)		//ADC1的地址
 //通用定时器2中断初始化
@@ -98,7 +98,7 @@ void  DMA1_Channel1_IRQHandler(void)
 														setData.chUpper[i], 
 														setData.chReverse[i]);//数值映射
 		}
-		if(nowIndex==0){
+		if(nowMenuIndex==0){
 			sendDataPacket();//发送数据包,采集完即发送到接收机
 			sendCount++;
 		}
