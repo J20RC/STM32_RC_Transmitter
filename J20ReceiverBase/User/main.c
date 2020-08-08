@@ -33,31 +33,31 @@
 #include "delay.h"
 #include "usart.h"
 #include "stm32f10x.h"
-#include "oled.h"
 #include "rtc.h" 
 #include "stdio.h"
 #include "string.h"
 #include "nrf24l01.h"
 #include "led.h"
 #include "tim.h"
+#include "sbus.h"
 
-u16 PWMvalue[chNum];//控制PWM占空比
+u16 PWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
+u8 sbusPacket[SBUS_PACKET_LENGTH];// 25个字节的SBUS数据包
+u8 signalLoss = 0;  // 1表示丢失信号
+u16 i=0,startIndex=0;
+u32 lastTime = 0;
+u32 sbusTime = 0;
+u8 chPacket[32];
+
 int main()
 {
-	u16 i=0,startIndex=0;
-	u32 lastTime = 0;
-	u8 chPacket[32];
-//	u8 txt[16]={0};
 	delay_init();//初始化延时函数
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
-	usart_init(115200);//初始化串口1，波特率为115200
+	usart_init(100000);//初始化串口1，作为sbus输出，（波特率为100000，8个数据位，偶校验，2个停止位）
 	TIM3_PWM_Init(19999,71);//预分频72，频率1MHz，周期1us；自动装载值20 000，故PWM周期1us*20 000
 	TIM2_PWM_Init(19999,71);//PWM输出
 	TIM4_Counter_Init(9,71); //预分频1MHz，周期1us，自动装载值10，故最小计数单位10us
-	RTC_Init();	  	//RTC初始化
 	LED_Init();		//LED初始化
-	OLED_Init();	//初始化OLED  
-	OLED_Clear();
 	NRF24L01_Init();//初始化NRF24L01
 	while(NRF24L01_Check())
 	{
@@ -81,28 +81,43 @@ int main()
 				PWMvalue[i] = ((u16)chPacket[startIndex] << 8) | ((u16)(chPacket[startIndex+1]));// 合并u8为u16
 				startIndex = startIndex+2;
 			}
-			TIM_SetCompare1(TIM2,PWMvalue[0]);//输出给PWM-PA0
-			TIM_SetCompare2(TIM2,PWMvalue[1]);//输出给PWM-PA1
-			TIM_SetCompare3(TIM2,PWMvalue[2]);//输出给PWM-PA2
-			TIM_SetCompare4(TIM2,PWMvalue[3]);//输出给PWM-PA3
-			TIM_SetCompare1(TIM3,PWMvalue[4]);//输出给PWM-PA6
-			TIM_SetCompare2(TIM3,PWMvalue[5]);//输出给PWM-PA7
-			TIM_SetCompare3(TIM3,PWMvalue[6]);//输出给PWM-PB0
-			TIM_SetCompare4(TIM3,PWMvalue[7]);//输出给PWM-PB1
+			for (i=chNum; i<16; i++) 
+			{
+				PWMvalue[i] = 1500;//未用到的通道全部置中
+			}
 			//printf("%d\t%d\t%d\t%d\t%d\n",PWMvalue[0],PWMvalue[1],PWMvalue[2],PWMvalue[3],PWMvalue[4]);
 			LED = 0;
 			lastTime = nowTime;
-//			if(PWMvalue[1]>1800) testPin = 1;
-//			else testPin = 0;
+		}
+		
+		if (nowTime > sbusTime) //输出SBUS
+		{
+			sbusPreparePacket(sbusPacket, PWMvalue, signalLoss, 0); //chNum通道数值转换为SBUS数据包
+			for(i=0;i<SBUS_PACKET_LENGTH;i++) 
+			{
+				USART_SendData(USART1,sbusPacket[i]);//将SBUS数据包通过串口TX0输出
+				while( USART_GetFlagStatus(USART1,USART_FLAG_TC)!= SET);//等待发送完成
+			}
+			sbusTime = nowTime + SBUS_UPDATE_RATE*100;
 		}
 //		printf("%d\t%d\n",nowTime,lastTime);
 		if(nowTime-lastTime>100*2000)//距离上次接收时间大于2s，则说明失去信号
 		{
 			LED=!LED;
+			signalLoss = 1;//失去信号标志
+			PWMvalue[0] = 1500;//通道1置中
+			PWMvalue[1] = 1500;//通道2置中
+			PWMvalue[2] = 1000;//油门最低
+			PWMvalue[3] = 1500;//通道4置中
 			delay_ms(200);
 		}
-//		itoa(PWM1value,txt,10);//将int类型转换成10进制字符串
-//		OLED_ShowString(6,3,txt,24); //位置6,3；字符大小24*24点阵
-//		OLED_Refresh_Gram();
+		TIM_SetCompare1(TIM2,PWMvalue[0]);//输出给PWM-PA0
+		TIM_SetCompare2(TIM2,PWMvalue[1]);//输出给PWM-PA1
+		TIM_SetCompare3(TIM2,PWMvalue[2]);//输出给PWM-PA2
+		TIM_SetCompare4(TIM2,PWMvalue[3]);//输出给PWM-PA3
+		TIM_SetCompare1(TIM3,PWMvalue[4]);//输出给PWM-PA6
+		TIM_SetCompare2(TIM3,PWMvalue[5]);//输出给PWM-PA7
+		TIM_SetCompare3(TIM3,PWMvalue[6]);//输出给PWM-PB0
+		TIM_SetCompare4(TIM3,PWMvalue[7]);//输出给PWM-PB1
 	}
 }

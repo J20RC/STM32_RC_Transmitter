@@ -61,11 +61,11 @@ void usart_init(u32 bound){
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;//浮空输入
 	GPIO_Init(GPIOB, &GPIO_InitStructure);//初始化GPIOB.7  
 
-	//4. USART 初始化设置
+	//4. USART 初始化设置,SBUS输出
 	USART_InitStructure.USART_BaudRate = bound;//串口波特率
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;//字长为8位数据格式
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;//一个停止位
-	USART_InitStructure.USART_Parity = USART_Parity_No;//无奇偶校验位
+	USART_InitStructure.USART_StopBits = USART_StopBits_2;//2个停止位
+	USART_InitStructure.USART_Parity = USART_Parity_Even;//偶校验位
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
 	USART_Init(USART1, &USART_InitStructure); //初始化串口1
