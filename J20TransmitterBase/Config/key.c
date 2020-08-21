@@ -81,7 +81,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			}
 			if(i==4 && status==KEY_LONG){
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
-				if(nowMenuIndex>=5 && nowMenuIndex<=8) 
+				if(nowMenuIndex==15 | nowMenuIndex==16 | (nowMenuIndex>=5 && nowMenuIndex<=8)) 
 				{	
 					menuEvent[0]=1;//菜单事件
 					menuEvent[1]=NUM_down; //按键CH4Left	【数值-】
@@ -89,7 +89,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			}
 			if(i==5 && status==KEY_LONG){
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
-				if(nowMenuIndex>=5 && nowMenuIndex<=8) 
+				if(nowMenuIndex==15 | nowMenuIndex==16 | (nowMenuIndex>=5 && nowMenuIndex<=8)) 
 				{	
 					menuEvent[0]=1;//菜单事件
 					menuEvent[1]=NUM_up; //按键CH4Right		【数值+】

@@ -58,19 +58,17 @@
 #include "flash.h"
 #include "menu.h"
 extern unsigned char logo[];
+u16 lastThrPWM = 0;//上一时刻的油门大小
+u16 loca;//存放坐标
+u16 updateWindow[10];//窗口更新标志
+u16 thrNum;//油门换算后的大小
+float lastBatVolt=0.00;//上一时刻的电池电压
+extern char batVoltStr[10];//电池电压字符串
+
 int main()
 {
-	
-	//u8 txt[16]={0};//存放字符串文本
-	//u8 sendStatus;
-	u16 lastThrPWM = 0;//上一时刻的油门大小
-	u16 loca;//存放坐标
-	u16 updateWindow[10];//窗口更新标志
-	u16 thrNum;//油门换算后的大小
 	delay_init();//初始化延时函数
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
-	
-	
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM2_Init(1999,71);//1MHz，每10ms进行ADC采样一次
 	TIM3_Init(19999,71);//1MHz，每20ms检测按键一次；
@@ -109,13 +107,18 @@ int main()
 			LED = !LED;// LED闪烁表示正在发送数据
 			if(abs(PWMvalue[2]/20-lastThrPWM)>0) updateWindow[0] = 1;
 			lastThrPWM = PWMvalue[2]/20;//将1000量程进行20分频
+			if(batVolt*100-lastBatVolt*100>5) updateWindow[0] = 1;//0.05V更新一次
+			lastBatVolt = batVolt;
 		}
 		
 		if(updateWindow[0] && nowMenuIndex==0 && sendCount == 10)//油门更新事件
 		{
-			thrNum = (int)(PWMvalue[2]-1000)/16;
+			thrNum = (int)(PWMvalue[2]-1000)/16;//更新油门
 			OLED_Fill(0,63-thrNum,0,63,1);//下部分写1
 			OLED_Fill(0,0,0,63-thrNum,0);//上部分写0
+			
+			sprintf((char *)batVoltStr,"%2.2fV",batVolt);//更新电池电压
+			OLED_ShowString(90,0, (u8 *)batVoltStr,12,1);
 			OLED_Refresh_Gram();//刷新显存
 			updateWindow[0] = 0;
 			sendCount = 0;
@@ -174,12 +177,13 @@ int main()
 				}
 				STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 			}
-			
-			for(int i=0;i<4;i++)
+			for(int i=0;i<4;i++)//限制微调范围
 			{
-				if(setData.PWMadjustValue[i]>100-setData.PWMadjustUnit) setData.PWMadjustValue[i]=100-setData.PWMadjustUnit;//限制微调范围
-				if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-100) setData.PWMadjustValue[i]=setData.PWMadjustUnit-100;//限制微调范围
+				if(setData.PWMadjustValue[i]>100-setData.PWMadjustUnit) setData.PWMadjustValue[i]=100-setData.PWMadjustUnit;
+				if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-100) setData.PWMadjustValue[i]=setData.PWMadjustUnit-100;
 			}
+			if(setData.PWMadjustUnit>8) setData.PWMadjustUnit = 8;//限制微调单位范围
+			if(setData.PWMadjustUnit<1) setData.PWMadjustUnit = 1;
 			if(menuEvent[1]==NUM_up)
 			{
 				if(nowMenuIndex==5){setData.PWMadjustValue[0] += setData.PWMadjustUnit;subMenu1_1();}
@@ -190,7 +194,10 @@ int main()
 				if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
 				if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
 				if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
-				
+				if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
+				if(nowMenuIndex==15) {setData.batVoltAdjust += 1;subMenu4_2();}
+				if(nowMenuIndex==16) {setData.warnBatVolt += 0.01;subMenu4_3();}
+				if(nowMenuIndex==17) {setData.PWMadjustUnit += 1;subMenu4_4();}
 			}
 			if(menuEvent[1]==NUM_down)
 			{
@@ -202,9 +209,14 @@ int main()
 				if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
 				if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
 				if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
+				if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
+				if(nowMenuIndex==15) {setData.batVoltAdjust -= 1;subMenu4_2();}
+				if(nowMenuIndex==16) {setData.warnBatVolt -= 0.01;subMenu4_3();}
+				if(nowMenuIndex==17) {setData.PWMadjustUnit -= 1;subMenu4_4();}
 			}
 			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 			OLED_Refresh_Gram();//刷新显存
+			
 			menuEvent[0] = 0;
 			menuEvent[1] = BM_NULL;
 		}

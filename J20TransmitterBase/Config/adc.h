@@ -19,12 +19,15 @@ typedef struct _set_Config// 用户设置结构体
 	u16 chReverse[chNum];//通道的正反，1为正常，0为反转
 	u16 PWMadjustUnit;//微调单位
 	float warnBatVolt;//报警电压=4个字节32位
+	u16 throttlePreference;//左右手油门，1为左手油门
+	u16 batVoltAdjust;//电池电压校准值
 }set_Config;
 #pragma pack()
 
 extern volatile u16 chValue[adcNum*sampleNum];//ADC采样值
 extern volatile u16 chResult[chNum];//滤波后的ADC采样值
 extern volatile u16 PWMvalue[chNum];//控制PWM占空比
+extern volatile float batVolt;//电池电压
 extern volatile u8 batVoltSignal;//是否报警
 extern volatile set_Config setData;
 

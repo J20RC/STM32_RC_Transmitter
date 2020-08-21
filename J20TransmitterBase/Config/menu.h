@@ -35,21 +35,26 @@ void mainWindow(void);//主界面
 void menu1(void);//菜单列表
 void menu2(void);//菜单列表
 void menu3(void);//菜单列表
-void menu4(void);//菜单列表-退出
+void menu4(void);//菜单列表
 
 void subMenu1_1(void);//子菜单
 void subMenu1_2(void);//子菜单
 void subMenu1_3(void);//子菜单
-void subMenu1_4(void);//子菜单-退出
+void subMenu1_4(void);//子菜单
 
 void subMenu2_1(void);//子菜单
 void subMenu2_2(void);//子菜单
 void subMenu2_3(void);//子菜单
-void subMenu2_4(void);//子菜单-退出
+void subMenu2_4(void);//子菜单
 
 void subMenu3_1(void);//子菜单
 void subMenu3_2(void);//子菜单
 void subMenu3_3(void);//子菜单
-void subMenu3_4(void);//子菜单-退出
+void subMenu3_4(void);//子菜单
+
+void subMenu4_1(void);//子菜单
+void subMenu4_2(void);//子菜单
+void subMenu4_3(void);//子菜单
+void subMenu4_4(void);//子菜单
 #endif
 

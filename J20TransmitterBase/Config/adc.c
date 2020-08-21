@@ -12,7 +12,7 @@ u16 volatile chValue[adcNum*sampleNum];//ADC采样值*10
 u16 volatile chResult[chNum];//滤波后的ADC采样值
 u16 volatile PWMvalue[chNum];//控制PWM占空比
 
-float batVolt;//电池电压
+float volatile batVolt;//电池电压
 u8 volatile batVoltSignal=0;//是否报警，1为报警，0为正常
 //setData_Union setDataUnion;
 volatile set_Config setData;
@@ -102,7 +102,7 @@ void  DMA1_Channel1_IRQHandler(void)
 			sendDataPacket();//发送数据包,采集完即发送到接收机
 			sendCount++;
 		}
-		batVolt = GetMedianNum(chValue,8)*3.3*3/4095;//电池电压采样
+		batVolt = GetMedianNum(chValue,8)*3.3*3*setData.batVoltAdjust/4095000;//电池电压采样
 		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// 报警信号
 		else batVoltSignal = 0;
 		//printf("%f,%f,%d\n",batVolt,setData.warnBatVolt,batVoltSignal);
@@ -152,6 +152,8 @@ void  Adc_Init(void)
 		}
 		setData.PWMadjustUnit = 2;//微调单位
 		setData.warnBatVolt = 3.7;//报警电压
+		setData.throttlePreference = 1;//左手油门
+		setData.batVoltAdjust = 1000;//电池电压校准值
 		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//写入FLASH
 	}
 	
