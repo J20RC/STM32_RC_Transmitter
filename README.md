@@ -1,7 +1,7 @@
 ![Alt text](./images/logo.png)
 # :airplane: J20航模遥控器
  - 基于STM32和MDK标准库开发的航模遥控器
- - 项目计划：https://blog.csdn.net/weixin_42268054/article/details/106955533 
+ - 项目计划：https://www.cnblogs.com/cai-zi/p/13438079.html 
  - Bilibili项目宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
  - 我们的开源宗旨：自由 协调 开放 合作 共享
  - 和一群志同道合的人，做自己所热爱的事！
@@ -51,8 +51,12 @@
 ## 5.版本说明
 - 基础版V1.0发布（2020.08.01）	<br/>
 实现了8通道遥控和接收，遥控器菜单包含通道微调、通道正反、行程校准功能；	<br/>
-制作教程：https://blog.csdn.net/weixin_42268054/article/details/107699434	<br/>
-使用说明：https://blog.csdn.net/weixin_42268054/article/details/107709928	<br/>
+Bilibili视频：https://www.bilibili.com/video/BV1ea4y1J7WV	<br/>
+制作教程：https://www.cnblogs.com/cai-zi/p/13438285.html	<br/>
+使用说明：https://www.cnblogs.com/cai-zi/p/13438406.html	<br/>
+开发说明：https://www.cnblogs.com/cai-zi/p/13536862.html	<br/>
+PCB打印：https://www.cnblogs.com/cai-zi/p/13536693.html		<br/>
+
 
 ## 非常感谢项目中所有的贡献者：
  * 蔡子CaiZi（B站up主）@Cai-Zi  https://cai-zi.github.io/
