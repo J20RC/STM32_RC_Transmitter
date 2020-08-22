@@ -1,42 +1,43 @@
 #ifndef __ADC_H
 #define __ADC_H
-#include "stm32f10x.h" //è®°å¾—æ·»åŠ æ­¤å¤´æ–‡ä»¶ï¼Œå› ä¸ºconfig.cç”¨åˆ°GPIOç›¸å…³å‡½æ•°ç­‰
+#include "stm32f10x.h" //¼ÇµÃÌí¼Ó´ËÍ·ÎÄ¼ş£¬ÒòÎªconfig.cÓÃµ½GPIOÏà¹Øº¯ÊıµÈ
 #include "sys.h"
-#define adcNum 9		//é‡‡æ ·é€šé“æ•°
-#define chNum 8	//é¥æ†é€šé“æ•°
-#define sampleNum 10 //æ¯ä¸ªé€šé“é‡‡æ ·æ¬¡æ•°
-#define setDataSize sizeof(setData)/2 //æ¯ä¸ªé€šé“é‡‡æ ·æ¬¡æ•°
+#define adcNum 9		//²ÉÑùÍ¨µÀÊı
+#define chNum 8	//Ò£¸ËÍ¨µÀÊı
+#define sampleNum 10 //Ã¿¸öÍ¨µÀ²ÉÑù´ÎÊı
+#define setDataSize sizeof(setData)/2 //Ã¿¸öÍ¨µÀ²ÉÑù´ÎÊı
 
-#pragma pack(1)//å•å­—èŠ‚å¯¹é½ï¼Œå¾ˆé‡è¦ï¼
-//ä¸è¦è¶…è¿‡127ä¸ª16ä½æ•°æ®
-//è®¡æ•°ï¼š1+8*3+8*2+8+1+2
-typedef struct _set_Config// ç”¨æˆ·è®¾ç½®ç»“æ„ä½“
+#pragma pack(1)//µ¥×Ö½Ú¶ÔÆë£¬ºÜÖØÒª£¡
+typedef struct _set_Config// ÓÃ»§ÉèÖÃ½á¹¹Ìå
 {
-	u16 writeFlag;//æ˜¯å¦ç¬¬ä¸€æ¬¡å†™å…¥=2å­—èŠ‚16ä½
-	u16 chLower[chNum];//é¥æ†çš„æœ€å°å€¼=2*chNum
-	u16 chMiddle[chNum];//é¥æ†çš„ä¸­å€¼
-	u16 chUpper[chNum];//é¥æ†çš„æœ€å¤§å€¼
-	int PWMadjustValue[chNum];//å¾®è°ƒPWMå ç©ºæ¯”=4å­—èŠ‚*chNum
-	u16 chReverse[chNum];//é€šé“çš„æ­£åï¼Œ1ä¸ºæ­£å¸¸ï¼Œ0ä¸ºåè½¬
-	u16 PWMadjustUnit;//å¾®è°ƒå•ä½
-	float warnBatVolt;//æŠ¥è­¦ç”µå‹=4ä¸ªå­—èŠ‚32ä½
+	u16 writeFlag;//ÊÇ·ñµÚÒ»´ÎĞ´Èë=2×Ö½Ú16Î»
+	u16 dataLen;//½á¹¹ÌåµÄÊı¾İ³¤¶È£¬Î´ÖªÔ­Òòµ¼ÖÂÇ°4¸ö×Ö½Ú¶ÁÈ¡´íÎó£¬Ç°Á½¸öÊı¾İ¶ªÆú£¬´ı½â¾ö£¿£¿£¿£¿£¿£¿£¿£¿
+	u16 chLower[chNum];//Ò£¸ËµÄ×îĞ¡Öµ=2*chNum
+	u16 chMiddle[chNum];//Ò£¸ËµÄÖĞÖµ
+	u16 chUpper[chNum];//Ò£¸ËµÄ×î´óÖµ
+	int PWMadjustValue[chNum];//Î¢µ÷PWMÕ¼¿Õ±È=4×Ö½Ú*chNum
+	u16 chReverse[chNum];//Í¨µÀµÄÕı·´£¬1ÎªÕı³££¬0Îª·´×ª
+	u16 PWMadjustUnit;//Î¢µ÷µ¥Î»
+	float warnBatVolt;//±¨¾¯µçÑ¹=4¸ö×Ö½Ú32Î»
+	u16 throttlePreference;//×óÓÒÊÖÓÍÃÅ£¬1Îª×óÊÖÓÍÃÅ
+	u16 batVoltAdjust;//µç³ØµçÑ¹Ğ£×¼Öµ
 }set_Config;
 #pragma pack()
 
-extern volatile u16 chValue[adcNum*sampleNum];//ADCé‡‡æ ·å€¼
-extern volatile u16 chResult[chNum];//æ»¤æ³¢åçš„ADCé‡‡æ ·å€¼
-extern volatile u16 PWMvalue[chNum];//æ§åˆ¶PWMå ç©ºæ¯”
-extern volatile float batVolt;//ç”µæ± ç”µå‹
-extern volatile u8 batVoltSignal;//æ˜¯å¦æŠ¥è­¦
+extern volatile u16 chValue[adcNum*sampleNum];//ADC²ÉÑùÖµ
+extern volatile u16 chResult[chNum];//ÂË²¨ºóµÄADC²ÉÑùÖµ
+extern volatile u16 PWMvalue[chNum];//¿ØÖÆPWMÕ¼¿Õ±È
+extern volatile float batVolt;//µç³ØµçÑ¹
+extern volatile u8 batVoltSignal;//ÊÇ·ñ±¨¾¯
 extern volatile set_Config setData;
 
-void TIM2_Init(u16 arr,u16 psc);//TIM2å®šæ—¶å™¨åˆå§‹åŒ–
+void TIM2_Init(u16 arr,u16 psc);//TIM2¶¨Ê±Æ÷³õÊ¼»¯
 void DMA1_Init(void);
 void GPIOA_Init(void);
-void Adc_Init(void);//ADC1åˆå§‹åŒ–
-u16 Get_Adc(u8 ch); //è·å–ä¸€æ¬¡ADCçš„å€¼
-u16 Get_Adc_Average(u8 ch,u8 times);//ADCé‡‡æ ·å€¼è¿›è¡Œå‡å€¼æ»¤æ³¢
-float map(float value,float fromLow,float fromHigh,float toLow,float toHigh);//æ˜ å°„å‡½æ•°
-int mapChValue(int val, int lower, int middle, int upper, int reverse);//é€šé“çš„é‡æ˜ å°„å‡½æ•°
-int GetMedianNum(volatile u16 * bArray, int ch);//ä¸­å€¼æ»¤æ³¢
+void Adc_Init(void);//ADC1³õÊ¼»¯
+u16 Get_Adc(u8 ch); //»ñÈ¡Ò»´ÎADCµÄÖµ
+u16 Get_Adc_Average(u8 ch,u8 times);//ADC²ÉÑùÖµ½øĞĞ¾ùÖµÂË²¨
+float map(float value,float fromLow,float fromHigh,float toLow,float toHigh);//Ó³Éäº¯Êı
+int mapChValue(int val, int lower, int middle, int upper, int reverse);//Í¨µÀµÄÖØÓ³Éäº¯Êı
+int GetMedianNum(volatile u16 * bArray, int ch);//ÖĞÖµÂË²¨
 #endif
