@@ -18,7 +18,7 @@ void STMFLASH_Write(u32 WriteAddr,u16 *pBuffer,u16 NumToWrite);		//从指定地�
 void STMFLASH_Read(u32 ReadAddr,u16 *pBuffer,u16 NumToRead);   		//从指定地址开始读出指定长度的数据
 
 //测试写入
-void Test_Write(u32 WriteAddr,u16 WriteData);								   
+void Test_Write(u32 WriteAddr,u16 WriteData);		   
 #endif
 
 
