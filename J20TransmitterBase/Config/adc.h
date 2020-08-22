@@ -8,10 +8,11 @@
 #define setDataSize sizeof(setData)/2 //每个通道采样次数
 
 #pragma pack(1)//单字节对齐，很重要！
+//不要超过127个16位数
+//计数：1+8*3+8*2+8+1+2+1+1
 typedef struct _set_Config// 用户设置结构体
 {
 	u16 writeFlag;//是否第一次写入=2字节16位
-	u16 dataLen;//结构体的数据长度，未知原因导致前4个字节读取错误，前两个数据丢弃，待解决？？？？？？？？
 	u16 chLower[chNum];//遥杆的最小值=2*chNum
 	u16 chMiddle[chNum];//遥杆的中值
 	u16 chUpper[chNum];//遥杆的最大值

@@ -133,7 +133,6 @@ void  Adc_Init(void)
 	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//从FLASH中读取结构体
 	if(setData.writeFlag==0xFFFF){
 		setData.writeFlag=0x0000;//是否第一次写入
-		setData.dataLen = 0x0000;
 		for(int i=0;i<4;i++)
 		{
 			setData.chLower[i] 	= 2047;	//遥杆的最小值
