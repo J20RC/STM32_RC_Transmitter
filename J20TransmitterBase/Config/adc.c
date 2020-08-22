@@ -8,70 +8,70 @@
 #include "nrf24l01.h"
 #include "menu.h"
 
-u16 volatile chValue[adcNum*sampleNum];//ADCé‡‡æ ·å€¼*10
-u16 volatile chResult[chNum];//æ»¤æ³¢åçš„ADCé‡‡æ ·å€¼
-u16 volatile PWMvalue[chNum];//æ§åˆ¶PWMå ç©ºæ¯”
+u16 volatile chValue[adcNum*sampleNum];//ADC²ÉÑùÖµ*10
+u16 volatile chResult[chNum];//ÂË²¨ºóµÄADC²ÉÑùÖµ
+u16 volatile PWMvalue[chNum];//¿ØÖÆPWMÕ¼¿Õ±È
 
-float volatile batVolt;//ç”µæ± ç”µå‹
-u8 volatile batVoltSignal=0;//æ˜¯å¦æŠ¥è­¦ï¼Œ1ä¸ºæŠ¥è­¦ï¼Œ0ä¸ºæ­£å¸¸
+float volatile batVolt;//µç³ØµçÑ¹
+u8 volatile batVoltSignal=0;//ÊÇ·ñ±¨¾¯£¬1Îª±¨¾¯£¬0ÎªÕı³£
 //setData_Union setDataUnion;
 volatile set_Config setData;
-#define setDataSize sizeof(setData)/2 //æ¯ä¸ªé€šé“é‡‡æ ·æ¬¡æ•°
-#define ADC1_DR_Address    ((u32)0x4001244C)		//ADC1çš„åœ°å€
-//é€šç”¨å®šæ—¶å™¨2ä¸­æ–­åˆå§‹åŒ–
-//è¿™é‡Œæ—¶é’Ÿé€‰æ‹©ä¸ºAPB1çš„2å€ï¼Œè€ŒAPB1ä¸º36M
-//arrï¼šè‡ªåŠ¨é‡è£…å€¼ã€‚
-//pscï¼šæ—¶é’Ÿé¢„åˆ†é¢‘æ•°
-//è¿™é‡Œä½¿ç”¨TIM2_CH2æ§åˆ¶ADC1å®šæ—¶é‡‡æ ·ï¼Œè§STM32ä¸­æ–‡å‚è€ƒæ‰‹å†ŒP156
+#define setDataSize sizeof(setData)/2 //Ã¿¸öÍ¨µÀ²ÉÑù´ÎÊı
+#define ADC1_DR_Address    ((u32)0x4001244C)		//ADC1µÄµØÖ·
+//Í¨ÓÃ¶¨Ê±Æ÷2ÖĞ¶Ï³õÊ¼»¯
+//ÕâÀïÊ±ÖÓÑ¡ÔñÎªAPB1µÄ2±¶£¬¶øAPB1Îª36M
+//arr£º×Ô¶¯ÖØ×°Öµ¡£
+//psc£ºÊ±ÖÓÔ¤·ÖÆµÊı
+//ÕâÀïÊ¹ÓÃTIM2_CH2¿ØÖÆADC1¶¨Ê±²ÉÑù£¬¼ûSTM32ÖĞÎÄ²Î¿¼ÊÖ²áP156
 void TIM2_Init(u16 arr,u16 psc)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef TIM_OCInitStructure;
 	
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); 		//æ—¶é’Ÿä½¿èƒ½
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); 		//Ê±ÖÓÊ¹ÄÜ
 
-	//å®šæ—¶å™¨TIM2åˆå§‹åŒ–
-	TIM_TimeBaseStructure.TIM_Period = arr; 		//è®¾ç½®åœ¨ä¸‹ä¸€ä¸ªæ›´æ–°äº‹ä»¶è£…å…¥æ´»åŠ¨çš„è‡ªåŠ¨é‡è£…è½½å¯„å­˜å™¨å‘¨æœŸçš„å€¼
-	TIM_TimeBaseStructure.TIM_Prescaler =psc; 			//è®¾ç½®ç”¨æ¥ä½œä¸ºTIMxæ—¶é’Ÿé¢‘ç‡é™¤æ•°çš„é¢„åˆ†é¢‘å€¼
-	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 		//è®¾ç½®æ—¶é’Ÿåˆ†å‰²:TDTS = Tck_tim
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 	//TIMå‘ä¸Šè®¡æ•°æ¨¡å¼
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);			//æ ¹æ®æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–TIMxçš„æ—¶é—´åŸºæ•°å•ä½
+	//¶¨Ê±Æ÷TIM2³õÊ¼»¯
+	TIM_TimeBaseStructure.TIM_Period = arr; 		//ÉèÖÃÔÚÏÂÒ»¸ö¸üĞÂÊÂ¼ş×°Èë»î¶¯µÄ×Ô¶¯ÖØ×°ÔØ¼Ä´æÆ÷ÖÜÆÚµÄÖµ
+	TIM_TimeBaseStructure.TIM_Prescaler =psc; 			//ÉèÖÃÓÃÀ´×÷ÎªTIMxÊ±ÖÓÆµÂÊ³ıÊıµÄÔ¤·ÖÆµÖµ
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 		//ÉèÖÃÊ±ÖÓ·Ö¸î:TDTS = Tck_tim
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 	//TIMÏòÉÏ¼ÆÊıÄ£Ê½
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);			//¸ù¾İÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯TIMxµÄÊ±¼ä»ùÊıµ¥Î»
 	
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;		//é€‰æ‹©å®šæ—¶å™¨æ¨¡å¼:TIMè„‰å†²å®½åº¦è°ƒåˆ¶æ¨¡å¼1
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;		//æ¯”è¾ƒè¾“å‡ºä½¿èƒ½
-	TIM_OCInitStructure.TIM_Pulse = 9;							//è®¡æ•°è¾¾åˆ°9äº§ç”Ÿä¸­æ–­
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;		//è¾“å‡ºææ€§:TIMè¾“å‡ºæ¯”è¾ƒææ€§ä½
-	TIM_OC2Init(TIM2, & TIM_OCInitStructure);		//åˆå§‹åŒ–å¤–è®¾TIM2_CH2
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;		//Ñ¡Ôñ¶¨Ê±Æ÷Ä£Ê½:TIMÂö³å¿í¶Èµ÷ÖÆÄ£Ê½1
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;		//±È½ÏÊä³öÊ¹ÄÜ
+	TIM_OCInitStructure.TIM_Pulse = 9;							//¼ÆÊı´ïµ½9²úÉúÖĞ¶Ï
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;		//Êä³ö¼«ĞÔ:TIMÊä³ö±È½Ï¼«ĞÔµÍ
+	TIM_OC2Init(TIM2, & TIM_OCInitStructure);		//³õÊ¼»¯ÍâÉèTIM2_CH2
 	
-	TIM_Cmd(TIM2, ENABLE); 			//ä½¿èƒ½TIMx
+	TIM_Cmd(TIM2, ENABLE); 			//Ê¹ÄÜTIMx
 	TIM_CtrlPWMOutputs(TIM2, ENABLE); 
 }
 
 
-//DMA1é…ç½®
+//DMA1ÅäÖÃ
 void DMA1_Init(void)
 {
 	DMA_InitTypeDef DMA_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);	  			//ä½¿èƒ½ADC1é€šé“æ—¶é’Ÿ
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);	  			//Ê¹ÄÜADC1Í¨µÀÊ±ÖÓ
 	
-	//DMA1åˆå§‹åŒ–
+	//DMA1³õÊ¼»¯
 	DMA_DeInit(DMA1_Channel1);
-	DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address;		//æŒ‡å®šDMA1çš„å¤–è®¾åœ°å€-ADC1åœ°å€
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&chValue; 		//chValueçš„å†…å­˜åœ°å€
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; 				//æ–¹å‘(ä»å¤–è®¾åˆ°å†…å­˜)
-	DMA_InitStructure.DMA_BufferSize = adcNum*sampleNum; 				//DMAç¼“å­˜å¤§å°ï¼Œå­˜æ”¾90æ¬¡é‡‡æ ·å€¼
-	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; 	//å¤–è®¾åœ°å€å›ºå®šï¼Œæ¥æ”¶ä¸€æ¬¡æ•°æ®åï¼Œè®¾å¤‡åœ°å€ç¦æ­¢åç§»
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; 			//å†…å­˜åœ°å€ä¸å›ºå®šï¼Œæ¥æ”¶å¤šæ¬¡æ•°æ®åï¼Œç›®æ ‡å†…å­˜åœ°å€åç§»
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord ; //å¤–è®¾æ•°æ®å•ä½ï¼Œå®šä¹‰å¤–è®¾æ•°æ®å®½åº¦ä¸º16ä½
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord ;    //å†…å­˜æ•°æ®å•ä½ï¼ŒHalfWordå°±æ˜¯ä¸º16ä½
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular  ; 		//DMAæ¨¡å¼ï¼šå¾ªç¯ä¼ è¾“
-	DMA_InitStructure.DMA_Priority = DMA_Priority_High ; 	//DMAä¼˜å…ˆçº§ï¼šé«˜
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;   		//ç¦æ­¢å†…å­˜åˆ°å†…å­˜çš„ä¼ è¾“
-	DMA_Init(DMA1_Channel1, &DMA_InitStructure);  //é…ç½®DMA1
+	DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address;		//Ö¸¶¨DMA1µÄÍâÉèµØÖ·-ADC1µØÖ·
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&chValue; 		//chValueµÄÄÚ´æµØÖ·
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC; 				//·½Ïò(´ÓÍâÉèµ½ÄÚ´æ)
+	DMA_InitStructure.DMA_BufferSize = adcNum*sampleNum; 				//DMA»º´æ´óĞ¡£¬´æ·Å90´Î²ÉÑùÖµ
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; 	//ÍâÉèµØÖ·¹Ì¶¨£¬½ÓÊÕÒ»´ÎÊı¾İºó£¬Éè±¸µØÖ·½ûÖ¹ºóÒÆ
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable; 			//ÄÚ´æµØÖ·²»¹Ì¶¨£¬½ÓÊÕ¶à´ÎÊı¾İºó£¬Ä¿±êÄÚ´æµØÖ·ºóÒÆ
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord ; //ÍâÉèÊı¾İµ¥Î»£¬¶¨ÒåÍâÉèÊı¾İ¿í¶ÈÎª16Î»
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord ;    //ÄÚ´æÊı¾İµ¥Î»£¬HalfWord¾ÍÊÇÎª16Î»
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular  ; 		//DMAÄ£Ê½£ºÑ­»·´«Êä
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High ; 	//DMAÓÅÏÈ¼¶£º¸ß
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;   		//½ûÖ¹ÄÚ´æµ½ÄÚ´æµÄ´«Êä
+	DMA_Init(DMA1_Channel1, &DMA_InitStructure);  //ÅäÖÃDMA1
 	
-	DMA_ITConfig(DMA1_Channel1,DMA_IT_TC, ENABLE);		//ä½¿èƒ½ä¼ è¾“å®Œæˆä¸­æ–­
+	DMA_ITConfig(DMA1_Channel1,DMA_IT_TC, ENABLE);		//Ê¹ÄÜ´«ÊäÍê³ÉÖĞ¶Ï
 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -82,42 +82,42 @@ void DMA1_Init(void)
 	DMA_Cmd(DMA1_Channel1,ENABLE);
 }
 
-//DMAä¸­æ–­å¤„ç†å‡½æ•°
+//DMAÖĞ¶Ï´¦Àíº¯Êı
 void  DMA1_Channel1_IRQHandler(void)
 {
 	u16 i;
 	if(DMA_GetITStatus(DMA1_IT_TC1)!=RESET){
 		
-		//ä¸­æ–­å¤„ç†ä»£ç 
+		//ÖĞ¶Ï´¦Àí´úÂë
 		for(i=0; i<chNum; i++)
 		{
-			chResult[i] = GetMedianNum(chValue,i);//ä¸­å€¼æ»¤æ³¢
+			chResult[i] = GetMedianNum(chValue,i);//ÖĞÖµÂË²¨
 			PWMvalue[i]= setData.PWMadjustValue[i]+mapChValue(chResult[i], 
 														setData.chLower[i], 
 														setData.chMiddle[i], 
 														setData.chUpper[i], 
-														setData.chReverse[i]);//æ•°å€¼æ˜ å°„
+														setData.chReverse[i]);//ÊıÖµÓ³Éä
 		}
 		if(nowMenuIndex==0){
-			sendDataPacket();//å‘é€æ•°æ®åŒ…,é‡‡é›†å®Œå³å‘é€åˆ°æ¥æ”¶æœº
+			sendDataPacket();//·¢ËÍÊı¾İ°ü,²É¼¯Íê¼´·¢ËÍµ½½ÓÊÕ»ú
 			sendCount++;
 		}
-		batVolt = GetMedianNum(chValue,8)*3.3*3*setData.batVoltAdjust/4095000;//ç”µæ± ç”µå‹é‡‡æ ·
-		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// æŠ¥è­¦ä¿¡å·
+		batVolt = GetMedianNum(chValue,8)*3.3*3*setData.batVoltAdjust/4095000;//µç³ØµçÑ¹²ÉÑù
+		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// ±¨¾¯ĞÅºÅ
 		else batVoltSignal = 0;
 		//printf("%f,%f,%d\n",batVolt,setData.warnBatVolt,batVoltSignal);
-//		printf("\nå½“å‰æ—¶é—´ï¼š%d:%d:%d\r\n",calendar.hour,calendar.min,calendar.sec);
-		DMA_ClearITPendingBit(DMA1_IT_TC1);//æ¸…é™¤æ ‡å¿—
+//		printf("\nµ±Ç°Ê±¼ä£º%d:%d:%d\r\n",calendar.hour,calendar.min,calendar.sec);
+		DMA_ClearITPendingBit(DMA1_IT_TC1);//Çå³ı±êÖ¾
 	}
 }
-//GPIOé…ç½®æ¨¡æ‹Ÿè¾“å…¥ï¼ŒPA0-7,PB0
+//GPIOÅäÖÃÄ£ÄâÊäÈë£¬PA0-7,PB0
 void GPIOA_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB, ENABLE);	  //ä½¿èƒ½GPIOA Bæ—¶é’Ÿ
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB, ENABLE);	  //Ê¹ÄÜGPIOA BÊ±ÖÓ
 
-	//PA0-7 PB0ä½œä¸ºæ¨¡æ‹Ÿé€šé“è¾“å…¥å¼•è„š   
+	//PA0-7 PB0×÷ÎªÄ£ÄâÍ¨µÀÊäÈëÒı½Å   
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
@@ -127,85 +127,86 @@ void GPIOA_Init(void)
 	GPIO_Init(GPIOB, &GPIO_InitStructure); 
 }
 
-//åˆå§‹åŒ–ADC															   
+//³õÊ¼»¯ADC															   
 void  Adc_Init(void)
 { 	
-	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//ä»FLASHä¸­è¯»å–ç»“æ„ä½“
+	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//´ÓFLASHÖĞ¶ÁÈ¡½á¹¹Ìå
 	if(setData.writeFlag==0xFFFF){
-		setData.writeFlag=0x0000;//æ˜¯å¦ç¬¬ä¸€æ¬¡å†™å…¥
+		setData.writeFlag=0x0000;//ÊÇ·ñµÚÒ»´ÎĞ´Èë
+		setData.dataLen = 0x0000;
 		for(int i=0;i<4;i++)
 		{
-			setData.chLower[i] 	= 2047;	//é¥æ†çš„æœ€å°å€¼
-			setData.chMiddle[i] = 2047;	//é¥æ†çš„ä¸­å€¼
-			setData.chUpper[i] 	= 2047;	//é¥æ†çš„æœ€å¤§å€¼
-			setData.PWMadjustValue[i]=0;//å¾®è°ƒå€¼
-			setData.chReverse[i] = 1;	//é€šé“çš„æ­£åï¼Œ1ä¸ºæ­£å¸¸ï¼Œ0ä¸ºåè½¬
+			setData.chLower[i] 	= 2047;	//Ò£¸ËµÄ×îĞ¡Öµ
+			setData.chMiddle[i] = 2047;	//Ò£¸ËµÄÖĞÖµ
+			setData.chUpper[i] 	= 2047;	//Ò£¸ËµÄ×î´óÖµ
+			setData.PWMadjustValue[i]=0;//Î¢µ÷Öµ
+			setData.chReverse[i] = 1;	//Í¨µÀµÄÕı·´£¬1ÎªÕı³££¬0Îª·´×ª
 		}
 		for(int i=4;i<chNum;i++)
 		{
-			setData.chLower[i] 	= 0;	//é¥æ†çš„æœ€å°å€¼
-			setData.chMiddle[i] = 2047;	//é¥æ†çš„ä¸­å€¼
-			setData.chUpper[i] 	= 4095;	//é¥æ†çš„æœ€å¤§å€¼
-			setData.PWMadjustValue[i]=0;//å¾®è°ƒå€¼
-			setData.chReverse[i] = 1;	//é€šé“çš„æ­£åï¼Œ1ä¸ºæ­£å¸¸ï¼Œ0ä¸ºåè½¬
+			setData.chLower[i] 	= 0;	//Ò£¸ËµÄ×îĞ¡Öµ
+			setData.chMiddle[i] = 2047;	//Ò£¸ËµÄÖĞÖµ
+			setData.chUpper[i] 	= 4095;	//Ò£¸ËµÄ×î´óÖµ
+			setData.PWMadjustValue[i]=0;//Î¢µ÷Öµ
+			setData.chReverse[i] = 1;	//Í¨µÀµÄÕı·´£¬1ÎªÕı³££¬0Îª·´×ª
 		}
-		setData.PWMadjustUnit = 2;//å¾®è°ƒå•ä½
-		setData.warnBatVolt = 3.7;//æŠ¥è­¦ç”µå‹
-		setData.throttlePreference = 1;//å·¦æ‰‹æ²¹é—¨
-		setData.batVoltAdjust = 1000;//ç”µæ± ç”µå‹æ ¡å‡†å€¼
-		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//å†™å…¥FLASH
+		setData.PWMadjustUnit = 2;//Î¢µ÷µ¥Î»
+		setData.warnBatVolt = 3.7;//±¨¾¯µçÑ¹
+		setData.throttlePreference = 1;//×óÊÖÓÍÃÅ
+		setData.batVoltAdjust = 1000;//µç³ØµçÑ¹Ğ£×¼Öµ
+		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//Ğ´ÈëFLASH
 	}
 	
 	GPIOA_Init();
 	ADC_InitTypeDef ADC_InitStructure;
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	  //ä½¿èƒ½ADC1é€šé“æ—¶é’Ÿ
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);	  //Ê¹ÄÜADC1Í¨µÀÊ±ÖÓ
 
-	//ADC1åˆå§‹åŒ–
-	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent; 			//ç‹¬ç«‹ADCæ¨¡å¼
-	ADC_InitStructure.ADC_ScanConvMode = ENABLE;  				//å¼€å¯æ‰«ææ–¹å¼
-	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;			//å¼€å¯è¿ç»­è½¬æ¢æ¨¡å¼
-	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T2_CC2;   	//ä½¿ç”¨å¤–éƒ¨è§¦å‘æ¨¡å¼ADC_ExternalTrigConvEdge_None
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; 		//é‡‡é›†æ•°æ®å³å¯¹é½
-	ADC_InitStructure.ADC_NbrOfChannel = adcNum; 			//è¦è½¬æ¢çš„é€šé“æ•°ç›®
+	//ADC1³õÊ¼»¯
+	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent; 			//¶ÀÁ¢ADCÄ£Ê½
+	ADC_InitStructure.ADC_ScanConvMode = ENABLE;  				//¿ªÆôÉ¨Ãè·½Ê½
+	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;			//¿ªÆôÁ¬Ğø×ª»»Ä£Ê½
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T2_CC2;   	//Ê¹ÓÃÍâ²¿´¥·¢Ä£Ê½ADC_ExternalTrigConvEdge_None
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; 		//²É¼¯Êı¾İÓÒ¶ÔÆë
+	ADC_InitStructure.ADC_NbrOfChannel = adcNum; 			//Òª×ª»»µÄÍ¨µÀÊıÄ¿
 	ADC_Init(ADC1, &ADC_InitStructure);
 	
-	RCC_ADCCLKConfig(RCC_PCLK2_Div6);				//é…ç½®ADCæ—¶é’Ÿï¼Œä¸ºPCLK2çš„6åˆ†é¢‘ï¼Œå³12MHz
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“0ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ 
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“1ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 3, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“2ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 4, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“3ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 5, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“4ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 6, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“5ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 7, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“6ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 8, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“7ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 9, ADC_SampleTime_239Cycles5);		//é…ç½®ADC1é€šé“8ä¸º239.5ä¸ªé‡‡æ ·å‘¨æœŸ
+	RCC_ADCCLKConfig(RCC_PCLK2_Div6);				//ÅäÖÃADCÊ±ÖÓ£¬ÎªPCLK2µÄ6·ÖÆµ£¬¼´12MHz
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ0Îª239.5¸ö²ÉÑùÖÜÆÚ 
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ1Îª239.5¸ö²ÉÑùÖÜÆÚ
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 3, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ2Îª239.5¸ö²ÉÑùÖÜÆÚ
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 4, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ3Îª239.5¸ö²ÉÑùÖÜÆÚ
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 5, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ4Îª239.5¸ö²ÉÑùÖÜÆÚ
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 6, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ5Îª239.5¸ö²ÉÑùÖÜÆÚ
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 7, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ6Îª239.5¸ö²ÉÑùÖÜÆÚ
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 8, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ7Îª239.5¸ö²ÉÑùÖÜÆÚ
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 9, ADC_SampleTime_239Cycles5);		//ÅäÖÃADC1Í¨µÀ8Îª239.5¸ö²ÉÑùÖÜÆÚ
 	
 	
-	ADC_DMACmd(ADC1,ENABLE);//ADCå‘DMAå‘å‡ºè¯·æ±‚ï¼Œè¯·æ±‚DMAä¼ è¾“æ•°æ®
-	ADC_Cmd(ADC1,ENABLE);//ä½¿èƒ½ADC
+	ADC_DMACmd(ADC1,ENABLE);//ADCÏòDMA·¢³öÇëÇó£¬ÇëÇóDMA´«ÊäÊı¾İ
+	ADC_Cmd(ADC1,ENABLE);//Ê¹ÄÜADC
  
-	ADC_ResetCalibration(ADC1);				//å¤ä½æ ¡å‡†å¯„å­˜å™¨
-	while(ADC_GetResetCalibrationStatus(ADC1));	//ç­‰å¾…æ ¡å‡†å¯„å­˜å™¨å¤ä½å®Œæˆ
+	ADC_ResetCalibration(ADC1);				//¸´Î»Ğ£×¼¼Ä´æÆ÷
+	while(ADC_GetResetCalibrationStatus(ADC1));	//µÈ´ıĞ£×¼¼Ä´æÆ÷¸´Î»Íê³É
  
-	ADC_StartCalibration(ADC1);				//ADCæ ¡å‡†
-	while(ADC_GetCalibrationStatus(ADC1));	//ç­‰å¾…æ ¡å‡†å®Œæˆ
+	ADC_StartCalibration(ADC1);				//ADCĞ£×¼
+	while(ADC_GetCalibrationStatus(ADC1));	//µÈ´ıĞ£×¼Íê³É
 	
-	ADC_ExternalTrigConvCmd(ADC1, ENABLE);	//è®¾ç½®å¤–éƒ¨è§¦å‘æ¨¡å¼ä½¿èƒ½
+	ADC_ExternalTrigConvCmd(ADC1, ENABLE);	//ÉèÖÃÍâ²¿´¥·¢Ä£Ê½Ê¹ÄÜ
 }
 
-//è·å¾—ADCå€¼ï¼Œæ­¤å‡½æ•°æœªä½¿ç”¨
-//ch:é€šé“å€¼ 0~8
+//»ñµÃADCÖµ£¬´Ëº¯ÊıÎ´Ê¹ÓÃ
+//ch:Í¨µÀÖµ 0~8
 u16 Get_Adc(u8 ch)   
 {
-  	//è®¾ç½®æŒ‡å®šADCçš„è§„åˆ™ç»„é€šé“ï¼Œä¸€ä¸ªåºåˆ—ï¼Œé‡‡æ ·æ—¶é—´
-	ADC_RegularChannelConfig(ADC1, ch, 1, ADC_SampleTime_239Cycles5 );	//ADC1,ADCé€šé“,é‡‡æ ·æ—¶é—´ä¸º239.5ä¸ªå‘¨æœŸ	
-	ADC_SoftwareStartConvCmd(ADC1, ENABLE);		//ä½¿èƒ½æŒ‡å®šçš„ADC1çš„è½¯ä»¶è½¬æ¢å¯åŠ¨åŠŸèƒ½	
-	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC ));//ç­‰å¾…è½¬æ¢ç»“æŸ
-	return ADC_GetConversionValue(ADC1);	//è¿”å›æœ€è¿‘ä¸€æ¬¡ADC1è§„åˆ™ç»„çš„è½¬æ¢ç»“æœ
+  	//ÉèÖÃÖ¸¶¨ADCµÄ¹æÔò×éÍ¨µÀ£¬Ò»¸öĞòÁĞ£¬²ÉÑùÊ±¼ä
+	ADC_RegularChannelConfig(ADC1, ch, 1, ADC_SampleTime_239Cycles5 );	//ADC1,ADCÍ¨µÀ,²ÉÑùÊ±¼äÎª239.5¸öÖÜÆÚ	
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);		//Ê¹ÄÜÖ¸¶¨µÄADC1µÄÈí¼ş×ª»»Æô¶¯¹¦ÄÜ	
+	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC ));//µÈ´ı×ª»»½áÊø
+	return ADC_GetConversionValue(ADC1);	//·µ»Ø×î½üÒ»´ÎADC1¹æÔò×éµÄ×ª»»½á¹û
 }
 
-//ch:é€šé“å€¼ 0~8ï¼Œé‡‡æ ·timesæ¬¡åä½œå‡å€¼æ»¤æ³¢ï¼Œæ­¤å‡½æ•°æœªä½¿ç”¨
+//ch:Í¨µÀÖµ 0~8£¬²ÉÑùtimes´Îºó×÷¾ùÖµÂË²¨£¬´Ëº¯ÊıÎ´Ê¹ÓÃ
 u16 Get_Adc_Average(u8 ch,u8 times)
 {
 	u32 temp_val=0;
@@ -219,35 +220,35 @@ u16 Get_Adc_Average(u8 ch,u8 times)
 }
 
 
-/*å‡½æ•°ï¼šfloat map(float value,float fromLow,float fromHigh,float toLow,float toHigh)
-* è¯´æ˜ï¼šä»¿Arduino,å°†ä¸€ä¸ªæ•°å­—ä»ä¸€ä¸ªèŒƒå›´é‡æ–°æ˜ å°„åˆ°å¦ä¸€ä¸ªèŒƒå›´
-		ä¹Ÿå°±æ˜¯è¯´ï¼ŒfromLowçš„å€¼å°†æ˜ å°„åˆ°toLowï¼Œfromlhighåˆ°toHighçš„å€¼ç­‰ç­‰ã€‚
-* å‚æ•°ï¼švalueï¼šå¾…æ˜ å°„çš„æ•°å€¼ï¼›
-		fromLowï¼šåŸèŒƒå›´çš„æœ€å°å€¼
-		fromHighï¼šåŸèŒƒå›´çš„æœ€å¤§å€¼
-		toLowï¼šè¦è½¬æ¢çš„èŒƒå›´çš„æœ€å°å€¼
-		toHighï¼šè¦è½¬æ¢çš„èŒƒå›´çš„æœ€å¤§å€¼
-* è¿”å›ï¼šè½¬æ¢åçš„æ•°å€¼
+/*º¯Êı£ºfloat map(float value,float fromLow,float fromHigh,float toLow,float toHigh)
+* ËµÃ÷£º·ÂArduino,½«Ò»¸öÊı×Ö´ÓÒ»¸ö·¶Î§ÖØĞÂÓ³Éäµ½ÁíÒ»¸ö·¶Î§
+		Ò²¾ÍÊÇËµ£¬fromLowµÄÖµ½«Ó³Éäµ½toLow£¬fromlhighµ½toHighµÄÖµµÈµÈ¡£
+* ²ÎÊı£ºvalue£º´ıÓ³ÉäµÄÊıÖµ£»
+		fromLow£ºÔ­·¶Î§µÄ×îĞ¡Öµ
+		fromHigh£ºÔ­·¶Î§µÄ×î´óÖµ
+		toLow£ºÒª×ª»»µÄ·¶Î§µÄ×îĞ¡Öµ
+		toHigh£ºÒª×ª»»µÄ·¶Î§µÄ×î´óÖµ
+* ·µ»Ø£º×ª»»ºóµÄÊıÖµ
 */
 float map(float value,float fromLow,float fromHigh,float toLow,float toHigh)
 {
 	return ((value-fromLow)*(toHigh-toLow)/(fromHigh-fromLow)+toLow);
 }
 
-/*å‡½æ•°ï¼šint mapChValue(int val, int lower, int middle, int upper, int reverse)
-* è¯´æ˜ï¼šå°†ADCè·å–çš„é‡‡æ ·å€¼è½¬æ¢åˆ°1000~2000ï¼Œlower~middle~upperé€‚é…é¥æ†çš„èŒƒå›´ï¼Œ
-		å¹¶åŠ å…¥æ­£åå¼€å…³çš„æ§åˆ¶ã€‚
-* å‚æ•°ï¼švalï¼šè¯¥é€šé“ADCå½“å‰é‡‡æ ·å€¼ï¼›
-		lowerï¼šè¯¥é€šé“é¥æ†æœ€ä½ä½ç½®æ—¶çš„ADCé‡‡æ ·å€¼ï¼›
-		middleï¼šè¯¥é€šé“é¥æ†å›ä¸­æ—¶çš„ADCé‡‡æ ·å€¼ï¼›
-		upperï¼šè¯¥é€šé“é¥æ†æœ€é«˜ä½ç½®æ—¶çš„ADCé‡‡æ ·å€¼ï¼›
-		reverseï¼šè¯¥é€šé“æ­£åå¼€å…³çŠ¶æ€ï¼Œ1ä¸ºæ­£å¸¸ï¼Œ0ä¸ºåè½¬
-* è¿”å›ï¼šè¯¥é€šé“å˜æ¢åçš„å€¼(1000~2000)
+/*º¯Êı£ºint mapChValue(int val, int lower, int middle, int upper, int reverse)
+* ËµÃ÷£º½«ADC»ñÈ¡µÄ²ÉÑùÖµ×ª»»µ½1000~2000£¬lower~middle~upperÊÊÅäÒ£¸ËµÄ·¶Î§£¬
+		²¢¼ÓÈëÕı·´¿ª¹ØµÄ¿ØÖÆ¡£
+* ²ÎÊı£ºval£º¸ÃÍ¨µÀADCµ±Ç°²ÉÑùÖµ£»
+		lower£º¸ÃÍ¨µÀÒ£¸Ë×îµÍÎ»ÖÃÊ±µÄADC²ÉÑùÖµ£»
+		middle£º¸ÃÍ¨µÀÒ£¸Ë»ØÖĞÊ±µÄADC²ÉÑùÖµ£»
+		upper£º¸ÃÍ¨µÀÒ£¸Ë×î¸ßÎ»ÖÃÊ±µÄADC²ÉÑùÖµ£»
+		reverse£º¸ÃÍ¨µÀÕı·´¿ª¹Ø×´Ì¬£¬1ÎªÕı³££¬0Îª·´×ª
+* ·µ»Ø£º¸ÃÍ¨µÀ±ä»»ºóµÄÖµ(1000~2000)
 */
 int mapChValue(int val, int lower, int middle, int upper, int reverse)
 {
 	if(val>upper) val = upper;
-	if(val<lower) val = lower;//å°†valé™åˆ¶åœ¨lower~upperèŒƒå›´å†…
+	if(val<lower) val = lower;//½«valÏŞÖÆÔÚlower~upper·¶Î§ÄÚ
 	if ( val < middle )
 	{
 		val = (int)map(val, lower, middle, 1000, 1500);
@@ -258,15 +259,15 @@ int mapChValue(int val, int lower, int middle, int upper, int reverse)
 	}
 	return ( reverse ? 3000 - val : val );
  }
-/*å‡½æ•°ï¼šint GetMedianNum(volatile u16 * bArray, int ch)
-* è¯´æ˜ï¼šå¯¹æ•°ç»„ä¸­æŸä¸ªé€šé“çš„é‡‡æ ·å€¼è¿›è¡Œä¸­å€¼æ»¤æ³¢ï¼Œä½¿é‡‡æ ·å€¼æ›´ç¨³å®š
-* å‚æ•°ï¼šbArrayï¼šå¾…æ»¤æ³¢çš„æ•°ç»„ï¼›
-		chï¼šé‡‡æ ·é€šé“0~adcNum-1ï¼›
-* è¿”å›ï¼šè¯¥é€šé“çš„é‡‡æ ·å€¼çš„ä¸­å€¼
+/*º¯Êı£ºint GetMedianNum(volatile u16 * bArray, int ch)
+* ËµÃ÷£º¶ÔÊı×éÖĞÄ³¸öÍ¨µÀµÄ²ÉÑùÖµ½øĞĞÖĞÖµÂË²¨£¬Ê¹²ÉÑùÖµ¸üÎÈ¶¨
+* ²ÎÊı£ºbArray£º´ıÂË²¨µÄÊı×é£»
+		ch£º²ÉÑùÍ¨µÀ0~adcNum-1£»
+* ·µ»Ø£º¸ÃÍ¨µÀµÄ²ÉÑùÖµµÄÖĞÖµ
 */
 int GetMedianNum(volatile u16 * bArray, int ch)
 {
-    int i,j;// å¾ªç¯å˜é‡
+    int i,j;// Ñ­»·±äÁ¿
     int bTemp;
 	u16 tempArray[sampleNum];
 	for(i=0; i<sampleNum;i++)
@@ -274,14 +275,14 @@ int GetMedianNum(volatile u16 * bArray, int ch)
 		tempArray[i] = bArray[ch+adcNum*i];
 	}
 
-    // ç”¨å†’æ³¡æ³•å¯¹æ•°ç»„è¿›è¡Œæ’åº
+    // ÓÃÃ°Åİ·¨¶ÔÊı×é½øĞĞÅÅĞò
     for (j = 0; j < sampleNum - 1; j ++)
     {
         for (i = 0; i < sampleNum - j - 1; i ++)
         {
             if (tempArray[i] > tempArray[i + 1])
             {
-                // äº’æ¢
+                // »¥»»
                 bTemp = tempArray[i];
                 tempArray[i] = tempArray[i + 1];
                 tempArray[i + 1] = bTemp;
@@ -289,15 +290,15 @@ int GetMedianNum(volatile u16 * bArray, int ch)
         }
     }
 
-    // è®¡ç®—ä¸­å€¼
+    // ¼ÆËãÖĞÖµ
     if ((sampleNum & 1) > 0)
     {
-        // æ•°ç»„æœ‰å¥‡æ•°ä¸ªå…ƒç´ ï¼Œè¿”å›ä¸­é—´ä¸€ä¸ªå…ƒç´ 
+        // Êı×éÓĞÆæÊı¸öÔªËØ£¬·µ»ØÖĞ¼äÒ»¸öÔªËØ
         bTemp = tempArray[(sampleNum + 1) / 2];
     }
     else
     {
-        // æ•°ç»„æœ‰å¶æ•°ä¸ªå…ƒç´ ï¼Œè¿”å›ä¸­é—´ä¸¤ä¸ªå…ƒç´ å¹³å‡å€¼
+        // Êı×éÓĞÅ¼Êı¸öÔªËØ£¬·µ»ØÖĞ¼äÁ½¸öÔªËØÆ½¾ùÖµ
         bTemp = (tempArray[sampleNum / 2] + tempArray[sampleNum / 2 + 1]) / 2;
     }
 
