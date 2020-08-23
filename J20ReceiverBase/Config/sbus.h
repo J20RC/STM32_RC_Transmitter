@@ -14,9 +14,10 @@
 #define SBUS_FRAME_FOOTER_V2 0x04	// SBUS数据尾，结束字节2
 #define SBUS_STATE_FAILSAFE 0x08	// 激活故障安全标志
 #define SBUS_STATE_SIGNALLOSS 0x04 	// 丢失信号标志
-#define SBUS_UPDATE_RATE 5 //SBUS输出更新时间ms
+#define SBUS_UPDATE_RATE 10 //SBUS输出更新时间ms
 
 void sbusPreparePacket(u8 packet[], u16 channels[], u8 isSignalLoss, u8 isFailsafe);
+void sbusData(u8 SBUS_DATA[], u16 CH_Rec[]);
 float map(float value,float fromLow,float fromHigh,float toLow,float toHigh);
 
 #endif
