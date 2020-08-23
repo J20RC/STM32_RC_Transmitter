@@ -131,21 +131,21 @@ int main()
 				if(keyEvent==1|keyEvent==2) 
 				{
 					OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-					loca = (int)95+setData.PWMadjustValue[0]/4;
+					loca = (int)95+setData.PWMadjustValue[0]/8;
 					OLED_Fill(loca,59,loca,62,1);//写1
 					OLED_DrawPlusSign(95,61);//中心标识
 				}
 				if(keyEvent==3|keyEvent==4) 
 				{
 					OLED_Fill(123,1,126,63,0);//写0
-					loca = (int)32-setData.PWMadjustValue[1]/4;
+					loca = (int)32-setData.PWMadjustValue[1]/8;
 					OLED_Fill(123,loca,126,loca,1);//写1
 					OLED_DrawPlusSign(125,32);//中心标识
 				}
 				if(keyEvent==5|keyEvent==6) 
 				{	
 					OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-					loca = (int)33+setData.PWMadjustValue[3]/4;
+					loca = (int)33+setData.PWMadjustValue[3]/8;
 					OLED_Fill(loca,59,loca,62,1);//写1
 					OLED_DrawPlusSign(33,61);//中心标识
 				}
@@ -179,11 +179,11 @@ int main()
 			}
 			for(int i=0;i<4;i++)//限制微调范围
 			{
-				if(setData.PWMadjustValue[i]>100-setData.PWMadjustUnit) setData.PWMadjustValue[i]=100-setData.PWMadjustUnit;
-				if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-100) setData.PWMadjustValue[i]=setData.PWMadjustUnit-100;
+				if(setData.PWMadjustValue[i]>200-setData.PWMadjustUnit) setData.PWMadjustValue[i]=200-setData.PWMadjustUnit;
+				if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-200) setData.PWMadjustValue[i]=setData.PWMadjustUnit-200;
 			}
 			if(setData.PWMadjustUnit>8) setData.PWMadjustUnit = 8;//限制微调单位范围
-			if(setData.PWMadjustUnit<1) setData.PWMadjustUnit = 1;
+			if(setData.PWMadjustUnit<1) setData.PWMadjustUnit = 2;
 			if(menuEvent[1]==NUM_up)
 			{
 				if(nowMenuIndex==5){setData.PWMadjustValue[0] += setData.PWMadjustUnit;subMenu1_1();}

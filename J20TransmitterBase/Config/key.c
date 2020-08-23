@@ -59,8 +59,8 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 				if(i==0 | i==1) ch = 0;
 				if(i==2 | i==3) ch = 1;
 				if(i==4 | i==5) ch = 3;//第几个通道
-				if(setData.PWMadjustValue[ch]>100-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=100-setData.PWMadjustUnit;//限制微调范围
-				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-100) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-100;//限制微调范围
+				if(setData.PWMadjustValue[ch]>200-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=200-setData.PWMadjustUnit;//限制微调范围
+				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-200) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-200;//限制微调范围
 				if(i%2==0) setData.PWMadjustValue[ch] -= setData.PWMadjustUnit;//微调减
 				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;//微调加
 				keyEvent = i+1;//有按键按下标志
@@ -72,8 +72,8 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 				if(i==2 | i==3) ch = 1;
 				if(i==4 | i==5) ch = 3;//第几个通道
 				
-				if(setData.PWMadjustValue[ch]>100-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=100-setData.PWMadjustUnit;//限制微调范围
-				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-100) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-100;//限制微调范围
+				if(setData.PWMadjustValue[ch]>200-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=200-setData.PWMadjustUnit;//限制微调范围
+				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-200) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-200;//限制微调范围
 				
 				if(i%2==0) setData.PWMadjustValue[ch] -= setData.PWMadjustUnit;
 				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;
