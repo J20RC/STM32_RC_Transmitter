@@ -158,7 +158,7 @@ int main()
 		{
 			subMenu3_1();
 			OLED_Refresh_Gram();//刷新显存
-			for(int i=0;i<4;i++)
+			for(int i=0;i<chNum;i++)
 			{
 				if(chResult[i]>setData.chUpper[i]) setData.chUpper[i]=chResult[i];
 				if(chResult[i]<setData.chLower[i]) setData.chLower[i]=chResult[i];
@@ -171,7 +171,7 @@ int main()
 			OLED_display();
 			if(nowMenuIndex==13 && lastMenuIndex != 13)//通道中立点校准
 			{
-				for(int i=0;i<4;i++)
+				for(int i=0;i<chNum;i++)
 				{
 					setData.chMiddle[i]=chResult[i];
 				}
