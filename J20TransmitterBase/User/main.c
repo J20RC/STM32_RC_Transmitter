@@ -1,5 +1,5 @@
 /*
-=============J20航模遥控器遥控器端-基础版V1.1==============
+=============J20航模遥控器遥控器端-基础版V1.0==============
 	开发板：STM32F103C8T6蓝色板
 	NRF24L01模块：
 				GND   	电源地
@@ -158,12 +158,11 @@ int main()
 		{
 			subMenu3_1();
 			OLED_Refresh_Gram();//刷新显存
-			for(int i=0;i<chNum;i++)
+			for(int i=0;i<4;i++)
 			{
 				if(chResult[i]>setData.chUpper[i]) setData.chUpper[i]=chResult[i];
 				if(chResult[i]<setData.chLower[i]) setData.chLower[i]=chResult[i];
 			}
-			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 		}
 		
 		if(menuEvent[0])//菜单事件
@@ -171,12 +170,14 @@ int main()
 			OLED_display();
 			if(nowMenuIndex==13 && lastMenuIndex != 13)//通道中立点校准
 			{
-				for(int i=0;i<chNum;i++)
+				for(int i=0;i<4;i++)
 				{
-					setData.chMiddle[i]=chResult[i];
+					setData.chLower[i] 	= chResult[i];	//遥杆的最小值更新
+					setData.chMiddle[i] = chResult[i];	//遥杆的中值
+					setData.chUpper[i] 	= chResult[i];	//遥杆的最大值更新
 				}
-				STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 			}
+			
 			for(int i=0;i<4;i++)//限制微调范围
 			{
 				if(setData.PWMadjustValue[i]>200-setData.PWMadjustUnit) setData.PWMadjustValue[i]=200-setData.PWMadjustUnit;
@@ -214,7 +215,10 @@ int main()
 				if(nowMenuIndex==16) {setData.warnBatVolt -= 0.01;subMenu4_3();}
 				if(nowMenuIndex==17) {setData.PWMadjustUnit -= 1;subMenu4_4();}
 			}
-			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
+			if(nowMenuIndex!=lastMenuIndex && lastMenuIndex>=5 && lastMenuIndex<=17)
+			{
+				STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
+			}
 			OLED_Refresh_Gram();//刷新显存
 			
 			menuEvent[0] = 0;
@@ -222,5 +226,6 @@ int main()
 		}
 		lastMenuIndex = nowMenuIndex;
 	}
+	
 }
 

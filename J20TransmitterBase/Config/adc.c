@@ -133,11 +133,19 @@ void  Adc_Init(void)
 	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//从FLASH中读取结构体
 	if(setData.writeFlag!=0x1111){
 		setData.writeFlag=0x1111;//是否第一次写入
-		for(int i=0;i<chNum;i++)
+		for(int i=0;i<4;i++)
 		{
 			setData.chLower[i] 	= 2047;	//遥杆的最小值
 			setData.chMiddle[i] = 2047;	//遥杆的中值
 			setData.chUpper[i] 	= 2047;	//遥杆的最大值
+			setData.PWMadjustValue[i]=0;//微调值
+			setData.chReverse[i] = 1;	//通道的正反，1为正常，0为反转
+		}
+		for(int i=4;i<chNum;i++)
+		{
+			setData.chLower[i] 	= 0;	//遥杆的最小值
+			setData.chMiddle[i] = 2047;	//遥杆的中值
+			setData.chUpper[i] 	= 4095;	//遥杆的最大值
 			setData.PWMadjustValue[i]=0;//微调值
 			setData.chReverse[i] = 1;	//通道的正反，1为正常，0为反转
 		}
