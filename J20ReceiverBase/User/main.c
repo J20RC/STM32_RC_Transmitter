@@ -42,6 +42,7 @@
 #include "sbus.h"
 
 u16 PWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
+u16 recPWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
 u8 sbusPacket[SBUS_PACKET_LENGTH];// 25个字节的SBUS数据包
 u8 signalLoss = 0;  // 1表示丢失信号
 u16 i=0,startIndex=0;
@@ -54,6 +55,7 @@ int main()
 	delay_init();//初始化延时函数
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(100000);//初始化串口1，作为sbus输出，（波特率为100000，8个数据位，偶校验，2个停止位）
+	//usart_init(115200);
 	TIM3_PWM_Init(19999,71);//预分频72，频率1MHz，周期1us；自动装载值20 000，故PWM周期1us*20 000
 	TIM2_PWM_Init(19999,71);//PWM输出
 	TIM4_Counter_Init(9,71); //预分频1MHz，周期1us，自动装载值10，故最小计数单位10us
@@ -78,14 +80,15 @@ int main()
 			}
 			for(i=0;i<chNum;i++)//从起始位置开始处理
 			{
-				PWMvalue[i] = ((u16)chPacket[startIndex] << 8) | ((u16)(chPacket[startIndex+1]));// 合并u8为u16
+				recPWMvalue[i] = ((u16)chPacket[startIndex] << 8) | ((u16)(chPacket[startIndex+1]));// 合并u8为u16
+				if(recPWMvalue[i]!=0) PWMvalue[i] = recPWMvalue[i];
 				startIndex = startIndex+2;
 			}
 			for (i=chNum; i<16; i++) 
 			{
 				PWMvalue[i] = 1500;//未用到的通道全部置中
 			}
-			//printf("%d\t%d\t%d\t%d\t%d\n",PWMvalue[0],PWMvalue[1],PWMvalue[2],PWMvalue[3],PWMvalue[4]);
+			//printf("%d,%d,%d,%d\n",PWMvalue[4],PWMvalue[5],PWMvalue[6],PWMvalue[7]);
 			LED = 0;
 			lastTime = nowTime;
 		}
@@ -93,12 +96,13 @@ int main()
 		if (nowTime > sbusTime) //输出SBUS
 		{
 			sbusPreparePacket(sbusPacket, PWMvalue, signalLoss, 0); //chNum通道数值转换为SBUS数据包
-			for(i=0;i<SBUS_PACKET_LENGTH;i++) 
+			//sbusData(sbusPacket, PWMvalue);
+			for(i=0;i<SBUS_PACKET_LENGTH;i++)
 			{
 				USART_SendData(USART1,sbusPacket[i]);//将SBUS数据包通过串口TX0输出
 				while( USART_GetFlagStatus(USART1,USART_FLAG_TC)!= SET);//等待发送完成
 			}
-			sbusTime = nowTime + SBUS_UPDATE_RATE*100;
+			sbusTime = nowTime + SBUS_UPDATE_RATE*100;//10ms更新一次
 		}
 //		printf("%d\t%d\n",nowTime,lastTime);
 		if(nowTime-lastTime>100*2000)//距离上次接收时间大于2s，则说明失去信号

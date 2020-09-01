@@ -44,6 +44,61 @@ void sbusPreparePacket(u8 packet[], u16 channels[], u8 isSignalLoss, u8 isFailsa
     packet[23] = stateByte;         // 标志位0x00
     packet[24] = SBUS_FRAME_FOOTER; // SBUS结束字节0x00
 }
+void sbusData(u8 SBUS_DATA[], u16 CH_Rec[])
+{
+	u32 SBUS_B;
+	SBUS_DATA[0] = 0x0F;
+	SBUS_B = (CH_Rec[0] - 500);
+	SBUS_DATA[1] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[1] - 500)) << 11)) >> 8;
+	SBUS_DATA[2] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[2] - 500)) << 14)) >> 8;
+	SBUS_DATA[3] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	SBUS_DATA[4] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[3] - 500)) << 9)) >> 8;
+	SBUS_DATA[5] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[4] - 500)) << 12)) >> 8;
+	SBUS_DATA[6] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[5] - 500)) << 15)) >> 8;
+	SBUS_DATA[7] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	SBUS_DATA[8] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[6] - 500)) << 10)) >> 8;
+	SBUS_DATA[9] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[7] - 500)) << 13)) >> 8;
+	SBUS_DATA[10] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	SBUS_DATA[11] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	SBUS_B = (CH_Rec[8] - 500);
+	SBUS_DATA[12] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[9] - 500)) << 11)) >> 8;
+	SBUS_DATA[13] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[10] - 500)) << 14)) >> 8;
+	SBUS_DATA[14] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	SBUS_DATA[15] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[11] - 500)) << 9)) >> 8;
+	SBUS_DATA[16] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[12] - 500)) << 12)) >> 8;
+	SBUS_DATA[17] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[13] - 500)) << 15)) >> 8;
+	SBUS_DATA[18] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	SBUS_DATA[19] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[14] - 500)) << 10)) >> 8;
+	SBUS_DATA[20] = SBUS_B & 0xFF;
+	SBUS_B = (SBUS_B | (((uint32_t)(CH_Rec[15] - 500)) << 13)) >> 8;
+	SBUS_DATA[21] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	SBUS_DATA[22] = SBUS_B & 0xFF;
+	SBUS_B = SBUS_B >> 8;
+	
+	SBUS_DATA[23] = 0x00;// | 0x0C;			//无信号（RSSI低）时应加入失控标记
+	SBUS_DATA[24] = 0x00;
+}
+
 
 /*函数：float map(float value,float fromLow,float fromHigh,float toLow,float toHigh)
 * 说明：仿Arduino,将一个数字从一个范围重新映射到另一个范围

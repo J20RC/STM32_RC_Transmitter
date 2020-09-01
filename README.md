@@ -1,6 +1,6 @@
 ![Alt text](./images/logo.png)
 # :airplane: J20航模遥控器
- - 基于STM32和MDK标准库开发的航模遥控器
+ - 基于STM32和标准库/HAL库开发的航模遥控器
  - 项目计划：https://www.cnblogs.com/cai-zi/p/13438079.html 
  - Bilibili项目宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
  - 我们的开源宗旨：自由 协调 开放 合作 共享
