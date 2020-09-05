@@ -98,10 +98,8 @@ void  DMA1_Channel1_IRQHandler(void)
 														setData.chUpper[i], 
 														setData.chReverse[i]);//数值映射
 		}
-		if(nowMenuIndex==0){
-			sendDataPacket();//发送数据包,采集完即发送到接收机
-			sendCount++;
-		}
+		sendDataPacket();//发送数据包,采集完即发送到接收机
+		sendCount++;
 		batVolt = GetMedianNum(chValue,8)*3.3*3*setData.batVoltAdjust/4095000;//电池电压采样
 		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// 报警信号
 		else batVoltSignal = 0;

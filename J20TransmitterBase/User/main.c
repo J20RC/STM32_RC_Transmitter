@@ -96,11 +96,7 @@ int main()
 	mainWindow();//显示主界面
 	OLED_Refresh_Gram();//刷新显存
 	while (1){
-		if(nowMenuIndex!=0){
-			sendDataPacket();//发送数据包
-			sendCount++;
-		}
-		if(sendCount == 5)//每隔10次检查一下
+		if(sendCount == 5)//每隔20次检查一下
 		{
 			if(batVoltSignal==1) Beeper = !Beeper;//蜂鸣器间断鸣叫，报警
 			else Beeper = 0;//不报警
@@ -123,7 +119,7 @@ int main()
 			updateWindow[0] = 0;
 			sendCount = 0;
 		}
-		if(sendCount > 10) sendCount = 0;
+		if(sendCount > 20) sendCount = 0;
 		if(keyEvent>0)//微调更新事件
 		{
 			if(nowMenuIndex==0)
