@@ -29,7 +29,7 @@
 	
 	by J20开发团队
 */
-#include "pwm.h"
+
 #include "delay.h"
 #include "usart.h"
 #include "stm32f10x.h"
@@ -40,6 +40,7 @@
 #include "led.h"
 #include "tim.h"
 #include "sbus.h"
+#include "pwm.h"
 
 u16 PWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
 u16 recPWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
@@ -58,7 +59,7 @@ int main()
 	//usart_init(115200);
 	TIM3_PWM_Init(19999,71);//预分频72，频率1MHz，周期1us；自动装载值20 000，故PWM周期1us*20 000
 	TIM2_PWM_Init(19999,71);//PWM输出
-	TIM4_Counter_Init(9,71); //预分频1MHz，周期1us，自动装载值10，故最小计数单位10us
+	TIM4_Counter_Init(1,71); //预分频1MHz，周期1us，自动装载值2，故最小计数单位2us
 	LED_Init();		//LED初始化
 	NRF24L01_Init();//初始化NRF24L01
 	while(NRF24L01_Check())
@@ -88,6 +89,7 @@ int main()
 			{
 				PWMvalue[i] = 1500;//未用到的通道全部置中
 			}
+			for (i=0;i<chNum;i++) {chTime[i] = map(PWMvalue[i],1000,2000,(int)(500/1.15),(int)(1000/1.15));}
 			//printf("%d,%d,%d,%d\n",PWMvalue[4],PWMvalue[5],PWMvalue[6],PWMvalue[7]);
 			LED = 0;
 			lastTime = nowTime;
@@ -96,16 +98,15 @@ int main()
 		if (nowTime > sbusTime) //输出SBUS
 		{
 			sbusPreparePacket(sbusPacket, PWMvalue, signalLoss, 0); //chNum通道数值转换为SBUS数据包
-			//sbusData(sbusPacket, PWMvalue);
 			for(i=0;i<SBUS_PACKET_LENGTH;i++)
 			{
 				USART_SendData(USART1,sbusPacket[i]);//将SBUS数据包通过串口TX0输出
 				while( USART_GetFlagStatus(USART1,USART_FLAG_TC)!= SET);//等待发送完成
 			}
-			sbusTime = nowTime + SBUS_UPDATE_RATE*100;//10ms更新一次
+			sbusTime = nowTime + SBUS_UPDATE_RATE*500;//10ms更新一次
 		}
 //		printf("%d\t%d\n",nowTime,lastTime);
-		if(nowTime-lastTime>100*2000)//距离上次接收时间大于2s，则说明失去信号
+		if(nowTime-lastTime>500*2000)//距离上次接收时间大于2s，则说明失去信号
 		{
 			LED=!LED;
 			signalLoss = 1;//失去信号标志
@@ -113,6 +114,11 @@ int main()
 			PWMvalue[1] = 1500;//通道2置中
 			PWMvalue[2] = 1000;//油门最低
 			PWMvalue[3] = 1500;//通道4置中
+			for (i=4; i<8; i++) 
+			{
+				PWMvalue[i] = 1500;//未用到的通道全部置中
+			}
+			for (i=0;i<chNum;i++) {chTime[i] = map(PWMvalue[i],1000,2000,(int)(500/1.15),(int)(1000/1.15));}
 			delay_ms(200);
 		}
 		TIM_SetCompare1(TIM2,PWMvalue[0]);//输出给PWM-PA0

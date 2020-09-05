@@ -2,6 +2,7 @@
 #define __PWM_H
 #include "stm32f10x.h" //记得添加此头文件，因为config.c用到GPIO相关函数等
 #include "sys.h"
+
 #define chNum 8		//采样通道数
 
 void TIM3_PB5_PWM_Init(u16 arr,u16 psc);//PB5定时器初始化
