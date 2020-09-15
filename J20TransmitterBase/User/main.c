@@ -146,8 +146,8 @@ int main()
 					OLED_DrawPlusSign(33,61);//中心标识
 				}
 				OLED_Refresh_Gram();//刷新显存
+				STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 			}
-			STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 			keyEvent = 0;
 		}
 		if(nowMenuIndex==13)//通道校准
