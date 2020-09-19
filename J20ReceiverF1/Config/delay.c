@@ -1,8 +1,8 @@
 #include "delay.h"
-
+/*
 static u8  fac_us=0;							//us延时倍乘数			   
 static u16 fac_ms=0;							//ms延时倍乘数,在ucos下,代表每个节拍的ms数
-		   
+
 //初始化延迟函数
 //SYSTICK的时钟固定为HCLK时钟的1/8
 //SYSCLK:系统时钟
@@ -47,10 +47,30 @@ void delay_ms(u16 nms)
 	SysTick->CTRL&=~SysTick_CTRL_ENABLE_Msk;	//关闭计数器
 	SysTick->VAL =0X00;       					//清空计数器	  	    
 } 
+*/
+//延时n us
+//nus为要延时的us数.		    								   
+void delay_us(u32 nus)
+{		
+	u16 i=0;  
+	while(nus--)
+	{
+	  i=12;
+	  while(i--);
+	}
+}
 
-
-
-
+//延时n ms
+//nms为要延时的ms数.		    								   
+void delay_ms(u16 nms)
+{		
+	u16 i=0;  
+	while(nms--)
+	{
+	  i=12000;
+	  while(i--);
+	}
+}
 
 
 

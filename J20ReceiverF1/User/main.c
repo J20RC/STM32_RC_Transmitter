@@ -41,6 +41,7 @@
 #include "tim.h"
 #include "sbus.h"
 #include "pwm.h"
+#include "ppm.h"
 
 u16 PWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
 u16 recPWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
@@ -51,22 +52,27 @@ u32 lastTime = 0;
 u32 sbusTime = 0;
 u8 chPacket[32];
 
+void PWM_reset(void);
+
 int main()
 {
-	delay_init();//初始化延时函数
+//	delay_init();//初始化延时函数
+	PWM_reset();
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(100000);//初始化串口1，作为sbus输出，（波特率为100000，8个数据位，偶校验，2个停止位）
 	//usart_init(115200);
 	TIM3_PWM_Init(19999,71);//预分频72，频率1MHz，周期1us；自动装载值20 000，故PWM周期1us*20 000
 	TIM2_PWM_Init(19999,71);//PWM输出
-	TIM4_Counter_Init(1,71); //预分频1MHz，周期1us，自动装载值2，故最小计数单位2us
+	TIM4_Counter_Init(9,71); //预分频1MHz，周期1us，自动装载值10，故最小计数单位10us
+	PPM_Pin_Init();//PPM引脚初始化
+	systick_init(10000);//PPM定时初始化，初始值随意设置
 	LED_Init();		//LED初始化
 	NRF24L01_Init();//初始化NRF24L01
 	while(NRF24L01_Check())
 	{
  		delay_ms(200);
 	}
-		
+	
 	NRF24L01_RX_Mode();
 	while (1){ 	
 		if(NRF24L01_RxPacket(chPacket)==0)
@@ -89,7 +95,6 @@ int main()
 			{
 				PWMvalue[i] = 1500;//未用到的通道全部置中
 			}
-			for (i=0;i<chNum;i++) {chTime[i] = map(PWMvalue[i],1000,2000,(int)(500/1.15),(int)(1000/1.15));}
 			//printf("%d,%d,%d,%d\n",PWMvalue[4],PWMvalue[5],PWMvalue[6],PWMvalue[7]);
 			LED = 0;
 			lastTime = nowTime;
@@ -103,24 +108,18 @@ int main()
 				USART_SendData(USART1,sbusPacket[i]);//将SBUS数据包通过串口TX0输出
 				while( USART_GetFlagStatus(USART1,USART_FLAG_TC)!= SET);//等待发送完成
 			}
-			sbusTime = nowTime + SBUS_UPDATE_RATE*500;//10ms更新一次
+			sbusTime = nowTime + SBUS_UPDATE_RATE*100;//10ms更新一次
 		}
 //		printf("%d\t%d\n",nowTime,lastTime);
-		if(nowTime-lastTime>500*2000)//距离上次接收时间大于2s，则说明失去信号
+		if(nowTime-lastTime>100*2000)//距离上次接收时间大于2s，则说明失去信号
 		{
 			LED=!LED;
 			signalLoss = 1;//失去信号标志
-			PWMvalue[0] = 1500;//通道1置中
-			PWMvalue[1] = 1500;//通道2置中
-			PWMvalue[2] = 1000;//油门最低
-			PWMvalue[3] = 1500;//通道4置中
-			for (i=4; i<8; i++) 
-			{
-				PWMvalue[i] = 1500;//未用到的通道全部置中
-			}
-			for (i=0;i<chNum;i++) {chTime[i] = map(PWMvalue[i],1000,2000,(int)(500/1.15),(int)(1000/1.15));}
+			PWM_reset();//失控保护
 			delay_ms(200);
 		}
+		//PPM数据转换
+		for (i=0;i<chNum;i++) {chTime[i] = (u32)(map(PWMvalue[i],1000,2000,72000,72000*2));}
 		TIM_SetCompare1(TIM2,PWMvalue[0]);//输出给PWM-PA0
 		TIM_SetCompare2(TIM2,PWMvalue[1]);//输出给PWM-PA1
 		TIM_SetCompare3(TIM2,PWMvalue[2]);//输出给PWM-PA2
@@ -131,3 +130,16 @@ int main()
 		TIM_SetCompare4(TIM3,PWMvalue[7]);//输出给PWM-PB1
 	}
 }
+//初始化PWM输出和失控保护
+void PWM_reset(void)
+{
+	PWMvalue[0] = 1500;//通道1置中
+	PWMvalue[1] = 1500;//通道2置中
+	PWMvalue[2] = 1000;//油门最低
+	PWMvalue[3] = 1500;//通道4置中
+	for (i=4; i<chNum; i++) 
+	{
+		PWMvalue[i] = 1500;//未用到的通道全部置中
+	}
+}
+
