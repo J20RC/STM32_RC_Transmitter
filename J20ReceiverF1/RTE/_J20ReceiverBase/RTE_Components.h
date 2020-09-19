@@ -3,7 +3,7 @@
  * Auto generated Run-Time-Environment Component Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'J20ReceiverBase' 
+ * Project: 'J20ReceiverF1' 
  * Target:  'J20ReceiverBase' 
  */
 
