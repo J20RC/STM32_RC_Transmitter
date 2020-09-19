@@ -22,7 +22,7 @@
   </DaveTm>
 
   <Target>
-    <TargetName>J20ReceiverBaseSTM32F0</TargetName>
+    <TargetName>J20ReceiverF0</TargetName>
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>

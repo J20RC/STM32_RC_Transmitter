@@ -3,7 +3,7 @@
  * Auto generated Run-Time-Environment Component Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'J20ReceiverBaseSTM32F0' 
+ * Project: 'J20ReceiverBaseF0' 
  * Target:  'J20ReceiverBaseSTM32F0' 
  */
 

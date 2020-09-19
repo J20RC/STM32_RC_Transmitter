@@ -60,6 +60,7 @@ Pin	PINs		FUNCTIONs	LABELs
 
 /* USER CODE BEGIN PV */
 u8 update_count = 0;
+u8 PPM_count=0;
 uint16_t CH_Safe[16];			//系统保存的失控保护通道值
 uint32_t CH_PPM[9];				//该缓存区仅用于DMA搬运PPM，因此需要8个最后一个用于计算间隔。
 u16 PWMvalue[SBUS_CHANNEL_NUMBER];// 控制PWM占空比
@@ -431,7 +432,7 @@ HAL_StatusTypeDef My_HAL_TIM_PWM_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Cha
   return HAL_OK;
 }
 
-/*PPM没有调通，实在不行就当作第9通道用吧
+/*PPM没有调通，实在不行就当作第9通道用吧*/
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == htim1.Instance)
@@ -447,7 +448,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 }
 
-*/
+
 /* USER CODE END 4 */
 
 /**
