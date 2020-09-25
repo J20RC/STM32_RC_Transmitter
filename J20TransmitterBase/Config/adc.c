@@ -89,14 +89,24 @@ void  DMA1_Channel1_IRQHandler(void)
 	if(DMA_GetITStatus(DMA1_IT_TC1)!=RESET){
 		
 		//中断处理代码
+		//通道映射,判断设置的左/右手油门
+		for(i=0; i<4; i++)
+		{
+			if(setData.throttlePreference){chResult[i] = GetMedianNum(chValue,i);}
+			else {chResult[i] = GetMedianNum(chValue,3-i);}
+		}
+		for(i=4; i<chNum; i++)
+		{
+			chResult[i] = GetMedianNum(chValue,i);//后4个通道映射
+		}
+		//数值映射
 		for(i=0; i<chNum; i++)
 		{
-			chResult[i] = GetMedianNum(chValue,i);//中值滤波
 			PWMvalue[i]= setData.PWMadjustValue[i]+mapChValue(chResult[i], 
 														setData.chLower[i], 
 														setData.chMiddle[i], 
 														setData.chUpper[i], 
-														setData.chReverse[i]);//数值映射
+														setData.chReverse[i]);
 		}
 		sendDataPacket();//发送数据包,采集完即发送到接收机
 		sendCount++;
