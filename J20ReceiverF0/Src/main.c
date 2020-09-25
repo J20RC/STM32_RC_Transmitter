@@ -141,8 +141,8 @@ int main(void)
 	for(i = 0; i<16; i ++) {PWMvalue[i] = CH_Safe[i];}
 	
 	//PPM
-	for(i = 0; i<8; i ++) {CH_PPM[i] = PWMvalue[i];}
-	CH_PPM[8] = 20000 - CH_PPM[0] - CH_PPM[1] - CH_PPM[2] - CH_PPM[3] - CH_PPM[4] - CH_PPM[5] - CH_PPM[6] - CH_PPM[7];
+	for(i = 0; i<8; i ++) {CH_PPM[i] = PWMvalue[i]-500;}//PWM高电平时间-500us的低电平时间
+	CH_PPM[8] = 20000 - PWMvalue[0] - PWMvalue[1] - PWMvalue[2] - PWMvalue[3] - PWMvalue[4] - PWMvalue[5] - PWMvalue[6] - PWMvalue[7];
 	My_HAL_TIM_PWM_Start_DMA(&htim1, TIM_CHANNEL_1, CH_PPM, 9);
 	
 	//PWM
@@ -298,7 +298,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 {
 	for(uint8_t i = 0; i != 8; i ++) {CH_PPM[i] = PWMvalue[i];}
-	CH_PPM[8] = 20000 - CH_PPM[0] - CH_PPM[1] - CH_PPM[2] - CH_PPM[3] - CH_PPM[4] - CH_PPM[5] - CH_PPM[6] - CH_PPM[7];
+	CH_PPM[8] = 20000 - PWMvalue[0] - PWMvalue[1] - PWMvalue[2] - PWMvalue[3] - PWMvalue[4] - PWMvalue[5] - PWMvalue[6] - PWMvalue[7];
 }
 
 //改变原有库函数，将DMA目标寄存器改为ARR。
@@ -432,7 +432,7 @@ HAL_StatusTypeDef My_HAL_TIM_PWM_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Cha
   return HAL_OK;
 }
 
-/*PPM没有调通，实在不行就当作第9通道用吧*/
+/*PPM输出*/
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == htim1.Instance)
