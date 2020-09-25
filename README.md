@@ -54,6 +54,11 @@ Bilibili视频：https://www.bilibili.com/video/BV1ea4y1J7WV	<br/>
 使用说明：https://www.cnblogs.com/cai-zi/p/13438406.html	<br/>
 开发说明：https://www.cnblogs.com/cai-zi/p/13536862.html	<br/>
 PCB打印：https://www.cnblogs.com/cai-zi/p/13536693.html		<br/>
+- 基础版V1.1发布（2020.09.25）	<br/>
+遥控器端系统设置增加左右手油门设置、报警电压、校准电压、微调单位等；	<br/>
+遥控器的mini板PCB修复电压供电波动问题，使用AMS1117-3.3芯片替代原来的H7233芯片；	<br/>
+STM32F0接收机增加SBUS输出、PPM输出；	<br/>
+STM32F1接收机增加SBUS输出、PPM输出；	<br/>
 
 
 ## 非常感谢项目中所有的贡献者：
