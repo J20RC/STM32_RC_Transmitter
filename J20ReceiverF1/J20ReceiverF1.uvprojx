@@ -443,6 +443,11 @@
               <FileType>1</FileType>
               <FilePath>.\Config\sbus.c</FilePath>
             </File>
+            <File>
+              <FileName>ppm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Config\ppm.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
