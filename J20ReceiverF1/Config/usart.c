@@ -1,5 +1,6 @@
 #include "stm32f10x.h"
 #include "usart.h"	   
+#include "main.h"
 
 #if 1
 #pragma import(__use_no_semihosting)             
@@ -51,10 +52,10 @@ void usart_init(u32 bound){
 	
 	//3. GPIO端口模式设置
 	//USART1_TX   GPIOB.6
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6; //PB.6
+	GPIO_InitStructure.GPIO_Pin = SBUS_Pin; //PB.6
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	//复用推挽输出
-	GPIO_Init(GPIOB, &GPIO_InitStructure);//初始化GPIOB.6
+	GPIO_Init(SBUS_GPIO_Port, &GPIO_InitStructure);//初始化GPIOB.6
 	
 	//USART1_RX	  GPIOB.7初始化
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;//PB7

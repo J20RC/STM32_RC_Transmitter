@@ -1,3 +1,4 @@
+#include "main.h"
 #include "sbus.h"
 #include "delay.h"
 #include "usart.h"

@@ -1,5 +1,5 @@
 #include "led.h"
-
+#include "main.h"
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK战舰STM32开发板
@@ -20,17 +20,13 @@ void LED_Init(void)
  
 	GPIO_InitTypeDef  GPIO_InitStructure;
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOC, ENABLE);	 //使能PB,PE端口时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);	 //使能PC端口时钟
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;				 //LED0-->PC13端口配置
+	GPIO_InitStructure.GPIO_Pin = LED_Pin;				 //LED0-->PC13端口配置
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 //IO口速度为50MHz
-	GPIO_Init(GPIOC, &GPIO_InitStructure);					 //根据设定参数初始化GPIOC13
-	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;	
-	GPIO_Init(GPIOA, &GPIO_InitStructure);	//初始化PA10推挽输出
+	GPIO_Init(LED_GPIO_Port, &GPIO_InitStructure);					 //根据设定参数初始化GPIOC13
 	
 	GPIO_SetBits(GPIOC,GPIO_Pin_13);						 //PC13 输出高
-	GPIO_SetBits(GPIOA,GPIO_Pin_10);						 //PC13 输出高
 }
  

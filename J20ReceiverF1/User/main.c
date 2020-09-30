@@ -29,7 +29,7 @@
 	
 	by J20开发团队
 */
-
+#include "main.h"
 #include "delay.h"
 #include "usart.h"
 #include "stm32f10x.h"

@@ -1,3 +1,4 @@
+#include "main.h"
 #include "pwm.h"
 #include "delay.h"
 #include "usart.h"
@@ -60,7 +61,7 @@ void TIM2_PWM_Init(u16 arr,u16 psc)
 	    
  
    //设置PA0-3引脚为复用输出功能,输出PWM脉冲波形
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3; //TIM2_CH1-4
+	GPIO_InitStructure.GPIO_Pin = CH1_Pin|CH2_Pin|CH3_Pin|CH4_Pin; //TIM2_CH1-4
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  //推挽输出
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA
@@ -107,12 +108,12 @@ void TIM3_PWM_Init(u16 arr,u16 psc)
 	    
  
    //设置PA6-7、PB0-1引脚为复用输出功能,输出PWM脉冲波形
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6|GPIO_Pin_7; //TIM3_CH1-2
+	GPIO_InitStructure.GPIO_Pin = CH5_Pin|CH6_Pin; //TIM3_CH1-2
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;  //推挽输出
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);//初始化GPIOA
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1; //TIM3_CH3-4
+	GPIO_InitStructure.GPIO_Pin = CH7_Pin|CH8_Pin; //TIM3_CH3-4
 	GPIO_Init(GPIOB, &GPIO_InitStructure);//初始化GPIOB
  
    //初始化TIM3

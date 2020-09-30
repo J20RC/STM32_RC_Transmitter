@@ -1,4 +1,5 @@
-#include "tim.h" //记得添加此头文件，因为config.c用到GPIO相关函数等
+#include "main.h"
+#include "tim.h"
 #include "sys.h"
 #include "pwm.h"
 

@@ -1,3 +1,4 @@
+#include "main.h"
 #include "nrf24l01.h"
 #include "delay.h"
 #include "spi.h"
@@ -21,21 +22,23 @@ void NRF24L01_Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB, ENABLE);	 //使能PA/B端口时钟
     	
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;				 //PB12推挽
+	GPIO_InitStructure.GPIO_Pin = NRF_CSN_Pin;				 //PB12推挽
  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
- 	GPIO_Init(GPIOB, &GPIO_InitStructure);	//初始化PB12推挽输出-NRF_CSN
+ 	GPIO_Init(NRF_CSN_GPIO_Port, &GPIO_InitStructure);	//初始化PB12推挽输出-NRF_CSN
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;	
-	GPIO_Init(GPIOA, &GPIO_InitStructure);	//初始化PA8推挽输出-NRF_CE
+	GPIO_InitStructure.GPIO_Pin = NRF_CE_Pin;	
+	GPIO_Init(NRF_CE_GPIO_Port, &GPIO_InitStructure);	//初始化PA8推挽输出-NRF_CE
 				
   
-	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_9;   
+	GPIO_InitStructure.GPIO_Pin  = NRF_IRQ_Pin;   
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; //PA9 中断上拉输入-NRF_IRQ  
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(NRF_IRQ_GPIO_Port, &GPIO_InitStructure);
 
-	GPIO_ResetBits(GPIOA,GPIO_Pin_8|GPIO_Pin_9);//PA8上拉	
-	GPIO_ResetBits(GPIOB,GPIO_Pin_12);//PB12上拉	
+	GPIO_ResetBits(NRF_CSN_GPIO_Port,NRF_CSN_Pin);//CSN上拉	
+	GPIO_ResetBits(NRF_CE_GPIO_Port,NRF_CE_Pin);//CE上拉
+	GPIO_ResetBits(NRF_IRQ_GPIO_Port,NRF_IRQ_Pin);//IRQ上拉		
+		
 		 
 	SPI2_Init();    		//初始化SPI	 
  
@@ -72,11 +75,11 @@ void EXTIX_Init(void)
 	EXTI_InitTypeDef EXTI_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin = NRF_IRQ_Pin;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;  //上拉输入
-	GPIO_Init(GPIOA, &GPIO_InitStructure); 
-	GPIO_ResetBits(GPIOA,GPIO_Pin_9);//PA9上拉
+	GPIO_Init(NRF_IRQ_GPIO_Port, &GPIO_InitStructure); 
+	GPIO_ResetBits(NRF_IRQ_GPIO_Port,NRF_IRQ_Pin);//PA9上拉
 
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource9);     //NRF24L01 IRQ  PA9
 	EXTI_InitStructure.EXTI_Line = EXTI_Line9;                       //NRF24L01 IRQ PA9

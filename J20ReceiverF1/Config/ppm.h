@@ -4,8 +4,6 @@
 #include "sys.h"
 #include "pwm.h"
 
-#define PPM_Pin PAout(4)	// PA4
-
 extern u32 chTime[chNum];
 
 void PPM_Pin_Init(void);

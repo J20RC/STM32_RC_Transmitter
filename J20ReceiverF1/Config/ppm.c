@@ -1,3 +1,4 @@
+#include "main.h"
 #include "ppm.h"
 
 void systick_init(u32 count)
@@ -19,10 +20,10 @@ void PPM_Pin_Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  //使能GPIO外设时钟
 	
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Pin = PPM_Pin;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-	GPIO_SetBits(GPIOA,GPIO_Pin_4);						 //PA4 输出高
+    GPIO_Init(PPM_GPIO_Port, &GPIO_InitStructure);
+	GPIO_SetBits(PPM_GPIO_Port,PPM_Pin);						 //PA4 输出高
 }
 
 
@@ -51,7 +52,7 @@ void ppm_output(void)
         systick_init(MS05);
         total_value += MS05;
         state = CH_UP_STATE;
-        PPM_Pin = 0;
+        PPM = 0;
     } 
 	else {
         /* CH1 ~ CH8 高电平*/
@@ -72,7 +73,7 @@ void ppm_output(void)
             ch_idx = 0;
         }
         state = CH_DOWN_STATE;
-        PPM_Pin = 1;
+        PPM = 1;
     }     
 }
 

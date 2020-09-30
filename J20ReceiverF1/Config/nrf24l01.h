@@ -44,10 +44,7 @@
 #define NRF_FIFO_STATUS 0x17  //FIFO状态寄存器;bit0,RX FIFO寄存器空标志;bit1,RX FIFO满标志;bit2,3,保留
                               //bit4,TX FIFO空标志;bit5,TX FIFO满标志;bit6,1,循环发送上一数据包.0,不循环;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-//24L01操作线
-#define NRF24L01_CE   PAout(8) //24L01片选信号
-#define NRF24L01_CSN  PBout(12) //SPI片选信号	   
-#define NRF24L01_IRQ  PAin(9)  //IRQ主机数据输入
+
 //24L01发送接收数据宽度定义
 #define TX_ADR_WIDTH    5   	//5字节的地址宽度
 #define RX_ADR_WIDTH    5   	//5字节的地址宽度
