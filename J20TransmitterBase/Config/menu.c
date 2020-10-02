@@ -94,31 +94,62 @@ void mainWindow(void)
 	sprintf((char *)batVoltStr,"%2.2fV",batVolt);
 	OLED_ShowString(90,0, (u8 *)batVoltStr,12,1);//显示电池电压
 	
-	//第1通道微调标识-横滚-右横线
-	OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-	loca = (int)95+setData.PWMadjustValue[0]/4;
-	OLED_Fill(loca,59,loca,62,1);//写1
-	OLED_DrawPlusSign(95,61);//中心标识
-	OLED_Fill(66,63,124,63,1);//写1
 	
-	//第2通道微调标识-升降舵-右竖线
-	OLED_Fill(123,1,126,63,0);//写0
-	loca = (int)32-setData.PWMadjustValue[1]/4;
-	OLED_Fill(123,loca,126,loca,1);//写1
-	OLED_DrawPlusSign(125,32);//中心标识
-	OLED_Fill(127,1,127,63,1);//写1
-	
-	//第3通道油门行程线-左竖线
-	thrNum = (int)(PWMvalue[2]-1000)/16;
-	OLED_Fill(0,63-thrNum,0,63,1);//下部分写1
-	OLED_Fill(0,0,0,63-thrNum,0);//上部分写0
-	
-	//第4通道微调标识-方向舵-左横线
-	OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-	loca = (int)33+setData.PWMadjustValue[3]/4;
-	OLED_Fill(loca,59,loca,62,1);//写1
-	OLED_DrawPlusSign(33,61);//中心标识
-	OLED_Fill(4,63,62,63,1);//写1
+	if(setData.throttlePreference)//左手油门
+	{
+		//第1通道微调标识-横滚-右横线
+		OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
+		loca = (int)95+setData.PWMadjustValue[0]/4;
+		OLED_Fill(loca,59,loca,62,1);//写1
+		OLED_DrawPlusSign(95,61);//中心标识
+		OLED_Fill(66,63,124,63,1);//写1
+		
+		//第2通道微调标识-升降舵-右竖线
+		OLED_Fill(123,1,126,63,0);//写0
+		loca = (int)32-setData.PWMadjustValue[1]/4;
+		OLED_Fill(123,loca,126,loca,1);//写1
+		OLED_DrawPlusSign(125,32);//中心标识
+		OLED_Fill(127,1,127,63,1);//写1
+		
+		//第3通道油门行程线-左竖线
+		thrNum = (int)(PWMvalue[2]-1000)/16;
+		OLED_Fill(0,63-thrNum,0,63,1);//下部分写1
+		OLED_Fill(0,0,0,63-thrNum,0);//上部分写0
+		
+		//第4通道微调标识-方向舵-左横线
+		OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
+		loca = (int)33+setData.PWMadjustValue[3]/4;
+		OLED_Fill(loca,59,loca,62,1);//写1
+		OLED_DrawPlusSign(33,61);//中心标识
+		OLED_Fill(4,63,62,63,1);//写1
+	}
+	else{//右手油门
+		//第1通道微调标识-横滚-左横线
+		OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
+		loca = (int)33+setData.PWMadjustValue[0]/4;
+		OLED_Fill(loca,59,loca,62,1);//写1
+		OLED_DrawPlusSign(33,61);//中心标识
+		OLED_Fill(4,63,62,63,1);//写1
+		
+		//第2通道微调标识-升降舵-左竖线
+		OLED_Fill(1,1,4,63,0);//写0
+		loca = (int)32-setData.PWMadjustValue[1]/4;
+		OLED_Fill(1,loca,4,loca,1);//写1
+		OLED_DrawPlusSign(2,32);//中心标识
+		OLED_Fill(0,1,0,63,1);//写1
+		
+		//第3通道油门行程线-右竖线
+		thrNum = (int)(PWMvalue[2]-1000)/16;
+		OLED_Fill(127,63-thrNum,127,63,1);//下部分写1
+		OLED_Fill(127,0,127,63-thrNum,0);//上部分写0
+		
+		//第4通道微调标识-方向舵-右横线
+		OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
+		loca = (int)95+setData.PWMadjustValue[3]/4;
+		OLED_Fill(loca,59,loca,62,1);//写1
+		OLED_DrawPlusSign(95,61);//中心标识
+		OLED_Fill(66,63,124,63,1);//写1
+	}
 }
 void menu1(void)//菜单列表
 {

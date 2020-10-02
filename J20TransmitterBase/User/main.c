@@ -1,5 +1,5 @@
 /*
-=============J20航模遥控器遥控器端-基础版V1.0==============
+=============J20航模遥控器遥控器端-基础版V2.0==============
 	开发板：STM32F103C8T6蓝色板
 	NRF24L01模块：
 				GND   	电源地
@@ -57,6 +57,9 @@
 #include "key.h"
 #include "flash.h"
 #include "menu.h"
+
+void keyEventProcess(void);
+	
 extern unsigned char logo[];
 u16 lastThrPWM = 0;//上一时刻的油门大小
 u16 loca;//存放坐标
@@ -98,7 +101,7 @@ int main()
 	while (1){
 		if(sendCount == 5)//每隔20次检查一下
 		{
-			if(batVoltSignal==1) Beeper = !Beeper;//蜂鸣器间断鸣叫，报警
+			if(batVoltSignal==1) Beeper = 1;//蜂鸣器间断鸣叫，报警
 			else Beeper = 0;//不报警
 			LED = !LED;// LED闪烁表示正在发送数据
 			if(abs(PWMvalue[2]/20-lastThrPWM)>0) updateWindow[0] = 1;
@@ -110,9 +113,15 @@ int main()
 		if(updateWindow[0] && nowMenuIndex==0 && sendCount == 10)//油门更新事件
 		{
 			thrNum = (int)(PWMvalue[2]-1000)/16;//更新油门
-			OLED_Fill(0,63-thrNum,0,63,1);//下部分写1
-			OLED_Fill(0,0,0,63-thrNum,0);//上部分写0
-			
+			if(setData.throttlePreference)//左手油门
+			{
+				OLED_Fill(0,63-thrNum,0,63,1);//下部分写1
+				OLED_Fill(0,0,0,63-thrNum,0);//上部分写0
+			}
+			else{//右手油门
+				OLED_Fill(127,63-thrNum,127,63,1);//下部分写1
+				OLED_Fill(127,0,127,63-thrNum,0);//上部分写0
+			}
 			sprintf((char *)batVoltStr,"%2.2fV",batVolt);//更新电池电压
 			OLED_ShowString(90,0, (u8 *)batVoltStr,12,1);
 			OLED_Refresh_Gram();//刷新显存
@@ -122,32 +131,7 @@ int main()
 		if(sendCount > 20) sendCount = 0;
 		if(keyEvent>0)//微调更新事件
 		{
-			if(nowMenuIndex==0)
-			{
-				if(keyEvent==1|keyEvent==2) 
-				{
-					OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-					loca = (int)95+setData.PWMadjustValue[0]/8;
-					OLED_Fill(loca,59,loca,62,1);//写1
-					OLED_DrawPlusSign(95,61);//中心标识
-				}
-				if(keyEvent==3|keyEvent==4) 
-				{
-					OLED_Fill(123,1,126,63,0);//写0
-					loca = (int)32-setData.PWMadjustValue[1]/8;
-					OLED_Fill(123,loca,126,loca,1);//写1
-					OLED_DrawPlusSign(125,32);//中心标识
-				}
-				if(keyEvent==5|keyEvent==6) 
-				{	
-					OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-					loca = (int)33+setData.PWMadjustValue[3]/8;
-					OLED_Fill(loca,59,loca,62,1);//写1
-					OLED_DrawPlusSign(33,61);//中心标识
-				}
-				OLED_Refresh_Gram();//刷新显存
-				STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
-			}
+			keyEventProcess();
 			keyEvent = 0;
 		}
 		if(nowMenuIndex==13)//通道校准
@@ -223,5 +207,66 @@ int main()
 		lastMenuIndex = nowMenuIndex;
 	}
 	
+}
+
+//微调事件处理函数：更新主界面
+void keyEventProcess(void)
+{
+	if(nowMenuIndex==0)
+	{
+		if(keyEvent==1|keyEvent==2) 
+		{//第1通道微调
+			if(setData.throttlePreference)//左手油门
+			{
+				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
+				loca = (int)95+setData.PWMadjustValue[0]/4;
+				OLED_Fill(loca,59,loca,62,1);//写1
+				OLED_DrawPlusSign(95,61);//中心标识
+			}
+			else//右手油门
+			{//第4通道微调
+				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
+				loca = (int)95+setData.PWMadjustValue[3]/4;
+				OLED_Fill(loca,59,loca,62,1);//写1
+				OLED_DrawPlusSign(95,61);//中心标识
+			}
+		}
+		if(keyEvent==3|keyEvent==4) 
+		{
+			if(setData.throttlePreference)//左手油门
+			{//第2通道微调
+				OLED_Fill(123,1,126,63,0);//写0
+				loca = (int)32-setData.PWMadjustValue[1]/4;
+				OLED_Fill(123,loca,126,loca,1);//写1
+				OLED_DrawPlusSign(125,32);//中心标识
+			}
+			else//右手油门
+			{//第2通道微调
+				OLED_Fill(1,1,4,63,0);//写0
+				loca = (int)32-setData.PWMadjustValue[1]/4;
+				OLED_Fill(1,loca,4,loca,1);//写1
+				OLED_DrawPlusSign(2,32);//中心标识
+			}
+		}
+		if(keyEvent==5|keyEvent==6) 
+		{	
+			if(setData.throttlePreference)//左手油门
+			{//第4通道微调
+				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
+				loca = (int)33+setData.PWMadjustValue[3]/4;
+				OLED_Fill(loca,59,loca,62,1);//写1
+				OLED_DrawPlusSign(33,61);//中心标识
+			}
+			else//右手油门
+			{//第1通道微调
+				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
+				loca = (int)33+setData.PWMadjustValue[0]/4;
+				OLED_Fill(loca,59,loca,62,1);//写1
+				OLED_DrawPlusSign(33,61);//中心标识
+			}
+		}
+		OLED_Refresh_Gram();//刷新显存
+		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
+	}
 }
 

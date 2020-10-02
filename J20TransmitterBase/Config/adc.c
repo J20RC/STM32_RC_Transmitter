@@ -92,8 +92,8 @@ void  DMA1_Channel1_IRQHandler(void)
 		//通道映射,判断设置的左/右手油门
 		for(i=0; i<4; i++)
 		{
-			if(setData.throttlePreference){chResult[i] = GetMedianNum(chValue,i);}
-			else {chResult[i] = GetMedianNum(chValue,3-i);}
+			if(setData.throttlePreference) chResult[i] = GetMedianNum(chValue,i);
+			else chResult[i] = GetMedianNum(chValue,3-i);
 		}
 		for(i=4; i<chNum; i++)
 		{

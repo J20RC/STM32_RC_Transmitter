@@ -56,9 +56,9 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			status = Key_Buf[i].Status.KEY_EVENT;
 			if(i<6 && status==KEY_DOWN && nowMenuIndex==0) //短按
 			{
-				if(i==0 | i==1) ch = 0;
-				if(i==2 | i==3) ch = 1;
-				if(i==4 | i==5) ch = 3;//第几个通道
+				if(i==0 | i==1) ch = (setData.throttlePreference? 0 : 3);
+				if(i==2 | i==3) ch = (setData.throttlePreference? 1 : 1);
+				if(i==4 | i==5) ch = (setData.throttlePreference? 3 : 0);//第几个通道
 				if(setData.PWMadjustValue[ch]>200-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=200-setData.PWMadjustUnit;//限制微调范围
 				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-200) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-200;//限制微调范围
 				if(i%2==0) setData.PWMadjustValue[ch] -= setData.PWMadjustUnit;//微调减
@@ -68,10 +68,9 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			if(i<6 && status==KEY_LONG && nowMenuIndex==0) //长按
 			{
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
-				if(i==0 | i==1) ch = 0;
-				if(i==2 | i==3) ch = 1;
-				if(i==4 | i==5) ch = 3;//第几个通道
-				
+				if(i==0 | i==1) ch = (setData.throttlePreference? 0 : 3);
+				if(i==2 | i==3) ch = (setData.throttlePreference? 1 : 1);
+				if(i==4 | i==5) ch = (setData.throttlePreference? 3 : 0);//第几个通道
 				if(setData.PWMadjustValue[ch]>200-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=200-setData.PWMadjustUnit;//限制微调范围
 				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-200) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-200;//限制微调范围
 				
