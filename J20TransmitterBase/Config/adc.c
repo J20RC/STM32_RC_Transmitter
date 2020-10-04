@@ -7,6 +7,7 @@
 #include "key.h" 
 #include "nrf24l01.h"
 #include "menu.h"
+#include "ppm.h"
 
 u16 volatile chValue[adcNum*sampleNum];//ADC采样值*10
 u16 volatile chResult[chNum];//滤波后的ADC采样值
@@ -107,6 +108,7 @@ void  DMA1_Channel1_IRQHandler(void)
 														setData.chMiddle[i], 
 														setData.chUpper[i], 
 														setData.chReverse[i]);
+			chTime[i] = PWMvalue[i]*9;
 		}
 		sendDataPacket();//发送数据包,采集完即发送到接收机
 		sendCount++;

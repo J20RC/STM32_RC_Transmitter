@@ -53,12 +53,14 @@
 #include "stdio.h"
 #include "string.h"
 #include "nrf24l01.h"
-#include "led.h"
+#include "beeper.h"
 #include "key.h"
 #include "flash.h"
 #include "menu.h"
+#include "ppm.h"
 
-void keyEventProcess(void);
+void keyEventHandle(void);
+void menuEventHandle(void);
 	
 extern unsigned char logo[];
 u16 lastThrPWM = 0;//上一时刻的油门大小
@@ -70,7 +72,7 @@ extern char batVoltStr[10];//电池电压字符串
 
 int main()
 {
-	delay_init();//初始化延时函数
+//	delay_init();//初始化延时函数
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM2_Init(1999,71);//1MHz，每10ms进行ADC采样一次
@@ -78,21 +80,22 @@ int main()
 	DMA1_Init();	//DMA初始化
 	Adc_Init();		//ADC初始化
 	RTC_Init();		//RTC初始化
-	LED_Init();		//LED初始化
+	BEEPER_Init();	//BEEPER初始化
 	KEY_Init();		//KEY初始化
-	NRF24L01_Init();//初始化NRF24L01
+	NRF24L01_Init();//NRF24L01初始化
+	PPM_Pin_Init();//PPM初始化
+	systick_init(10000);//PPM定时初始化，初始值随意设置
 	
 	OLED_Init();	//初始化OLED
 	OLED_Clear();
 	OLED_DrawPointBMP(9,0,logo,110,56,1);//显示logo
 	OLED_Refresh_Gram();//刷新显存
-	
+	beeperOnce();
 	while(NRF24L01_Check())
 	{
- 		delay_ms(200);
-		LED = !LED;// LED闪烁表示正在等待无线模块连接
+ 		delay_ms(500);
+		Beeper = !Beeper;//蜂鸣器1Hz报警，表示无线模块故障
 	}
-	LED = 0;//熄灭LED
 	NRF24L01_TX_Mode();
 	delay_ms(1000);
 		
@@ -103,7 +106,6 @@ int main()
 		{
 			if(batVoltSignal==1) Beeper = 1;//蜂鸣器间断鸣叫，报警
 			else Beeper = 0;//不报警
-			LED = !LED;// LED闪烁表示正在发送数据
 			if(abs(PWMvalue[2]/20-lastThrPWM)>0) updateWindow[0] = 1;
 			lastThrPWM = PWMvalue[2]/20;//将1000量程进行20分频
 			if(batVolt*100-lastBatVolt*100>5) updateWindow[0] = 1;//0.05V更新一次
@@ -131,8 +133,8 @@ int main()
 		if(sendCount > 20) sendCount = 0;
 		if(keyEvent>0)//微调更新事件
 		{
-			keyEventProcess();
-			keyEvent = 0;
+			beeperOnce();
+			keyEventHandle();
 		}
 		if(nowMenuIndex==13)//通道校准
 		{
@@ -144,73 +146,18 @@ int main()
 				if(chResult[i]<setData.chLower[i]) setData.chLower[i]=chResult[i];
 			}
 		}
-		
 		if(menuEvent[0])//菜单事件
 		{
-			OLED_display();
-			if(nowMenuIndex==13 && lastMenuIndex != 13)//通道中立点校准
-			{
-				for(int i=0;i<4;i++)
-				{
-					setData.chLower[i] 	= chResult[i];	//遥杆的最小值更新
-					setData.chMiddle[i] = chResult[i];	//遥杆的中值
-					setData.chUpper[i] 	= chResult[i];	//遥杆的最大值更新
-				}
-			}
-			
-			for(int i=0;i<4;i++)//限制微调范围
-			{
-				if(setData.PWMadjustValue[i]>200-setData.PWMadjustUnit) setData.PWMadjustValue[i]=200-setData.PWMadjustUnit;
-				if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-200) setData.PWMadjustValue[i]=setData.PWMadjustUnit-200;
-			}
-			if(setData.PWMadjustUnit>8) setData.PWMadjustUnit = 8;//限制微调单位范围
-			if(setData.PWMadjustUnit<1) setData.PWMadjustUnit = 2;
-			if(menuEvent[1]==NUM_up)
-			{
-				if(nowMenuIndex==5){setData.PWMadjustValue[0] += setData.PWMadjustUnit;subMenu1_1();}
-				if(nowMenuIndex==6){setData.PWMadjustValue[1] += setData.PWMadjustUnit;subMenu1_2();}
-				if(nowMenuIndex==7){setData.PWMadjustValue[2] += setData.PWMadjustUnit;subMenu1_3();}
-				if(nowMenuIndex==8){setData.PWMadjustValue[3] += setData.PWMadjustUnit;subMenu1_4();}
-				if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
-				if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
-				if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
-				if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
-				if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
-				if(nowMenuIndex==15) {setData.batVoltAdjust += 1;subMenu4_2();}
-				if(nowMenuIndex==16) {setData.warnBatVolt += 0.01;subMenu4_3();}
-				if(nowMenuIndex==17) {setData.PWMadjustUnit += 1;subMenu4_4();}
-			}
-			if(menuEvent[1]==NUM_down)
-			{
-				if(nowMenuIndex==5){setData.PWMadjustValue[0] -= setData.PWMadjustUnit;subMenu1_1();}
-				if(nowMenuIndex==6){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;subMenu1_2();}
-				if(nowMenuIndex==7){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;subMenu1_3();}
-				if(nowMenuIndex==8){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;subMenu1_4();}
-				if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
-				if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
-				if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
-				if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
-				if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
-				if(nowMenuIndex==15) {setData.batVoltAdjust -= 1;subMenu4_2();}
-				if(nowMenuIndex==16) {setData.warnBatVolt -= 0.01;subMenu4_3();}
-				if(nowMenuIndex==17) {setData.PWMadjustUnit -= 1;subMenu4_4();}
-			}
-			if(nowMenuIndex!=lastMenuIndex && lastMenuIndex>=5 && lastMenuIndex<=17)
-			{
-				STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
-			}
-			OLED_Refresh_Gram();//刷新显存
-			
-			menuEvent[0] = 0;
-			menuEvent[1] = BM_NULL;
+			beeperOnce();
+			menuEventHandle();
 		}
 		lastMenuIndex = nowMenuIndex;
 	}
-	
 }
 
+
 //微调事件处理函数：更新主界面
-void keyEventProcess(void)
+void keyEventHandle(void)
 {
 	if(nowMenuIndex==0)
 	{
@@ -219,14 +166,14 @@ void keyEventProcess(void)
 			if(setData.throttlePreference)//左手油门
 			{
 				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-				loca = (int)95+setData.PWMadjustValue[0]/4;
+				loca = (int)95+setData.PWMadjustValue[0]/8;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(95,61);//中心标识
 			}
 			else//右手油门
 			{//第4通道微调
 				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-				loca = (int)95+setData.PWMadjustValue[3]/4;
+				loca = (int)95+setData.PWMadjustValue[3]/8;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(95,61);//中心标识
 			}
@@ -236,14 +183,14 @@ void keyEventProcess(void)
 			if(setData.throttlePreference)//左手油门
 			{//第2通道微调
 				OLED_Fill(123,1,126,63,0);//写0
-				loca = (int)32-setData.PWMadjustValue[1]/4;
+				loca = (int)32-setData.PWMadjustValue[1]/8;
 				OLED_Fill(123,loca,126,loca,1);//写1
 				OLED_DrawPlusSign(125,32);//中心标识
 			}
 			else//右手油门
 			{//第2通道微调
 				OLED_Fill(1,1,4,63,0);//写0
-				loca = (int)32-setData.PWMadjustValue[1]/4;
+				loca = (int)32-setData.PWMadjustValue[1]/8;
 				OLED_Fill(1,loca,4,loca,1);//写1
 				OLED_DrawPlusSign(2,32);//中心标识
 			}
@@ -253,14 +200,14 @@ void keyEventProcess(void)
 			if(setData.throttlePreference)//左手油门
 			{//第4通道微调
 				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-				loca = (int)33+setData.PWMadjustValue[3]/4;
+				loca = (int)33+setData.PWMadjustValue[3]/8;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(33,61);//中心标识
 			}
 			else//右手油门
 			{//第1通道微调
 				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-				loca = (int)33+setData.PWMadjustValue[0]/4;
+				loca = (int)33+setData.PWMadjustValue[0]/8;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(33,61);//中心标识
 			}
@@ -268,5 +215,65 @@ void keyEventProcess(void)
 		OLED_Refresh_Gram();//刷新显存
 		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 	}
+	keyEvent = 0;
 }
 
+//菜单事件处理函数：更新菜单界面、数据处理
+void menuEventHandle(void)
+{
+	OLED_display();
+	if(nowMenuIndex==13 && lastMenuIndex != 13)//通道中立点校准
+	{
+		for(int i=0;i<4;i++)
+		{
+			setData.chLower[i] 	= chResult[i];	//遥杆的最小值更新
+			setData.chMiddle[i] = chResult[i];	//遥杆的中值
+			setData.chUpper[i] 	= chResult[i];	//遥杆的最大值更新
+		}
+	}
+	
+	for(int i=0;i<4;i++)//限制微调范围
+	{
+		if(setData.PWMadjustValue[i]>200-setData.PWMadjustUnit) setData.PWMadjustValue[i]=200-setData.PWMadjustUnit;
+		if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-200) setData.PWMadjustValue[i]=setData.PWMadjustUnit-200;
+	}
+	if(setData.PWMadjustUnit>8) setData.PWMadjustUnit = 8;//限制微调单位范围
+	if(setData.PWMadjustUnit<1) setData.PWMadjustUnit = 2;
+	if(menuEvent[1]==NUM_up)
+	{
+		if(nowMenuIndex==5){setData.PWMadjustValue[0] += setData.PWMadjustUnit;subMenu1_1();}
+		if(nowMenuIndex==6){setData.PWMadjustValue[1] += setData.PWMadjustUnit;subMenu1_2();}
+		if(nowMenuIndex==7){setData.PWMadjustValue[2] += setData.PWMadjustUnit;subMenu1_3();}
+		if(nowMenuIndex==8){setData.PWMadjustValue[3] += setData.PWMadjustUnit;subMenu1_4();}
+		if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
+		if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
+		if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
+		if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
+		if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
+		if(nowMenuIndex==15) {setData.batVoltAdjust += 1;subMenu4_2();}
+		if(nowMenuIndex==16) {setData.warnBatVolt += 0.01;subMenu4_3();}
+		if(nowMenuIndex==17) {setData.PWMadjustUnit += 1;subMenu4_4();}
+	}
+	if(menuEvent[1]==NUM_down)
+	{
+		if(nowMenuIndex==5){setData.PWMadjustValue[0] -= setData.PWMadjustUnit;subMenu1_1();}
+		if(nowMenuIndex==6){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;subMenu1_2();}
+		if(nowMenuIndex==7){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;subMenu1_3();}
+		if(nowMenuIndex==8){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;subMenu1_4();}
+		if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
+		if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
+		if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
+		if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
+		if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
+		if(nowMenuIndex==15) {setData.batVoltAdjust -= 1;subMenu4_2();}
+		if(nowMenuIndex==16) {setData.warnBatVolt -= 0.01;subMenu4_3();}
+		if(nowMenuIndex==17) {setData.PWMadjustUnit -= 1;subMenu4_4();}
+	}
+	if(nowMenuIndex!=lastMenuIndex && lastMenuIndex>=5 && lastMenuIndex<=17)
+	{
+		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
+	}
+	OLED_Refresh_Gram();//刷新显存
+	menuEvent[0] = 0;
+	menuEvent[1] = BM_NULL;
+}
