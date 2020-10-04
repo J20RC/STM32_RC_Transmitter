@@ -4,7 +4,7 @@
 void systick_init(u32 count)
 {
 	SysTick_Config(count);//此行应放在配置时钟源之前,count赋值给LOAD寄存器
-    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);//选择外部时钟HCLK,计数72000 000为1s
+    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);//选择外部时钟HCLK,计数9000 000为1s
 	SysTick->VAL = 0;//当VAL=0,LOAD寄存器中的重装载值赋值给VAL寄存器作为初值，每经过一个Systick时钟周期,VAL寄存器值-1
 }
 
@@ -36,8 +36,8 @@ enum PPM_OUTPUT_CH_STATE {
 
 static enum PPM_OUTPUT_CH_STATE state = CH_DOWN_STATE;
 
-#define MS20	(72000 * 20)/* 20ms */
-#define MS05	(36000)		/* 0.5ms */
+#define MS20	(9000 * 20) /* 20ms */
+#define MS05	(4500)		/* 0.5ms */
 
 static uint64_t total_value = 0;
 static u8 ch_idx = 0;

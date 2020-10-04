@@ -1,6 +1,6 @@
 /*
 =============J20航模遥控器接收端-基础版V1.0==============
-	芯片STM32F103C8T6，实现了NRF24L01无线接收和10个通道的PWM输出
+	芯片STM32F103C8T6，实现了NRF24L01无线接收和8个通道的PWM输出
 	NRF24L01模块：
 				GND   	电源地
 				VCC		接3.3V电源
@@ -119,7 +119,7 @@ int main()
 			delay_ms(200);
 		}
 		//PPM数据转换
-		for (i=0;i<chNum;i++) {chTime[i] = (u32)(map(PWMvalue[i],1000,2000,72000,72000*2));}
+		for (i=0;i<chNum;i++) {chTime[i] = PWMvalue[i]*9;}
 		TIM_SetCompare1(TIM2,PWMvalue[0]);//输出给PWM-PA0
 		TIM_SetCompare2(TIM2,PWMvalue[1]);//输出给PWM-PA1
 		TIM_SetCompare3(TIM2,PWMvalue[2]);//输出给PWM-PA2
