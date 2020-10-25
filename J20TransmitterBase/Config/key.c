@@ -54,25 +54,25 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 		for(i = 0;i < KEY_NUM;i++)
     	{
 			status = Key_Buf[i].Status.KEY_EVENT;
-			if(i<6 && status==KEY_DOWN && nowMenuIndex==0) //短按
+			if(i<6 && status==KEY_DOWN && nowMenuIndex==0) //主界面时，短按
 			{
 				if(i==0 | i==1) ch = (setData.throttlePreference? 0 : 3);
 				if(i==2 | i==3) ch = (setData.throttlePreference? 1 : 1);
 				if(i==4 | i==5) ch = (setData.throttlePreference? 3 : 0);//第几个通道
-				if(setData.PWMadjustValue[ch]>200-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=200-setData.PWMadjustUnit;//限制微调范围
-				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-200) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-200;//限制微调范围
+				if(setData.PWMadjustValue[ch]>300-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=300-setData.PWMadjustUnit;//限制微调范围
+				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-300) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-300;//限制微调范围
 				if(i%2==0) setData.PWMadjustValue[ch] -= setData.PWMadjustUnit;//微调减
 				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;//微调加
 				keyEvent = i+1;//有按键按下标志
 			}
-			if(i<6 && status==KEY_LONG && nowMenuIndex==0) //长按
+			if(i<6 && status==KEY_LONG && nowMenuIndex==0) //主界面时，长按
 			{
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
 				if(i==0 | i==1) ch = (setData.throttlePreference? 0 : 3);
 				if(i==2 | i==3) ch = (setData.throttlePreference? 1 : 1);
 				if(i==4 | i==5) ch = (setData.throttlePreference? 3 : 0);//第几个通道
-				if(setData.PWMadjustValue[ch]>200-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=200-setData.PWMadjustUnit;//限制微调范围
-				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-200) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-200;//限制微调范围
+				if(setData.PWMadjustValue[ch]>300-setData.PWMadjustUnit) setData.PWMadjustValue[ch]=300-setData.PWMadjustUnit;//限制微调范围
+				if(setData.PWMadjustValue[ch]<setData.PWMadjustUnit-300) setData.PWMadjustValue[ch]=setData.PWMadjustUnit-300;//限制微调范围
 				
 				if(i%2==0) setData.PWMadjustValue[ch] -= setData.PWMadjustUnit;
 				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;
@@ -80,7 +80,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			}
 			if(i==4 && status==KEY_LONG){
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
-				if(nowMenuIndex==15 | nowMenuIndex==16 | (nowMenuIndex>=5 && nowMenuIndex<=8)) 
+				if(nowMenuIndex!=home)
 				{	
 					menuEvent[0]=1;//菜单事件
 					menuEvent[1]=NUM_down; //按键CH4Left	【数值-】
@@ -88,33 +88,33 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			}
 			if(i==5 && status==KEY_LONG){
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
-				if(nowMenuIndex==15 | nowMenuIndex==16 | (nowMenuIndex>=5 && nowMenuIndex<=8)) 
+				if(nowMenuIndex!=home) 
 				{	
 					menuEvent[0]=1;//菜单事件
 					menuEvent[1]=NUM_up; //按键CH4Right		【数值+】
 				}
 			}
-			if(i==0 && status==KEY_DOWN && nowMenuIndex>0)
+			if(i==0 && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=KEY_home; //按键CH1Left	【home】
 			}
-			if(i==2 && status==KEY_DOWN && nowMenuIndex>0)
+			if(i==2 && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=KEY_enter; //按键CH2Down	【确定】
 			}
-			if(i==3 && status==KEY_DOWN && nowMenuIndex>0)
+			if(i==3 && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=KEY_esc; //按键CH2Up		【返回】
 			}
-			if(i==4 && status==KEY_DOWN && nowMenuIndex>0)
+			if(i==4 && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=NUM_down; //按键CH4Left	【数值-】
 			}
-			if(i==5 && status==KEY_DOWN && nowMenuIndex>0)
+			if(i==5 && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=NUM_up; //按键CH4Right		【数值+】

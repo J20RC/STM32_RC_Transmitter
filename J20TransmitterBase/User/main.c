@@ -72,7 +72,7 @@ extern char batVoltStr[10];//电池电压字符串
 
 int main()
 {
-//	delay_init();//初始化延时函数
+	delay_init();//初始化延时函数
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM2_Init(1999,71);//1MHz，每10ms进行ADC采样一次
@@ -83,8 +83,8 @@ int main()
 	BEEPER_Init();	//BEEPER初始化
 	KEY_Init();		//KEY初始化
 	NRF24L01_Init();//NRF24L01初始化
-	PPM_Pin_Init();//PPM初始化
-	systick_init(10000);//PPM定时初始化，初始值随意设置
+//	PPM_Pin_Init();//PPM初始化
+//	systick_init(10000);//PPM定时初始化，初始值随意设置
 	
 	OLED_Init();	//初始化OLED
 	OLED_Clear();
@@ -93,11 +93,11 @@ int main()
 	beeperOnce();
 	while(NRF24L01_Check())
 	{
- 		delay_ms(500);
+ 		delay_ms(100);
 		Beeper = !Beeper;//蜂鸣器1Hz报警，表示无线模块故障
 	}
 	NRF24L01_TX_Mode();
-	delay_ms(1000);
+	delay_ms(100);
 		
 	mainWindow();//显示主界面
 	OLED_Refresh_Gram();//刷新显存
@@ -136,15 +136,20 @@ int main()
 			beeperOnce();
 			keyEventHandle();
 		}
-		if(nowMenuIndex==13)//通道校准
+		if(nowMenuIndex==xcjz14)//行程校准
 		{
-			subMenu3_1();
+			menu_xcjz14();
 			OLED_Refresh_Gram();//刷新显存
 			for(int i=0;i<4;i++)
 			{
 				if(chResult[i]>setData.chUpper[i]) setData.chUpper[i]=chResult[i];
 				if(chResult[i]<setData.chLower[i]) setData.chLower[i]=chResult[i];
 			}
+		}
+		if(nowMenuIndex==dljs18)//舵量监视
+		{
+			menu_dljs18();
+			OLED_Refresh_Gram();//刷新显存
 		}
 		if(menuEvent[0])//菜单事件
 		{
@@ -166,14 +171,14 @@ void keyEventHandle(void)
 			if(setData.throttlePreference)//左手油门
 			{
 				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-				loca = (int)95+setData.PWMadjustValue[0]/8;
+				loca = (int)95+setData.PWMadjustValue[0]/12;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(95,61);//中心标识
 			}
 			else//右手油门
 			{//第4通道微调
 				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-				loca = (int)95+setData.PWMadjustValue[3]/8;
+				loca = (int)95+setData.PWMadjustValue[3]/12;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(95,61);//中心标识
 			}
@@ -183,14 +188,14 @@ void keyEventHandle(void)
 			if(setData.throttlePreference)//左手油门
 			{//第2通道微调
 				OLED_Fill(123,1,126,63,0);//写0
-				loca = (int)32-setData.PWMadjustValue[1]/8;
+				loca = (int)32-setData.PWMadjustValue[1]/12;
 				OLED_Fill(123,loca,126,loca,1);//写1
 				OLED_DrawPlusSign(125,32);//中心标识
 			}
 			else//右手油门
 			{//第2通道微调
 				OLED_Fill(1,1,4,63,0);//写0
-				loca = (int)32-setData.PWMadjustValue[1]/8;
+				loca = (int)32-setData.PWMadjustValue[1]/12;
 				OLED_Fill(1,loca,4,loca,1);//写1
 				OLED_DrawPlusSign(2,32);//中心标识
 			}
@@ -200,14 +205,14 @@ void keyEventHandle(void)
 			if(setData.throttlePreference)//左手油门
 			{//第4通道微调
 				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-				loca = (int)33+setData.PWMadjustValue[3]/8;
+				loca = (int)33+setData.PWMadjustValue[3]/12;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(33,61);//中心标识
 			}
 			else//右手油门
 			{//第1通道微调
 				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-				loca = (int)33+setData.PWMadjustValue[0]/8;
+				loca = (int)33+setData.PWMadjustValue[0]/12;
 				OLED_Fill(loca,59,loca,62,1);//写1
 				OLED_DrawPlusSign(33,61);//中心标识
 			}
@@ -222,7 +227,7 @@ void keyEventHandle(void)
 void menuEventHandle(void)
 {
 	OLED_display();
-	if(nowMenuIndex==13 && lastMenuIndex != 13)//通道中立点校准
+	if(nowMenuIndex==xcjz14 && lastMenuIndex != xcjz14)//通道中立点校准
 	{
 		for(int i=0;i<4;i++)
 		{
@@ -234,42 +239,58 @@ void menuEventHandle(void)
 	
 	for(int i=0;i<4;i++)//限制微调范围
 	{
-		if(setData.PWMadjustValue[i]>200-setData.PWMadjustUnit) setData.PWMadjustValue[i]=200-setData.PWMadjustUnit;
-		if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-200) setData.PWMadjustValue[i]=setData.PWMadjustUnit-200;
+		if(setData.PWMadjustValue[i]>300-setData.PWMadjustUnit) setData.PWMadjustValue[i]=300-setData.PWMadjustUnit;
+		if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-300) setData.PWMadjustValue[i]=setData.PWMadjustUnit-300;
 	}
 	if(setData.PWMadjustUnit>8) setData.PWMadjustUnit = 8;//限制微调单位范围
 	if(setData.PWMadjustUnit<1) setData.PWMadjustUnit = 2;
 	if(menuEvent[1]==NUM_up)
 	{
-		if(nowMenuIndex==5){setData.PWMadjustValue[0] += setData.PWMadjustUnit;subMenu1_1();}
-		if(nowMenuIndex==6){setData.PWMadjustValue[1] += setData.PWMadjustUnit;subMenu1_2();}
-		if(nowMenuIndex==7){setData.PWMadjustValue[2] += setData.PWMadjustUnit;subMenu1_3();}
-		if(nowMenuIndex==8){setData.PWMadjustValue[3] += setData.PWMadjustUnit;subMenu1_4();}
-		if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
-		if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
-		if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
-		if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
-		if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
-		if(nowMenuIndex==15) {setData.batVoltAdjust += 1;subMenu4_2();}
-		if(nowMenuIndex==16) {setData.warnBatVolt += 0.01;subMenu4_3();}
-		if(nowMenuIndex==17) {setData.PWMadjustUnit += 1;subMenu4_4();}
+		if(nowMenuIndex==tdwt1){setData.PWMadjustValue[0] += setData.PWMadjustUnit;menu_tdwt1();}
+		if(nowMenuIndex==tdwt2){setData.PWMadjustValue[1] += setData.PWMadjustUnit;menu_tdwt2();}
+		if(nowMenuIndex==tdwt3){setData.PWMadjustValue[2] += setData.PWMadjustUnit;menu_tdwt3();}
+		if(nowMenuIndex==tdwt4){setData.PWMadjustValue[3] += setData.PWMadjustUnit;menu_tdwt4();}
+		if(nowMenuIndex==tdwt5){setData.PWMadjustValue[4] += setData.PWMadjustUnit;menu_tdwt5();}
+		if(nowMenuIndex==tdwt6){setData.PWMadjustValue[5] += setData.PWMadjustUnit;menu_tdwt6();}
+		if(nowMenuIndex==tdwt7){setData.PWMadjustValue[6] += setData.PWMadjustUnit;menu_tdwt7();}
+		if(nowMenuIndex==tdwt8){setData.PWMadjustValue[7] += setData.PWMadjustUnit;menu_tdwt8();}
+		if(nowMenuIndex==tdzf1){setData.chReverse[0] = !setData.chReverse[0];menu_tdzf1();}
+		if(nowMenuIndex==tdzf2){setData.chReverse[1] = !setData.chReverse[1];menu_tdzf2();}
+		if(nowMenuIndex==tdzf3){setData.chReverse[2] = !setData.chReverse[2];menu_tdzf3();}
+		if(nowMenuIndex==tdzf4){setData.chReverse[3] = !setData.chReverse[3];menu_tdzf4();}
+		if(nowMenuIndex==tdzf5){setData.chReverse[4] = !setData.chReverse[4];menu_tdzf5();}
+		if(nowMenuIndex==tdzf6){setData.chReverse[5] = !setData.chReverse[5];menu_tdzf6();}
+		if(nowMenuIndex==tdzf7){setData.chReverse[6] = !setData.chReverse[6];menu_tdzf7();}
+		if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
+		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
+		if(nowMenuIndex==dyjz) {setData.batVoltAdjust += 1;menu_dyjz();}
+		if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.01;menu_bjdy();}
+		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit += 1;menu_wtdw();}
 	}
 	if(menuEvent[1]==NUM_down)
 	{
-		if(nowMenuIndex==5){setData.PWMadjustValue[0] -= setData.PWMadjustUnit;subMenu1_1();}
-		if(nowMenuIndex==6){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;subMenu1_2();}
-		if(nowMenuIndex==7){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;subMenu1_3();}
-		if(nowMenuIndex==8){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;subMenu1_4();}
-		if(nowMenuIndex==9) {setData.chReverse[0] = !setData.chReverse[0];subMenu2_1();}
-		if(nowMenuIndex==10) {setData.chReverse[1] = !setData.chReverse[1];subMenu2_2();}
-		if(nowMenuIndex==11) {setData.chReverse[2] = !setData.chReverse[2];subMenu2_3();}
-		if(nowMenuIndex==12) {setData.chReverse[3] = !setData.chReverse[3];subMenu2_4();}
-		if(nowMenuIndex==14) {setData.throttlePreference = !setData.throttlePreference;subMenu4_1();}
-		if(nowMenuIndex==15) {setData.batVoltAdjust -= 1;subMenu4_2();}
-		if(nowMenuIndex==16) {setData.warnBatVolt -= 0.01;subMenu4_3();}
-		if(nowMenuIndex==17) {setData.PWMadjustUnit -= 1;subMenu4_4();}
+		if(nowMenuIndex==tdwt1){setData.PWMadjustValue[0] -= setData.PWMadjustUnit;menu_tdwt1();}
+		if(nowMenuIndex==tdwt2){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;menu_tdwt2();}
+		if(nowMenuIndex==tdwt3){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;menu_tdwt3();}
+		if(nowMenuIndex==tdwt4){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;menu_tdwt4();}
+		if(nowMenuIndex==tdwt5){setData.PWMadjustValue[4] -= setData.PWMadjustUnit;menu_tdwt5();}
+		if(nowMenuIndex==tdwt6){setData.PWMadjustValue[5] -= setData.PWMadjustUnit;menu_tdwt6();}
+		if(nowMenuIndex==tdwt7){setData.PWMadjustValue[6] -= setData.PWMadjustUnit;menu_tdwt7();}
+		if(nowMenuIndex==tdwt8){setData.PWMadjustValue[7] -= setData.PWMadjustUnit;menu_tdwt8();}
+		if(nowMenuIndex==tdzf1){setData.chReverse[0] = !setData.chReverse[0];menu_tdzf1();}
+		if(nowMenuIndex==tdzf2){setData.chReverse[1] = !setData.chReverse[1];menu_tdzf2();}
+		if(nowMenuIndex==tdzf3){setData.chReverse[2] = !setData.chReverse[2];menu_tdzf3();}
+		if(nowMenuIndex==tdzf4){setData.chReverse[3] = !setData.chReverse[3];menu_tdzf4();}
+		if(nowMenuIndex==tdzf5){setData.chReverse[4] = !setData.chReverse[4];menu_tdzf5();}
+		if(nowMenuIndex==tdzf6){setData.chReverse[5] = !setData.chReverse[5];menu_tdzf6();}
+		if(nowMenuIndex==tdzf7){setData.chReverse[6] = !setData.chReverse[6];menu_tdzf7();}
+		if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
+		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
+		if(nowMenuIndex==dyjz) {setData.batVoltAdjust -= 1;menu_dyjz();}
+		if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.01;menu_bjdy();}
+		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit -= 1;menu_wtdw();}
 	}
-	if(nowMenuIndex!=lastMenuIndex && lastMenuIndex>=5 && lastMenuIndex<=17)
+	if(nowMenuIndex!=lastMenuIndex)
 	{
 		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//将用户数据写入FLASH
 	}

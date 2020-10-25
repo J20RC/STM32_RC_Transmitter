@@ -1,13 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////////	
-//  功能描述   : 0.69寸OLED 接口演示例程(STM32F103C8T6 IIC)
-//              说明: 
-//              ----------------------------------------------------------------
-//              GND   电源地
-//              VCC   接3.3v电源
-//              SCL   接PB8（SCL）
-//              SDA   接PB9（SDA）            
-//              ----------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////////
 #ifndef __OLED_H
 #define __OLED_H			  	 
 #include "sys.h"
@@ -49,8 +39,9 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size);
 void OLED_ShowString(u8 x,u8 y, u8 *p,u8 size,u8 mode);	 
 void OLED_Set_Pos(unsigned char x, unsigned char y);
 void OLED_ShowChinese(u16 x,u16 y,u8 index,u8 size,u8 mode);
+void OLED_ShowChineseWords(u16 x,u16 y,u8 hzIndex[],u8 len,u8 mode);
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[]);
-void OLED_DrawPointBMP(u8 x,u8 y,unsigned char BMP[],u8 length,u8 width,u8 mode);
+void OLED_DrawPointBMP(u8 x,u8 y,unsigned char BMP[],u8 length,u8 height,u8 mode);
 void fill_picture(unsigned char fill_Data);
 void IIC_Start(void);
 void IIC_Stop(void);

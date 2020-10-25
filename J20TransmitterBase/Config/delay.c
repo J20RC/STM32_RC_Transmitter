@@ -1,5 +1,5 @@
 #include "delay.h"
-/*
+
 static u8  fac_us=0;							//us延时倍乘数			   
 static u16 fac_ms=0;							//ms延时倍乘数,在ucos下,代表每个节拍的ms数
 
@@ -47,7 +47,7 @@ void delay_ms(u16 nms)
 	SysTick->CTRL&=~SysTick_CTRL_ENABLE_Msk;	//关闭计数器
 	SysTick->VAL =0X00;       					//清空计数器	  	    
 } 
-*/
+/*
 //延时n us
 //nus为要延时的us数.		    								   
 void delay_us(u32 nus)
@@ -71,7 +71,7 @@ void delay_ms(u16 nms)
 	  while(i--);
 	}
 }
-
+*/
 
 
 
