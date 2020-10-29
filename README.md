@@ -1,4 +1,5 @@
-![Alt text](./images/logo.png)
+![J20RC](./images/logo.png)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 # :airplane: J20航模遥控器
 强烈推荐Star(￣▽￣)／
 我们开源团队会持续优化整个项目喔~<br>
