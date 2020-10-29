@@ -1,6 +1,7 @@
 ![Alt text](./images/logo.png)
 # :airplane: J20航模遥控器
-强烈推荐Star~我们开源团队会持续优化整个项目喔~<br>
+强烈推荐Star(￣▽￣)／
+我们开源团队会持续优化整个项目喔~<br>
 项目使用STM32标准库/HAL库来开发一套通用的航模遥控器和接收机，软硬件完全开源，还附带教程哦~
  - 项目计划：https://www.cnblogs.com/cai-zi/p/13438079.html 
  - Bilibili项目宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
