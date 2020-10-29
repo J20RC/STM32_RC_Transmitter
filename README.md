@@ -1,4 +1,5 @@
-![J20RC](./images/logo.png)
+![J20RC](./images/logo.png)<br>
+[![Latest version](https://img.shields.io/github/v/release/J20RC/STM32_RC_Transmitter)](https://github.com/J20RC/STM32_RC_Transmitter/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 # :airplane: J20航模遥控器
 强烈推荐Star(￣▽￣)／
