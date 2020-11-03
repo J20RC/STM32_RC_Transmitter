@@ -108,7 +108,7 @@ void  DMA1_Channel1_IRQHandler(void)
 														setData.chMiddle[i], 
 														setData.chUpper[i], 
 														setData.chReverse[i]);
-			chTime[i] = PWMvalue[i]*9;
+//			chTime[i] = PWMvalue[i]*9;
 		}
 		sendDataPacket();//发送数据包,采集完即发送到接收机
 		sendCount++;
