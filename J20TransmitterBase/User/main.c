@@ -44,20 +44,7 @@
 	
 	by J20开发团队
 */
-#include "adc.h"
-#include "delay.h"
-#include "usart.h"
-#include "rtc.h"
-#include "stm32f10x.h"
-#include "oled.h"
-#include "stdio.h"
-#include "string.h"
-#include "nrf24l01.h"
-#include "beeper.h"
-#include "key.h"
-#include "flash.h"
-#include "menu.h"
-#include "ppm.h"
+#include "main.h"
 
 void keyEventHandle(void);
 void menuEventHandle(void);
@@ -65,11 +52,12 @@ void menuEventHandle(void);
 extern unsigned char logo[];
 u16 lastThrPWM = 0;//上一时刻的油门大小
 u16 loca;//存放坐标
-u16 updateWindow[10];//窗口更新标志
+u16 updateFlag;//窗口更新标志
 u16 thrNum;//油门换算后的大小
 float lastBatVolt=0.00;//上一时刻的电池电压
-extern char batVoltStr[10];//电池电压字符串
-
+extern char batVoltStr[8];//电池电压字符串
+extern char timeStr[9];//时间字符串
+u16 count=0;
 int main()
 {
 	delay_init();//初始化延时函数
@@ -77,8 +65,10 @@ int main()
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM2_Init(1999,71);//1MHz，每10ms进行ADC采样一次
 	TIM3_Init(19999,71);//1MHz，每20ms检测按键一次；
+	TIM4_Counter_Init(999,7199);//每0.1s计数一次，系统计时
 	DMA1_Init();	//DMA初始化
 	Adc_Init();		//ADC初始化
+	set_Init();	//读取用户数据
 	RTC_Init();		//RTC初始化
 	BEEPER_Init();	//BEEPER初始化
 	KEY_Init();		//KEY初始化
@@ -98,39 +88,45 @@ int main()
 	}
 	NRF24L01_TX_Mode();
 	delay_ms(100);
-		
+	
+	OLED_Fill(0,0,127,63,0);//清空
 	mainWindow();//显示主界面
 	OLED_Refresh_Gram();//刷新显存
 	while (1){
-		if(sendCount == 5)//每隔20次检查一下
+		if(count%500==0 && nowMenuIndex==home)//检测电池电压
 		{
-			if(batVoltSignal==1) Beeper = 1;//蜂鸣器间断鸣叫，报警
+			if(batVoltSignal==1) beeperOnce();//蜂鸣器间断鸣叫，报警
 			else Beeper = 0;//不报警
-			if(abs(PWMvalue[2]/20-lastThrPWM)>0) updateWindow[0] = 1;
-			lastThrPWM = PWMvalue[2]/20;//将1000量程进行20分频
-			if(batVolt*100-lastBatVolt*100>5) updateWindow[0] = 1;//0.05V更新一次
-			lastBatVolt = batVolt;
-		}
-		
-		if(updateWindow[0] && nowMenuIndex==0 && sendCount == 10)//油门更新事件
-		{
-			thrNum = (int)(PWMvalue[2]-1000)/16;//更新油门
-			if(setData.throttlePreference)//左手油门
-			{
-				OLED_Fill(0,63-thrNum,0,63,1);//下部分写1
-				OLED_Fill(0,0,0,63-thrNum,0);//上部分写0
-			}
-			else{//右手油门
-				OLED_Fill(127,63-thrNum,127,63,1);//下部分写1
-				OLED_Fill(127,0,127,63-thrNum,0);//上部分写0
-			}
-			sprintf((char *)batVoltStr,"%2.2fV",batVolt);//更新电池电压
-			OLED_ShowString(90,0, (u8 *)batVoltStr,12,1);
+			sprintf((char *)batVoltStr,"%1.2fV",batVolt);
+			OLED_ShowString(80,19, (u8 *)batVoltStr,16,1);//显示电池电压
 			OLED_Refresh_Gram();//刷新显存
-			updateWindow[0] = 0;
-			sendCount = 0;
 		}
-		if(sendCount > 20) sendCount = 0;
+		if(count%100==0 && nowMenuIndex==home)//显示时间
+		{
+			drawClockTime();//显示时间00:00:00
+			showSwState();//显示后四个通道状态
+			OLED_Refresh_Gram();//刷新显存
+		}
+		if(count%20 == 0 && nowMenuIndex==home)//油门更新事件
+		{
+			if(abs(PWMvalue[2]-lastThrPWM)/10>0) updateFlag = 1;
+			lastThrPWM = PWMvalue[2];//1000量程=100%
+			if(updateFlag)
+			{
+				thrNum = (int)(PWMvalue[2]-1000)/22;//更新油门
+				if(setData.throttlePreference)//左手油门
+				{
+					OLED_Fill(2,62-thrNum,2,62,0);//下部分写1
+					OLED_Fill(2,16,2,62-thrNum,1);//上部分写0
+				}
+				else{//右手油门
+					OLED_Fill(125,62-thrNum,125,62,0);//下部分写1
+					OLED_Fill(125,16,125,62-thrNum,1);//上部分写0
+				}
+				OLED_Refresh_Gram();//刷新显存
+				updateFlag = 0;
+			}
+		}
 		if(keyEvent>0)//微调更新事件
 		{
 			beeperOnce();
@@ -157,6 +153,7 @@ int main()
 			menuEventHandle();
 		}
 		lastMenuIndex = nowMenuIndex;
+		count++;
 	}
 }
 
@@ -164,57 +161,51 @@ int main()
 //微调事件处理函数：更新主界面
 void keyEventHandle(void)
 {
-	if(nowMenuIndex==0)
+	if(nowMenuIndex==home)
 	{
 		if(keyEvent==1|keyEvent==2) 
-		{//第1通道微调
+		{
 			if(setData.throttlePreference)//左手油门
-			{
-				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-				loca = (int)95+setData.PWMadjustValue[0]/12;
-				OLED_Fill(loca,59,loca,62,1);//写1
-				OLED_DrawPlusSign(95,61);//中心标识
+			{//第1通道微调-右横线
+				OLED_Fill(66,61,119,61,1);//写1，清除原来的标志
+				loca = (int)93+setData.PWMadjustValue[0]/12.5;
+				OLED_Fill(loca-2,61,loca+2,61,0);//写0
 			}
 			else//右手油门
-			{//第4通道微调
-				OLED_Fill(66,59,124,62,0);//写0，清除原来的标志
-				loca = (int)95+setData.PWMadjustValue[3]/12;
-				OLED_Fill(loca,59,loca,62,1);//写1
-				OLED_DrawPlusSign(95,61);//中心标识
+			{//第4通道微调-右横线
+				OLED_Fill(66,61,119,61,1);//写1，清除原来的标志
+				loca = (int)93+setData.PWMadjustValue[3]/12.5;
+				OLED_Fill(loca-2,61,loca+2,61,0);//写0
 			}
 		}
 		if(keyEvent==3|keyEvent==4) 
 		{
 			if(setData.throttlePreference)//左手油门
-			{//第2通道微调
-				OLED_Fill(123,1,126,63,0);//写0
-				loca = (int)32-setData.PWMadjustValue[1]/12;
-				OLED_Fill(123,loca,126,loca,1);//写1
-				OLED_DrawPlusSign(125,32);//中心标识
+			{//第2通道微调-右竖线
+				OLED_Fill(125,16,125,62,1);//写1
+				loca = (int)39-setData.PWMadjustValue[1]/14.29;
+				OLED_Fill(125,loca-2,125,loca+2,0);//写1
 			}
 			else//右手油门
-			{//第2通道微调
-				OLED_Fill(1,1,4,63,0);//写0
-				loca = (int)32-setData.PWMadjustValue[1]/12;
-				OLED_Fill(1,loca,4,loca,1);//写1
-				OLED_DrawPlusSign(2,32);//中心标识
+			{//第2通道微调-左竖线
+				OLED_Fill(2,16,2,56,1);//写1
+				loca = (int)39-setData.PWMadjustValue[1]/12;
+				OLED_Fill(2,loca-2,2,loca+2,0);//写1
 			}
 		}
 		if(keyEvent==5|keyEvent==6) 
 		{	
 			if(setData.throttlePreference)//左手油门
-			{//第4通道微调
-				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-				loca = (int)33+setData.PWMadjustValue[3]/12;
-				OLED_Fill(loca,59,loca,62,1);//写1
-				OLED_DrawPlusSign(33,61);//中心标识
+			{//第4通道微调-左横线
+				OLED_Fill(7,61,61,61,1);//写1，清除原来的标志
+				loca = (int)35+setData.PWMadjustValue[3]/12.5;
+				OLED_Fill(loca-2,61,loca+2,61,0);//写0
 			}
 			else//右手油门
-			{//第1通道微调
-				OLED_Fill(4,59,62,62,0);//写0，清除原来的标志
-				loca = (int)33+setData.PWMadjustValue[0]/12;
-				OLED_Fill(loca,59,loca,62,1);//写1
-				OLED_DrawPlusSign(33,61);//中心标识
+			{//第1通道微调-左横线
+				OLED_Fill(7,61,61,61,1);//写1，清除原来的标志
+				loca = (int)34+setData.PWMadjustValue[0]/12.5;
+				OLED_Fill(loca-2,61,loca+2,61,0);//写0
 			}
 		}
 		OLED_Refresh_Gram();//刷新显存
@@ -266,6 +257,7 @@ void menuEventHandle(void)
 		if(nowMenuIndex==dyjz) {setData.batVoltAdjust += 1;menu_dyjz();}
 		if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.01;menu_bjdy();}
 		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit += 1;menu_wtdw();}
+		if(nowMenuIndex==xzmx) {setData.modelType += 1;if(setData.modelType>2) {setData.modelType=0;}menu_xzmx();}
 	}
 	if(menuEvent[1]==NUM_down)
 	{
@@ -289,6 +281,7 @@ void menuEventHandle(void)
 		if(nowMenuIndex==dyjz) {setData.batVoltAdjust -= 1;menu_dyjz();}
 		if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.01;menu_bjdy();}
 		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit -= 1;menu_wtdw();}
+		if(nowMenuIndex==xzmx) {if(setData.modelType==0){setData.modelType=2;}else {setData.modelType -= 1;}menu_xzmx();}
 	}
 	if(nowMenuIndex!=lastMenuIndex)
 	{

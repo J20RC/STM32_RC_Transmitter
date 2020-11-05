@@ -8,16 +8,14 @@
 #include "nrf24l01.h"
 #include "menu.h"
 #include "ppm.h"
-
+#include "main.h"
 u16 volatile chValue[adcNum*sampleNum];//ADC采样值*10
 u16 volatile chResult[chNum];//滤波后的ADC采样值
 u16 volatile PWMvalue[chNum];//控制PWM占空比
 
 float volatile batVolt;//电池电压
 u8 volatile batVoltSignal=0;//是否报警，1为报警，0为正常
-//setData_Union setDataUnion;
-volatile set_Config setData;
-#define setDataSize sizeof(setData)/2 //每个通道采样次数
+
 #define ADC1_DR_Address    ((u32)0x4001244C)		//ADC1的地址
 //通用定时器2中断初始化
 //这里时钟选择为APB1的2倍，而APB1为36M
@@ -111,7 +109,7 @@ void  DMA1_Channel1_IRQHandler(void)
 //			chTime[i] = PWMvalue[i]*9;
 		}
 		sendDataPacket();//发送数据包,采集完即发送到接收机
-		sendCount++;
+		
 		batVolt = GetMedianNum(chValue,8)*3.3*3*setData.batVoltAdjust/4095000;//电池电压采样
 		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// 报警信号
 		else batVoltSignal = 0;
@@ -140,24 +138,6 @@ void GPIOA_Init(void)
 //初始化ADC															   
 void  Adc_Init(void)
 { 	
-	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//从FLASH中读取结构体
-	if(setData.writeFlag!=0x1111){
-		setData.writeFlag=0x1111;//是否第一次写入
-		for(int i=0;i<chNum;i++)
-		{
-			setData.chLower[i] 	= 0;	//遥杆的最小值
-			setData.chMiddle[i] = 2047;	//遥杆的中值
-			setData.chUpper[i] 	= 4095;	//遥杆的最大值
-			setData.PWMadjustValue[i]=0;//微调值
-			setData.chReverse[i] = 1;	//通道的正反，1为正常，0为反转
-		}
-		setData.PWMadjustUnit = 2;//微调单位
-		setData.warnBatVolt = 3.7;//报警电压
-		setData.throttlePreference = 1;//左手油门
-		setData.batVoltAdjust = 1000;//电池电压校准值
-		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//写入FLASH
-	}
-	
 	GPIOA_Init();
 	ADC_InitTypeDef ADC_InitStructure;
 

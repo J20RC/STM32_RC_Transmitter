@@ -453,6 +453,16 @@
               <FileType>1</FileType>
               <FilePath>.\Config\beeper.c</FilePath>
             </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Config\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>setting.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Config\setting.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

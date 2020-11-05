@@ -95,7 +95,7 @@ typedef enum// 菜单索引
 /*通道微调正反混控设置三角翼差速襟副接收管理新建选择模型保存信密码
 输出入无线发射功率映左右遥杆开关舵量监视系统常用报警油门行程校准
 恢复厂于单位按键音效机画面串口试电压闹钟时长偏好曲失护
-自检请将回中包括断继续默认团队菜本成手*/
+自检请将回中包括断继续默认团队菜本成手车船*/
 typedef enum// 菜单索引
 {
 	tongDao,dao,weiTiao,tiao,zheng,fan,hun,kong,sheZhi,zhi,san,jiaoDu,yi,
@@ -106,7 +106,7 @@ typedef enum// 菜单索引
 	dan,weiZhi,an,jianPan,yin,xiao,jiQi,hua,mian,chuan,kou,shiTi,dian,ya,
 	nao,zhongDian,shiChang,changDu,pian,hao,qu,shiQu,hu,zi,jianCha,qing,
 	jiang,huiLai,zhongXin,baoKuo,kuo,duan,jiXu,xu,moRen,ren,tuan,dui,cai,ben,
-	chengGong,shouJi,
+	chengGong,shouJi,che,chuanBoat,
 	
 	HZ_NUM,//汉字个数
 }HZ_INDEX;
@@ -126,6 +126,7 @@ extern volatile u8 lastMenuIndex;
 
 void OLED_display(void);
 void mainWindow(void);//主界面
+void showSwState(void);
 
 void menu_tdwt(void);//一级菜单：通道微调
 void menu_tdzf(void);//一级菜单：通道正反

@@ -7,6 +7,7 @@
 #include "flash.h"
 #include "menu.h"
 #include "oled.h"
+#include "main.h"
 //参考链接https://blog.csdn.net/qq_42679566/article/details/105892105，原文错误已修正
 
 Key_Config Key_Buf[KEY_NUM];	// 创建按键数组
@@ -129,7 +130,8 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=KEY_home; //旋转编码器长按home
 			}
-//			if(status!=KEY_NULL) printf("%d,%d\n",i,status);
+			
+//			if(status!=KEY_NULL) printf("%d,%d\r\n",i,status);
 		}
 		
 		
