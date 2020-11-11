@@ -1,18 +1,18 @@
 ![J20RC](./images/logo.png)<br>
-# J20航模遥控器&接收机
+# J20航模遥控器
 [![Latest version](https://img.shields.io/github/v/release/J20RC/STM32_RC_Transmitter)](https://github.com/J20RC/STM32_RC_Transmitter/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)<br>
 强烈推荐Star(￣▽￣)／
 我们开源团队会持续优化整个项目喔~<br>
 项目使用STM32标准库/HAL库来开发一套通用的航模遥控器和接收机，软硬件完全开源，还附带教程哦~
- - 项目计划：https://www.cnblogs.com/cai-zi/p/13438079.html 
- - Bilibili项目宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
- - 我们的开源宗旨：自由 协调 开放 合作 共享
- - 和一群志同道合的人，做自己所热爱的事！
+- STM32F0接收机：https://github.com/J20RC/STM32F0_Receiver
+- STM32F1接收机：https://github.com/J20RC/STM32F1_Receiver
+- 项目计划：https://www.cnblogs.com/cai-zi/p/13438079.html 
+- Bilibili项目宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
 ## 拥抱开源，我们期待你的加入！
  - QQ群：1091996634，密码：J20
 
-## 1.材料清单 
+## 材料清单 
 | 器件名称        			| 数量   	| 上传图片名称  			| 备注 |
 | ------------- 			| :------:	| :-------------:			|------|
 | STM32F103C8T6最小系统板 	| 2 		| images/stm32f103c8t6.png 	|
@@ -39,31 +39,29 @@
 | 锂电池充电模块			| 1 		| images/cd.png		 		|
 
 
-## 2.安装Keil5(MDK) 
-- 参考链接进行安装：https://blog.csdn.net/weixin_42911200/article/details/81590158
+## 相关教程
+- 安装Keil5(MDK) ：https://blog.csdn.net/weixin_42911200/article/details/81590158
 - 注意要安装Keil.STM32F1xx_DFP.2.3.0.pack支持包，因为我们要用STM32F103系列芯片的库函数编写。
-
-## 3.新建工程 
 - 新建keil库函数工程，参考链接 https://www.cnblogs.com/zeng-1995/p/11308622.html
-
-## 4.代码说明
 - 多按键检测(基于有限状态机)：https://blog.csdn.net/weixin_42268054/article/details/107393669
 - 多级菜单(树形拓扑结构、状态机)：https://blog.csdn.net/weixin_42268054/article/details/107613192
+- 制作教程：https://www.cnblogs.com/cai-zi/p/13438285.html	<br>
+- 使用说明：https://www.cnblogs.com/cai-zi/p/13438406.html	<br>
+- 开发说明：https://www.cnblogs.com/cai-zi/p/13536862.html	<br>
+- PCB打印：https://www.cnblogs.com/cai-zi/p/13536693.html		<br>
 
-## 5.版本说明
-- 基础版V1.0发布（2020.08.01）	<br/>
-实现了8通道遥控和接收，遥控器菜单包含通道微调、通道正反、行程校准功能；	<br/>
+## 版本说明
+- 基础版1.0发布（2020.08.01）	<br>
+实现了8通道遥控和接收，遥控器菜单包含通道微调、通道正反、行程校准功能；	<br>
 Bilibili视频：https://www.bilibili.com/video/BV1ea4y1J7WV	<br/>
-制作教程：https://www.cnblogs.com/cai-zi/p/13438285.html	<br/>
-使用说明：https://www.cnblogs.com/cai-zi/p/13438406.html	<br/>
-开发说明：https://www.cnblogs.com/cai-zi/p/13536862.html	<br/>
-PCB打印：https://www.cnblogs.com/cai-zi/p/13536693.html		<br/>
-- 基础版V1.1发布（2020.09.25）	<br/>
-遥控器端系统设置增加左右手油门设置、报警电压、校准电压、微调单位等；	<br/>
-遥控器的mini板PCB修复电压供电波动问题，使用AMS1117-3.3芯片替代原来的H7233芯片；	<br/>
-STM32F0接收机增加SBUS输出、PPM输出；	<br/>
-STM32F1接收机增加SBUS输出、PPM输出；	<br/>
 
+- 基础版1.1发布（2020.09.25）	<br>
+遥控器端系统设置增加左右手油门设置、报警电压、校准电压、微调单位等；	<br>
+遥控器的mini板PCB修复电压供电波动问题，使用AMS1117-3.3芯片替代原来的H7233芯片；	<br>
+
+- 基础版2.0发布（2020.10.25）<br>
+全新的菜单界面，更丰富的设置功能。<br>
+Bilibili视频：https://www.bilibili.com/video/BV1wy4y1k718
 
 ## 非常感谢项目中所有的贡献者：
  * 蔡子CaiZi（B站up主）@Cai-Zi  https://cai-zi.github.io/
