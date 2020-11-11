@@ -7,8 +7,6 @@
 项目使用STM32标准库/HAL库来开发一套通用的航模遥控器和接收机，软硬件完全开源，还附带教程哦~
 - STM32F0接收机：https://github.com/J20RC/STM32F0_Receiver
 - STM32F1接收机：https://github.com/J20RC/STM32F1_Receiver
-- 项目计划：https://www.cnblogs.com/cai-zi/p/13438079.html 
-- Bilibili项目宣传视频：https://www.bilibili.com/video/BV1Vg4y1v7oQ
 ## 拥抱开源，我们期待你的加入！
  - QQ群：1091996634，密码：J20
 
@@ -54,11 +52,9 @@
 - 基础版1.0发布（2020.08.01）	<br>
 实现了8通道遥控和接收，遥控器菜单包含通道微调、通道正反、行程校准功能；	<br>
 Bilibili视频：https://www.bilibili.com/video/BV1ea4y1J7WV	<br/>
-
 - 基础版1.1发布（2020.09.25）	<br>
 遥控器端系统设置增加左右手油门设置、报警电压、校准电压、微调单位等；	<br>
 遥控器的mini板PCB修复电压供电波动问题，使用AMS1117-3.3芯片替代原来的H7233芯片；	<br>
-
 - 基础版2.0发布（2020.10.25）<br>
 全新的菜单界面，更丰富的设置功能。<br>
 Bilibili视频：https://www.bilibili.com/video/BV1wy4y1k718
