@@ -49,13 +49,13 @@
 - PCB打印：https://www.cnblogs.com/cai-zi/p/13536693.html		<br>
 
 ## 版本说明
-- 基础版1.0发布（2020.08.01）	<br>
+- [基础版1.0发布（2020.08.01）](https://github.com/J20RC/STM32_RC_Transmitter/releases/tag/1.0)	<br>
 实现了8通道遥控和接收，遥控器菜单包含通道微调、通道正反、行程校准功能；	<br>
 Bilibili视频：https://www.bilibili.com/video/BV1ea4y1J7WV	<br/>
-- 基础版1.1发布（2020.09.25）	<br>
+- [基础版1.1发布（2020.09.25）](https://github.com/J20RC/STM32_RC_Transmitter/releases/tag/1.1)	<br>
 遥控器端系统设置增加左右手油门设置、报警电压、校准电压、微调单位等；	<br>
 遥控器的mini板PCB修复电压供电波动问题，使用AMS1117-3.3芯片替代原来的H7233芯片；	<br>
-- 基础版2.0发布（2020.10.25）<br>
+- [基础版2.0发布（2020.10.25）](https://github.com/J20RC/STM32_RC_Transmitter/releases/tag/2.1)<br>
 全新的菜单界面，更丰富的设置功能。<br>
 Bilibili视频：https://www.bilibili.com/video/BV1wy4y1k718
 
