@@ -414,14 +414,14 @@
               <FilePath>.\Config\key.c</FilePath>
             </File>
             <File>
-              <FileName>menu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Config\menu.c</FilePath>
-            </File>
-            <File>
               <FileName>nrf24l01.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Config\nrf24l01.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Config\menu.c</FilePath>
             </File>
             <File>
               <FileName>oled.c</FileName>

@@ -92,6 +92,8 @@ typedef enum// 菜单索引
 	
 	MENU_NUM, // 菜单页总数
 }MENU_INDEX_LIST;
+
+
 /*通道微调正反混控设置三角翼差速襟副接收管理新建选择模型保存信密码
 输出入无线发射功率映左右遥杆开关舵量监视系统常用报警油门行程校准
 恢复厂于单位按键音效机画面串口试电压闹钟时长偏好曲失护
@@ -123,7 +125,7 @@ typedef struct{
 
 extern volatile u8 nowMenuIndex;
 extern volatile u8 lastMenuIndex;
-
+	
 void OLED_display(void);
 void mainWindow(void);//主界面
 void showSwState(void);
@@ -211,6 +213,7 @@ void menu_hfccTip(void);//三级菜单：将恢复默认
 void menu_hfcg(void);//三级菜单：恢复成功
 
 void menu_gybjInf(void);//三级菜单：J20RC开发团队-V2.0
+u16 IsInKeyMenu(u16 num);//判断是否为用户编辑页面
 
 #endif
 

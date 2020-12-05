@@ -11,6 +11,7 @@ extern "C" {
 #include "rtc.h"
 #include "stm32f10x.h"
 #include "oled.h"
+#include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
 #include "nrf24l01.h"
@@ -21,6 +22,11 @@ extern "C" {
 #include "ppm.h"
 #include "tim.h"
 #include "setting.h"
+
+#define ON 1
+#define OFF 0
+
+
 
 #ifdef __cplusplus
 }

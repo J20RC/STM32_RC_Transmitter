@@ -263,9 +263,9 @@ u32 mypow(u8 m,u8 n)
 //x,y :起点坐标	 
 //len :数字的位数
 //size:字体大小12/16/24
-//mode:模式	0,填充模式;1,叠加模式
+//mode:模式	0,反白模式;1,正常模式
 //num:数值(0~4294967295);	 		  
-void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
+void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size,u8 mode)
 {         	
 	u8 t,temp;
 	u8 enshow=0;						   
@@ -276,12 +276,12 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
 		{
 			if(temp==0)
 			{
-				OLED_ShowChar(x+(size/2)*t,y,' ',size,1);
+				OLED_ShowChar(x+(size/2)*t,y,' ',size,mode);
 				continue;
 			}else enshow=1; 
 		 	 
 		}
-	 	OLED_ShowChar(x+(size/2)*t,y,temp+'0',size,1); 
+	 	OLED_ShowChar(x+(size/2)*t,y,temp+'0',size,mode); 
 	}
 } 
 //显示字符串

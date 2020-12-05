@@ -1,6 +1,6 @@
 #include "beeper.h"
-#include "delay.h"
-	    
+#include "main.h"
+
 //蜂鸣器IO初始化
 void BEEPER_Init(void)
 {
@@ -17,9 +17,27 @@ void BEEPER_Init(void)
 	GPIO_ResetBits(GPIOA,GPIO_Pin_10);//输出低电平
 }
 //蜂鸣器短响一次
-void beeperOnce(void)
+//freq：频率1~50000
+void beeperOnce(u16 freq)
+{
+	for (u16 i=0; i<(u16)freq/20; i++) {
+		Beeper = 1;
+		delay_us((u16)50000/freq);
+		Beeper = 0;
+		delay_us((u16)50000/freq);
+	}
+}
+//开机声音
+void onSound(void)
 {
 	Beeper = 1;
 	delay_ms(5);
 	Beeper = 0;
+}
+//检测蜂鸣器模式后再响
+void keyDownSound(void)
+{
+	if (setData.keySound==ON) {
+		beeperOnce(1000);
+	}
 }

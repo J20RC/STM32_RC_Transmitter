@@ -16,9 +16,17 @@ void resetData(void)
 	}
 	setData.PWMadjustUnit = 2;//微调单位
 	setData.warnBatVolt = 3.7;//报警电压
-	setData.throttlePreference = 1;//左手油门
+	setData.throttlePreference = ON;//左手油门
 	setData.batVoltAdjust = 1000;//电池电压校准值
 	setData.modelType = 0;//模型类型：翼0，车1，船2
+	setData.NRF_Mode = ON;//默认启动
+	setData.keySound = ON;//默认启动
+	setData.onImage = 1;//开机画面0,1
+	setData.RecWarnBatVolt = 11.8;//接收机的报警电压
+	setData.clockMode = OFF;//闹钟是否报警
+	setData.clockTime = 5;//闹钟时间5min
+	setData.clockCheck = ON;//开机是否自检一下油门
+	setData.throttleProtect = 0;//油门保护值0%
 }
 void set_Init(void)
 {

@@ -3,12 +3,10 @@
 #include "sys.h"
 #include "stm32f10x.h"
 #include "stm32f10x_gpio.h" 
-#define BM_CLK PBin(1)// 旋转编码器CLK输入
-#define BM_DT PBin(10)// 旋转编码器DT输入
 
-#define MENU_up 	0x06//菜单向上事件标志
-#define MENU_down 0x07//菜单向下事件标志
-#define MENU_enter 0x08//确定按键事件标志
+#define MENU_up 		0x06//菜单向上事件标志
+#define MENU_down 	0x07//菜单向下事件标志
+#define MENU_enter 	0x08//确定按键事件标志
 #define MENU_esc		0x09//返回按键事件标志
 #define MENU_home	0x0A//主界面按键事件标志
 #define NUM_up 		0x0B//数值+按键事件标志
@@ -57,8 +55,8 @@ typedef enum // 按键注册表
 	CH2Down,
 	CH2Up,
 	CH4Left,
-	CH4Right,// 用户添加的按钮名称
-	BM_SW,
+	CH4Right,
+	MENU,// 用户添加的按钮名称
 	KEY_NUM, // 必须要有的记录按钮数量，必须在最后
 }KEY_LIST;
 

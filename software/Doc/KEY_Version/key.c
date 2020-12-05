@@ -91,17 +91,22 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			if(i==CH1Left && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
-				menuEvent[1]=MENU_home; //按键CH1Left	【home】
+				menuEvent[1]=MENU_enter; //按键CH1Left	【确定】
+			}
+			if(i==CH1Right && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=MENU_esc; //按键CH1Right	【返回】
 			}
 			if(i==CH2Down && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
-				menuEvent[1]=MENU_enter; //按键CH2Down	【确定】
+				menuEvent[1]=MENU_down; //按键CH2Down	【菜单向下】
 			}
 			if(i==CH2Up && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
-				menuEvent[1]=MENU_esc; //按键CH2Up		【返回】
+				menuEvent[1]=MENU_up; //按键CH2Up		【菜单向上】
 			}
 			if(i==CH4Left && status==KEY_DOWN && nowMenuIndex!=home)
 			{
@@ -113,16 +118,16 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=NUM_up; //按键CH4Right		【数值+】
 			}
-			if(i==BM_SW && status==KEY_DOWN)
+			if(i==MENU && status==KEY_DOWN && nowMenuIndex==home)
 			{
 				menuEvent[0]=1;//菜单事件
-				menuEvent[1]=MENU_enter; //旋转编码器短按确定
+				menuEvent[1]=MENU_enter; //按键MENU		【进入菜单】
 				
 			}
-			if(i==BM_SW && status==KEY_LONG)
+			if(i==MENU && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
-				menuEvent[1]=MENU_home; //旋转编码器长按home
+				menuEvent[1]=MENU_home; //按键MENU		【退出菜单】
 			}
 			
 //			if(status!=KEY_NULL) printf("%d,%d\r\n",i,status);
@@ -136,7 +141,6 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 //按键初始化函数
 void KEY_Init(void) //IO初始化
 { 
-	encoder_Init();//编码器引脚初始化
 	Key_Init KeyInit[KEY_NUM]=
 	{ 
 		{GPIO_Mode_IPU, GPIOB, GPIO_Pin_5, RCC_APB2Periph_GPIOB}, 	// 初始化按键CH1Left	【home】
@@ -278,52 +282,3 @@ void ReadKeyStatus(void)
         }
 	}
 }
-//旋转编码器CLK,DT引脚初始化
-void encoder_Init(void)
-{
-	GPIO_InitTypeDef  GPIO_InitStructure;
-
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	 //使能PC端口时钟
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_10; //PB1、PB10设置
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; //浮空输入
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure); //初始化 GPIOB
-	
-	EXTI_InitTypeDef EXTI_InitStructure;
- 	NVIC_InitTypeDef NVIC_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);//外部中断，需要使能AFIO时钟
-	
-	//GPIOB1 中断线以及中断初始化配置
-  	GPIO_EXTILineConfig(GPIO_PortSourceGPIOB,GPIO_PinSource1);
-  	EXTI_InitStructure.EXTI_Line=EXTI_Line1;
-  	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;	
-  	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;//上升沿触发
-  	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-  	EXTI_Init(&EXTI_InitStructure);	//根据EXTI_InitStruct中指定的参数初始化外设EXTI寄存器
-
-		
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn; //使能按键所在的外部中断通道
-  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;	//抢占优先级2， 
-  	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;		//子优先级1
-  	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;	//使能外部中断通道
-  	NVIC_Init(&NVIC_InitStructure); 
-}
-
-//中断服务函数，检测旋转编码器的旋转方向
-void EXTI1_IRQHandler(void)
-{
-	delay_ms(1);	//消抖，很重要
-	menuEvent[0]=1;//菜单事件
-	if(BM_CLK==BM_DT) //顺时针旋转
-	{
-		if(menuMode == 1) menuEvent[1] = NUM_up; //数字加
-		else menuEvent[1]=MENU_up; //菜单加
-	}
-	else //逆时针旋转
-	{
-		if(menuMode == 1) menuEvent[1] = NUM_down; //数字减
-		else menuEvent[1]=MENU_down; //菜单减
-	}
- 	EXTI_ClearITPendingBit(EXTI_Line1);    //清除LINE1上的中断标志位 
-}
-

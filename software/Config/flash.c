@@ -1,7 +1,5 @@
 #include "flash.h"
-#include "delay.h"
-#include "usart.h"
-#include "adc.h"
+#include "main.h"
 
 
 //读取指定地址的半字(16位数据)

@@ -1,13 +1,4 @@
 #include "adc.h"
-#include "delay.h"
-#include "usart.h"
-#include "sys.h"
-#include "rtc.h"
-#include "flash.h" 
-#include "key.h" 
-#include "nrf24l01.h"
-#include "menu.h"
-#include "ppm.h"
 #include "main.h"
 u16 volatile chValue[adcNum*sampleNum];//ADC采样值*10
 u16 volatile chResult[chNum];//滤波后的ADC采样值

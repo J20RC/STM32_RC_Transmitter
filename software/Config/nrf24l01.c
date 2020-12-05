@@ -232,6 +232,20 @@ void NRF24L01_TX_Mode(void)
 	NRF24L01_CE=1;//CE为高,10us后启动发送
 }
 
+/**
+  * 函数功能: 该函数NRF24L01进入低功耗模式
+  * 输入参数: 无
+  * 返 回 值: 无
+  * 说    明：无
+  *           
+  */
+void NRF24L01_LowPower_Mode(void)
+{
+	NRF24L01_CE=0;		 
+	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG, 0x00);		//配置工作模式:掉电模式
+}
+
+
 u8 sendDataPacket(void)
 {
 	u8 chPacket[32];//发送的数据包

@@ -5,6 +5,7 @@
 #define Beeper PAout(10)	//PA10
 
 void BEEPER_Init(void);//初始化
-void beeperOnce(void);//蜂鸣器短响一次
-		 				    
+void beeperOnce(u16 freq);//蜂鸣器短响一次
+void keyDownSound(void);
+void onSound(void);
 #endif

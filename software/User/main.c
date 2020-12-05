@@ -1,48 +1,9 @@
 /*
-=============J20航模遥控器遥控器端-基础版V2.0==============
-	开发板：STM32F103C8T6蓝色板
-	NRF24L01模块：
-				GND   	电源地
-				VCC		接3.3V电源
-				CSN		接PB12
-				SCK		接PB13
-				MISO	接PB14
-				MOSI	接PB15
-				CE		接PA8
-				IRQ		接PA9
-	ADC采样：PA0-7
-	电池电压检测：PB0
-	蜂鸣器：PA10
-	6个按键：
-				CH1Left 接PB5	【home】
-				CH1Right接PB4
-				CH2Up	接PA15	【返回】
-				CH2Down	接PB3	【确定】
-				CH4Left	接PA12	【数值-】
-				CH4Right接PA11	【数值+】
-	旋转编码器模块：
-				GND   	电源地
-				VCC   	接3.3V电源
-				SW		接PB11
-				DT		接PB10
-				CLK		接PB1
-	OLED显示屏：
-				GND   	电源地
-				VCC   	接3.3V电源
-				SCL   	接PB8（SCL）
-				SDA   	接PB9（SDA）
-	串口USB-TTL接法：	
-				GND   	电源地
-				3V3   	接3.3V
-				TXD   	接PB7
-				RXD   	接PB6
-	ST-LINK V2接法：
-				GND   	电源地
-				3V3   	接3.3V
-				SWCLK 	接DCLK
-				SWDIO 	接DIO
-	
-	by J20开发团队
+J20航模遥控器遥控器端
+	微控制器：STM32F103C8T6
+	版本：基础版V2.2
+	具体说明见Doc/ReadMe.txt
+	仓库：https://github.com/J20RC/STM32_RC_Transmitter
 */
 #include "main.h"
 
@@ -80,23 +41,23 @@ int main()
 	OLED_Clear();
 	OLED_DrawPointBMP(9,0,logo,110,56,1);//显示logo
 	OLED_Refresh_Gram();//刷新显存
-	beeperOnce();
+	onSound();
 	while(NRF24L01_Check())
 	{
  		delay_ms(100);
 		Beeper = !Beeper;//蜂鸣器1Hz报警，表示无线模块故障
 	}
-	NRF24L01_TX_Mode();
-	delay_ms(100);
+	if(setData.NRF_Mode == ON)  NRF24L01_TX_Mode();//发射模式
+	else NRF24L01_LowPower_Mode();//掉电模式
 	
+	delay_ms(1000);
 	OLED_Fill(0,0,127,63,0);//清空
 	mainWindow();//显示主界面
 	OLED_Refresh_Gram();//刷新显存
 	while (1){
 		if(count%500==0 && nowMenuIndex==home)//检测电池电压
 		{
-			if(batVoltSignal==1) beeperOnce();//蜂鸣器间断鸣叫，报警
-			else Beeper = 0;//不报警
+			if(batVoltSignal==1) onSound();//蜂鸣器间断鸣叫，报警
 			sprintf((char *)batVoltStr,"%1.2fV",batVolt);
 			OLED_ShowString(80,19, (u8 *)batVoltStr,16,1);//显示电池电压
 			OLED_Refresh_Gram();//刷新显存
@@ -129,7 +90,7 @@ int main()
 		}
 		if(keyEvent>0)//微调更新事件
 		{
-			beeperOnce();
+			keyDownSound();
 			keyEventHandle();
 		}
 		if(nowMenuIndex==xcjz14)//行程校准
@@ -149,7 +110,7 @@ int main()
 		}
 		if(menuEvent[0])//菜单事件
 		{
-			beeperOnce();
+			keyDownSound();
 			menuEventHandle();
 		}
 		lastMenuIndex = nowMenuIndex;
@@ -258,6 +219,7 @@ void menuEventHandle(void)
 		if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.01;menu_bjdy();}
 		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit += 1;menu_wtdw();}
 		if(nowMenuIndex==xzmx) {setData.modelType += 1;if(setData.modelType>2) {setData.modelType=0;}menu_xzmx();}
+		if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
 	}
 	if(menuEvent[1]==NUM_down)
 	{
@@ -282,6 +244,32 @@ void menuEventHandle(void)
 		if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.01;menu_bjdy();}
 		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit -= 1;menu_wtdw();}
 		if(nowMenuIndex==xzmx) {if(setData.modelType==0){setData.modelType=2;}else {setData.modelType -= 1;}menu_xzmx();}
+		if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
+	}
+	if(menuEvent[1]==MENU_enter)//旋转编码器短按后，改变菜单显示
+	{
+		if(nowMenuIndex==tdwt1){menu_tdwt1();}
+		if(nowMenuIndex==tdwt2){menu_tdwt2();}
+		if(nowMenuIndex==tdwt3){menu_tdwt3();}
+		if(nowMenuIndex==tdwt4){menu_tdwt4();}
+		if(nowMenuIndex==tdwt5){menu_tdwt5();}
+		if(nowMenuIndex==tdwt6){menu_tdwt6();}
+		if(nowMenuIndex==tdwt7){menu_tdwt7();}
+		if(nowMenuIndex==tdwt8){menu_tdwt8();}
+		if(nowMenuIndex==tdzf1){menu_tdzf1();}
+		if(nowMenuIndex==tdzf2){menu_tdzf2();}
+		if(nowMenuIndex==tdzf3){menu_tdzf3();}
+		if(nowMenuIndex==tdzf4){menu_tdzf4();}
+		if(nowMenuIndex==tdzf5){menu_tdzf5();}
+		if(nowMenuIndex==tdzf6){menu_tdzf6();}
+		if(nowMenuIndex==tdzf7){menu_tdzf7();}
+		if(nowMenuIndex==tdzf8){menu_tdzf8();}
+		if(nowMenuIndex==ymph) {menu_ymph();}
+		if(nowMenuIndex==dyjz) {menu_dyjz();}
+		if(nowMenuIndex==bjdy) {menu_bjdy();}
+		if(nowMenuIndex==wtdw) {menu_wtdw();}
+		if(nowMenuIndex==xzmx) {menu_xzmx();}
+		if(nowMenuIndex==wxfs) {menu_wxfs();}
 	}
 	if(nowMenuIndex!=lastMenuIndex)
 	{
@@ -289,5 +277,4 @@ void menuEventHandle(void)
 	}
 	OLED_Refresh_Gram();//刷新显存
 	menuEvent[0] = 0;
-	menuEvent[1] = BM_NULL;
 }
