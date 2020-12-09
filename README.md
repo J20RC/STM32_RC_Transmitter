@@ -10,7 +10,7 @@ Github：https://github.com/J20RC/STM32F0_Receiver<br>
 码云(Gitee)：https://gitee.com/J20RC/STM32F0_Receiver<br>
 - STM32F1接收机<br>
 Github：https://github.com/J20RC/STM32F1_Receiver<br>
-码云(Gitee)：https://gitee.com/J20RC/STM32F0_Receiver<br>
+码云(Gitee)：https://gitee.com/J20RC/STM32F1_Receiver<br>
 ## 拥抱开源，我们期待你的加入！
  - QQ群：1091996634，密码：J20
 
