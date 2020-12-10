@@ -64,7 +64,7 @@ void DMA1_Init(void)
 	DMA_ITConfig(DMA1_Channel1,DMA_IT_TC, ENABLE);		//使能传输完成中断
 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
@@ -75,37 +75,38 @@ void DMA1_Init(void)
 //DMA中断处理函数
 void  DMA1_Channel1_IRQHandler(void)
 {
-	u16 i;
+	u16 chIndex;
+	u16 PWM_Sum = 0;//8个PWM通道值的和
 	if(DMA_GetITStatus(DMA1_IT_TC1)!=RESET){
 		
 		//中断处理代码
 		//通道映射,判断设置的左/右手油门
-		for(i=0; i<4; i++)
+		for(chIndex=0; chIndex<4; chIndex++)
 		{
-			if(setData.throttlePreference) chResult[i] = GetMedianNum(chValue,i);
-			else chResult[i] = GetMedianNum(chValue,3-i);
+			if(setData.throttlePreference) chResult[chIndex] = GetMedianNum(chValue,chIndex);
+			else chResult[chIndex] = GetMedianNum(chValue,3-chIndex);
 		}
-		for(i=4; i<chNum; i++)
+		for(chIndex=4; chIndex<chNum; chIndex++)
 		{
-			chResult[i] = GetMedianNum(chValue,i);//后4个通道映射
+			chResult[chIndex] = GetMedianNum(chValue,chIndex);//后4个通道映射
 		}
 		//数值映射
-		for(i=0; i<chNum; i++)
+		for(chIndex=0; chIndex<chNum; chIndex++)
 		{
-			PWMvalue[i]= setData.PWMadjustValue[i]+mapChValue(chResult[i], 
-														setData.chLower[i], 
-														setData.chMiddle[i], 
-														setData.chUpper[i], 
-														setData.chReverse[i]);
-//			chTime[i] = PWMvalue[i]*9;
+			PWMvalue[chIndex]= setData.PWMadjustValue[chIndex]+mapChValue(chResult[chIndex], 
+														setData.chLower[chIndex], 
+														setData.chMiddle[chIndex], 
+														setData.chUpper[chIndex], 
+														setData.chReverse[chIndex]);
+			PPM_Array[chIndex*2+1] = PWMvalue[chIndex]-MS05;
+			PWM_Sum += PWMvalue[chIndex];
 		}
+		PPM_Array[PPM_NUM-1] = MS20 - PWM_Sum;
 		sendDataPacket();//发送数据包,采集完即发送到接收机
 		
 		batVolt = GetMedianNum(chValue,8)*3.3*3*setData.batVoltAdjust/4095000;//电池电压采样
 		if(batVolt < setData.warnBatVolt) batVoltSignal = 1;// 报警信号
 		else batVoltSignal = 0;
-		//printf("%f,%f,%d\n",batVolt,setData.warnBatVolt,batVoltSignal);
-//		printf("\n当前时间：%d:%d:%d\r\n",calendar.hour,calendar.min,calendar.sec);
 		DMA_ClearITPendingBit(DMA1_IT_TC1);//清除标志
 	}
 }

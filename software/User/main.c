@@ -22,11 +22,11 @@ u16 count=0;
 int main()
 {
 	delay_init();//初始化延时函数
+	SysTick_Config(900000);//0.1s系统滴答时钟
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM2_Init(1999,71);//1MHz，每10ms进行ADC采样一次
 	TIM3_Init(19999,71);//1MHz，每20ms检测按键一次；
-	TIM4_Counter_Init(999,7199);//每0.1s计数一次，系统计时
 	DMA1_Init();	//DMA初始化
 	Adc_Init();		//ADC初始化
 	set_Init();	//读取用户数据
@@ -34,8 +34,7 @@ int main()
 	BEEPER_Init();	//BEEPER初始化
 	KEY_Init();		//KEY初始化
 	NRF24L01_Init();//NRF24L01初始化
-//	PPM_Pin_Init();//PPM初始化
-//	systick_init(10000);//PPM定时初始化，初始值随意设置
+	PPM_Init();//PPM引脚初始化
 	
 	OLED_Init();	//初始化OLED
 	OLED_Clear();

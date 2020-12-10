@@ -1,16 +1,13 @@
 #ifndef __PPM_H
 #define __PPM_H
-#include "stm32f10x.h"
-#include "sys.h"
-#include "adc.h"
+#include "main.h"
+#define MS20	(20000)	/* 20ms */
+#define MS05	(500)	/* 0.5ms */
+#define PPM_NUM chNum*2+2 //PPM数组中的个数，这里是8通道1+8*2+1
 
-#define PPM_Pin PCout(13)	// PPM-PC13
+extern u16 PPM_Array[PPM_NUM];
 
-extern u32 chTime[chNum];
+void PPM_Init(void);
 
-void PPM_Pin_Init(void);
-void ppm_output(void);
-void systick_init(u32 count);
-void SysTick_Handler(void);
 #endif
 

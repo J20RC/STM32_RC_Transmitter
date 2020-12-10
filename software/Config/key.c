@@ -1,6 +1,9 @@
 #include "key.h"
 #include "main.h"
-//参考链接https://blog.csdn.net/qq_42679566/article/details/105892105，原文错误已修正
+/*
+EC11旋转编码器版本
+参考链接https://blog.csdn.net/qq_42679566/article/details/105892105，原文错误已修正
+*/
 #define KEY_LONG_DOWN_DELAY 30 	// 设置30个TIM3定时器中断=600ms算长按	
 #define DBGMCU_CR  (*((volatile u32 *)0xE0042004))
 	
@@ -30,8 +33,8 @@ void TIM3_Init(u16 arr,u16 psc)
 	
 	
 	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0;//抢占优先级0
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;		//子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;//抢占优先级
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;		//子优先级
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
 	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化NVIC寄存器
 	
@@ -48,7 +51,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 		for(i = 0;i < KEY_NUM;i++)
     	{
 			status = Key_Buf[i].Status.KEY_EVENT;
-			if(i<KEY_NUM-1 && status==KEY_DOWN && nowMenuIndex==0) //主界面时，短按
+			if(i<KEY_NUM-1 && status==KEY_DOWN && nowMenuIndex==home) //主界面时，短按
 			{
 				if(i==CH1Left | i==CH1Right) ch = (setData.throttlePreference? 0 : 3);
 				if(i==CH2Down | i==CH2Up) ch = (setData.throttlePreference? 1 : 1);
@@ -59,7 +62,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 				else setData.PWMadjustValue[ch] += setData.PWMadjustUnit;//微调加
 				keyEvent = i+1;//有按键按下标志
 			}
-			if(i<KEY_NUM-1 && status==KEY_LONG && nowMenuIndex==0) //主界面时，长按
+			if(i<KEY_NUM-1 && status==KEY_LONG && nowMenuIndex==home) //主界面时，长按
 			{
 				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
 				if(i==CH1Left | i==CH1Right) ch = (setData.throttlePreference? 0 : 3);
@@ -88,6 +91,7 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 					menuEvent[1]=NUM_up; //按键CH4Right		【数值+】
 				}
 			}
+			#ifdef EC11_VERSION
 			if(i==CH1Left && status==KEY_DOWN && nowMenuIndex!=home)
 			{
 				menuEvent[0]=1;//菜单事件
@@ -124,10 +128,69 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 				menuEvent[0]=1;//菜单事件
 				menuEvent[1]=MENU_home; //旋转编码器长按home
 			}
-			
+			#else
+			if(i==CH1Left && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=MENU_enter; //按键CH1Left	【确定】
+			}
+			if(i==CH1Right && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=MENU_esc; //按键CH1Right	【返回】
+			}
+			if(i==CH2Down && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=MENU_down; //按键CH2Down	【菜单向下】
+			}
+			if(i==CH2Up && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=MENU_up; //按键CH2Up		【菜单向上】
+			}
+			if(i==CH2Down && status==KEY_LONG)
+			{/*长按*/
+				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
+				if(nowMenuIndex!=home)
+				{	
+					menuEvent[0]=1;//菜单事件
+					menuEvent[1]=MENU_down; //按键CH2Down	【菜单向下】
+				}
+			}
+			if(i==CH2Up && status==KEY_LONG)
+			{/*长按*/
+				Key_Buf[i].Status.KEY_COUNT = 29;//调节加减速度，要小于KEY_LONG_DOWN_DELAY
+				if(nowMenuIndex!=home) 
+				{	
+					menuEvent[0]=1;//菜单事件
+					menuEvent[1]=MENU_up; //按键CH2Up		【菜单向上】
+				}
+			}
+			if(i==CH4Left && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=NUM_down; //按键CH4Left	【数值-】
+			}
+			if(i==CH4Right && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=NUM_up; //按键CH4Right		【数值+】
+			}
+			if(i==MENU && status==KEY_DOWN && nowMenuIndex==home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=MENU_enter; //按键MENU		【进入菜单】
+				
+			}
+			if(i==MENU && status==KEY_DOWN && nowMenuIndex!=home)
+			{
+				menuEvent[0]=1;//菜单事件
+				menuEvent[1]=MENU_home; //按键MENU		【退出菜单】
+			}
+			#endif
 //			if(status!=KEY_NULL) printf("%d,%d\r\n",i,status);
 		}
-		
 		
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);  //清除TIMx更新中断标志 
 	}
@@ -136,7 +199,10 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 //按键初始化函数
 void KEY_Init(void) //IO初始化
 { 
+	#ifdef EC11_VERSION
 	encoder_Init();//编码器引脚初始化
+	#endif
+	
 	Key_Init KeyInit[KEY_NUM]=
 	{ 
 		{GPIO_Mode_IPU, GPIOB, GPIO_Pin_5, RCC_APB2Periph_GPIOB}, 	// 初始化按键CH1Left	【home】

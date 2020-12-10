@@ -1,78 +1,62 @@
 #include "ppm.h"
 
-void systick_init(u32 count)
-{
-	SysTick_Config(count);//此行应放在配置时钟源之前,count赋值给LOAD寄存器
-    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);//选择外部时钟HCLK,计数9000 000为1s
-	SysTick->VAL = 0;//当VAL=0,LOAD寄存器中的重装载值赋值给VAL寄存器作为初值，每经过一个Systick时钟周期,VAL寄存器值-1
-}
-
-void SysTick_Handler(void)//中断入口
-{
-    ppm_output();
-}
-
-// PPM-PC13推挽输出
-void PPM_Pin_Init(void)
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);  //使能GPIO外设时钟
+u16 PPM_Array[PPM_NUM] = {MS05, 1000,MS05,1000,MS05,500,MS05,1000,MS05, 1000,MS05,1000,MS05,1000,MS05,1000,MS05,8000};
+u16 PPM_Index = 0;//PPM数组索引号
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;				 //PPM-->PC13 端口配置
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 //IO口速度为50MHz
-	GPIO_Init(GPIOC, &GPIO_InitStructure);					 //根据设定参数初始化GPIOC13
-	GPIO_SetBits(GPIOC,GPIO_Pin_13);						 //PC13 输出高
+/*TIM4的中断初始化*/ 
+static void NVIC_Configuration(void)
+{
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn; //TIM4的中断号
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; //抢占优先级，如果不设置为最高优先级，就会乱码
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; //子优先级
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道使能
+    NVIC_Init(&NVIC_InitStructure); //根据指定的参数初始化VIC寄存器
 }
 
-
-u32 chTime[chNum];// 控制PPM占空比
-
-enum PPM_OUTPUT_CH_STATE {
-    CH_DOWN_STATE,
-    CH_UP_STATE,
-};
-
-static enum PPM_OUTPUT_CH_STATE state = CH_DOWN_STATE;
-
-#define MS20	(9000 * 20)	/* 20ms */
-#define MS05	(4500)		/* 0.5ms */
-
-static uint64_t total_value = 0;
-static u8 ch_idx = 0;
-
-void ppm_output(void)
+/*PPM引脚初始化*/ 
+static void PPM_GPIO_Configuration(void)
 {
-    u32 ch_val = 0;
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);  //使能GPIO外设时钟
+    //设置PPM引脚为推挽输出功能,输出脉冲波形
+    GPIO_InitStructure.GPIO_Pin = PPM_Pin; //PPM引脚号
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  //推挽输出
+    GPIO_Init(PPM_GPIO_Port, &GPIO_InitStructure);//初始化PPM端口
+}
+/*TIM4初始化*/ 
+void PPM_Init(void)
+{
+    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);    //使能TIM4时钟
+     
+    TIM_TimeBaseStructure.TIM_Period = 500; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值
+    TIM_TimeBaseStructure.TIM_Prescaler = 71; //设置用来作为TIMx时钟频率除数的预分频值 
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
+    TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct中指定的参数初始化TIMx的时间基数单位
+    TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);//允许 更新 产生中断
     
-    /* CH1 ~ CH8和最后一个低电平时间段 */
-    if (state == CH_DOWN_STATE) {
-		/* 0.5ms后进入下一个定时中断 */
-        systick_init(MS05);
-        total_value += MS05;
-        state = CH_UP_STATE;
-        PPM_Pin = 0;
-    } 
-	else {
-        /* CH1 ~ CH8 高电平*/
-        if (ch_idx < chNum) {
-            if (chTime[ch_idx] < (MS05))
-                ch_val = MS05;//使两个上升沿间隔在1ms以上
-            else {
-                ch_val = chTime[ch_idx] - MS05;
-            }
-            systick_init(ch_val);
-            total_value += ch_val;
-            ch_idx++;
-        } 
-		else {
-            /* 最后一个高电平 */
-            systick_init(MS20 - total_value);
-            total_value = 0;
-            ch_idx = 0;
+    PPM_GPIO_Configuration(); //GPIO初始化
+    NVIC_Configuration(); //中断初始化
+    TIM_Cmd(TIM4, ENABLE); //使能TIM4
+    PPM = 0;//前500us输出低电平
+}
+
+/*TIM4中断服务子程序*/
+void TIM4_IRQHandler(void)
+{  
+    if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET)
+    {   
+        TIM_ClearITPendingBit(TIM4, TIM_IT_Update); // 清除标志位
+        TIM4->ARR = PPM_Array[PPM_Index]-1;//更新TIM4的自动重装载值，减1是给后几行程序留时间
+        PPM = !PPM;//更改电平
+        PPM_Index++;
+        if(PPM_Index>=PPM_NUM)
+        {
+            PPM_Index = 0;
         }
-        state = CH_DOWN_STATE;
-        PPM_Pin = 1;
-    }     
+    }
 }
 

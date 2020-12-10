@@ -46,15 +46,25 @@
                               //bit4,TX FIFO空标志;bit5,TX FIFO满标志;bit6,1,循环发送上一数据包.0,不循环;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //24L01操作线
+#ifdef NRF_PIN
+/*V2.0版本PCB的接线*/
 #define NRF24L01_CE   PAout(8) //24L01片选信号
 #define NRF24L01_CSN  PBout(12) //SPI片选信号	   
 #define NRF24L01_IRQ  PAin(9)  //IRQ主机数据输入
+#else
+/*V1.0版本PCB的接线*/
+#define NRF24L01_CE   PAout(9) //24L01片选信号输出
+#define NRF24L01_CSN  PAout(8) //SPI片选信号输出	   
+#define NRF24L01_IRQ  PBin(12)  //IRQ主机数据输入
+#endif
+
 //24L01发送接收数据宽度定义
 #define TX_ADR_WIDTH    5   	//5字节的地址宽度
 #define RX_ADR_WIDTH    5   	//5字节的地址宽度
 #define TX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
 #define RX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
-									   	   
+
+
 
 void NRF24L01_Init(void);						//初始化
 void NRF24L01_RX_Mode(void);					//配置为接收模式

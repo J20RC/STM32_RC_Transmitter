@@ -23,10 +23,14 @@ extern "C" {
 #include "tim.h"
 #include "setting.h"
 
-#define ON 1
-#define OFF 0
+#define ON			1
+#define OFF			0
+#define FM_VERSION	"2.2"
+#define FM_TIME		"2020.12.10"
 
-
+#define PPM_Pin         GPIO_Pin_13
+#define PPM_GPIO_Port   GPIOC        
+#define PPM             PCout(13)
 
 #ifdef __cplusplus
 }

@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD,NRF_PIN,EC11_VERSION</Define>
               <Undefine></Undefine>
               <IncludePath>.\User;.\RTE;.\RTE\Device;.\RTE\Device\STM32F103C8;.\Config</IncludePath>
             </VariousControls>
@@ -388,6 +388,21 @@
               <FileType>1</FileType>
               <FilePath>.\User\main.c</FilePath>
             </File>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>sys.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\sys.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\usart.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -397,11 +412,6 @@
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Config\adc.c</FilePath>
-            </File>
-            <File>
-              <FileName>delay.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Config\delay.c</FilePath>
             </File>
             <File>
               <FileName>flash.c</FileName>
@@ -439,16 +449,6 @@
               <FilePath>.\Config\spi.c</FilePath>
             </File>
             <File>
-              <FileName>sys.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Config\sys.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Config\usart.c</FilePath>
-            </File>
-            <File>
               <FileName>beeper.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Config\beeper.c</FilePath>
@@ -462,6 +462,11 @@
               <FileName>setting.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Config\setting.c</FilePath>
+            </File>
+            <File>
+              <FileName>ppm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Config\ppm.c</FilePath>
             </File>
           </Files>
         </Group>

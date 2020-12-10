@@ -21,7 +21,8 @@ void NRF24L01_Init(void)
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC, ENABLE);	 //使能PB,G端口时钟
     	
-	
+	#ifdef NRF_PIN
+	/*V2.0版本PCB的接线*/
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;				 //PB12推挽
  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -30,14 +31,26 @@ void NRF24L01_Init(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;	
 	GPIO_Init(GPIOA, &GPIO_InitStructure);	//初始化PA8推挽输出-NRF_CE
 				
-  
 	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_9;   
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; //PA9 中断上拉输入-NRF_IRQ  
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
+	GPIO_Init(GPIOA, &GPIO_InitStructure);	
+	#else
+	/*V1.0版本PCB的接线*/
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+ 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+ 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+ 	GPIO_Init(GPIOA, &GPIO_InitStructure);	//初始化PA8推挽输出-NRF_CSN
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;	
+	GPIO_Init(GPIOA, &GPIO_InitStructure);	//初始化PA9推挽输出-NRF_CE
+	
+	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_12;   
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; //PB12 中断上拉输入-NRF_IRQ  
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	#endif
 	GPIO_ResetBits(GPIOA,GPIO_Pin_8|GPIO_Pin_9);//PA8,9上拉	
-	GPIO_ResetBits(GPIOB,GPIO_Pin_12);//PB12上拉	
-		 
+	GPIO_ResetBits(GPIOB,GPIO_Pin_12);//PB12上拉
+	
 	SPI2_Init();    		//初始化SPI	 
  
 	SPI_Cmd(SPI2, DISABLE); // SPI外设不使能，先关闭SPI，再进行设置

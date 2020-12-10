@@ -16,8 +16,6 @@ u8 iconBottom[11]	= {0X80,0XC0,0X60,0X30,0X18,0X0C,0X18,0X30,0X60,0XC0,0X80};
 u8 iconHand[32] = {
 	0X01,0X00,0X01,0X00,0X02,0X80,0X02,0XC0,0X04,0XBC,0X05,0X6C,0X05,0XE8,0X0B,0X90,
 	0X0B,0X10,0X0E,0X08,0X1C,0X08,0X1C,0X18,0X18,0X60,0X33,0X80,0X3C,0X00,0X20,0X00,};
-u8 iconOn[18] = {0X10,0X28,0X44,0X82,0XBA,0XBA,0X82,0XC6,0XAA,0X92,0X82,0X82,0X82,0X82,0X82,0X44,0X28,0X10,};
-u8 iconOff[18] = {0X10,0X38,0X7C,0XFE,0XFE,0XFE,0XFE,0XFE,0XFE,0XEE,0XC6,0X82,0XBA,0XBA,0X82,0X44,0X28,0X10,};
 u8 onSign[28] = {0X7F,0XF8,0XFF,0XFC,0XC0,0X0C,0XC2,0X0C,0XC7,0X0C,0XC3,0X8C,0XC1,0XCC,0XC1,0XCC,0XC3,0X8C,0XC7,0X0C,0XCE,0X0C,0X9C,0X0C,0X39,0XFC,0X13,0XF8,};
 u8 offSign[28] = {0X7F,0XF8,0XFF,0XFC,0XC0,0X0C,0XC8,0X4C,0XDC,0XEC,0XCF,0XCC,0XC7,0X8C,0XC7,0X8C,0XCF,0XCC,0XDC,0XEC,0XC8,0X4C,0XC0,0X0C,0XFF,0XFC,0X7F,0XF8,};
 unsigned char iconJ20[102] = {
@@ -553,41 +551,42 @@ void menuList2tdzf(void)
 	OLED_Fill(63,0,64,63,1);//中间竖线
 }
 /*mode[]：各个CH的显示模式数组
-lineIndex:第几通道1-8
+listIndex:第几通道1-8
 */
-void tdzfWindow(u8 mode[], u8 lineIndex)
+void tdzfWindow(u8 mode[], u8 listIndex)
 {
 	OLED_ShowString(1,0, (u8 *)"CH1",16,mode[0]);
-	if(setData.chReverse[0])OLED_DrawPointBMP(30,4,iconOn,21,7,lineIndex==1?!menuMode:1);//正
-	else OLED_DrawPointBMP(30,4,iconOff,21,7,lineIndex==1?!menuMode:1);//反
+	
+	if(setData.chReverse[0]==ON)OLED_DrawPointBMP(30,0,onSign,16,14,listIndex==1?!menuMode:1);//正
+	else OLED_DrawPointBMP(30,0,offSign,16,14,listIndex==1?!menuMode:1);///反
 	
 	OLED_ShowString(1,16, (u8 *)"CH2",16,mode[1]);
-	if(setData.chReverse[1])OLED_DrawPointBMP(30,20,iconOn,21,7,lineIndex==2?!menuMode:1);//正
-	else OLED_DrawPointBMP(30,20,iconOff,21,7,lineIndex==2?!menuMode:1);//反
+	if(setData.chReverse[1]==ON)OLED_DrawPointBMP(30,16,onSign,16,14,listIndex==2?!menuMode:1);///正
+	else OLED_DrawPointBMP(30,16,offSign,16,14,listIndex==2?!menuMode:1);//反
 	
 	OLED_ShowString(1,32, (u8 *)"CH3",16,mode[2]);
-	if(setData.chReverse[2])OLED_DrawPointBMP(30,36,iconOn,21,7,lineIndex==3?!menuMode:1);//正
-	else OLED_DrawPointBMP(30,36,iconOff,21,7,lineIndex==3?!menuMode:1);//反
+	if(setData.chReverse[2]==ON)OLED_DrawPointBMP(30,32,onSign,16,14,listIndex==3?!menuMode:1);///正
+	else OLED_DrawPointBMP(30,32,offSign,16,14,listIndex==3?!menuMode:1);//反
 	
 	OLED_ShowString(1,48, (u8 *)"CH4",16,mode[3]);
-	if(setData.chReverse[3])OLED_DrawPointBMP(30,52,iconOn,21,7,lineIndex==4?!menuMode:1);//正
-	else OLED_DrawPointBMP(30,52,iconOff,21,7,lineIndex==4?!menuMode:1);//反
+	if(setData.chReverse[3]==ON)OLED_DrawPointBMP(30,48,onSign,16,14,listIndex==4?!menuMode:1);///正
+	else OLED_DrawPointBMP(30,48,offSign,16,14,listIndex==4?!menuMode:1);//反
 	
 	OLED_ShowString(66,0, (u8 *)"CH5",16,mode[4]);
-	if(setData.chReverse[4])OLED_DrawPointBMP(94,4,iconOn,21,7,lineIndex==5?!menuMode:1);//正
-	else OLED_DrawPointBMP(94,4,iconOff,21,7,lineIndex==5?!menuMode:1);//反
+	if(setData.chReverse[4]==ON)OLED_DrawPointBMP(94,0,onSign,16,14,listIndex==5?!menuMode:1);///正
+	else OLED_DrawPointBMP(94,0,offSign,16,14,listIndex==5?!menuMode:1);//反
 	
 	OLED_ShowString(66,16, (u8 *)"CH6",16,mode[5]);
-	if(setData.chReverse[5])OLED_DrawPointBMP(94,20,iconOn,21,7,lineIndex==6?!menuMode:1);//正
-	else OLED_DrawPointBMP(94,20,iconOff,21,7,lineIndex==6?!menuMode:1);//反
+	if(setData.chReverse[5]==ON)OLED_DrawPointBMP(94,16,onSign,16,14,listIndex==6?!menuMode:1);//正
+	else OLED_DrawPointBMP(94,16,offSign,16,14,listIndex==6?!menuMode:1);//反
 	
 	OLED_ShowString(66,32, (u8 *)"CH7",16,mode[6]);
-	if(setData.chReverse[6])OLED_DrawPointBMP(94,36,iconOn,21,7,lineIndex==7?!menuMode:1);//正
-	else OLED_DrawPointBMP(94,36,iconOff,21,7,lineIndex==7?!menuMode:1);//反
+	if(setData.chReverse[6]==ON)OLED_DrawPointBMP(94,32,onSign,16,14,listIndex==7?!menuMode:1);//正
+	else OLED_DrawPointBMP(94,32,offSign,16,14,listIndex==7?!menuMode:1);//反
 	
 	OLED_ShowString(66,48, (u8 *)"CH8",16,mode[7]);
-	if(setData.chReverse[7])OLED_DrawPointBMP(94,52,iconOn,21,7,lineIndex==8?!menuMode:1);//正
-	else OLED_DrawPointBMP(94,52,iconOff,21,7,lineIndex==8?!menuMode:1);//反
+	if(setData.chReverse[7]==ON)OLED_DrawPointBMP(94,48,onSign,16,14,listIndex==8?!menuMode:1);//正
+	else OLED_DrawPointBMP(94,48,offSign,16,14,listIndex==8?!menuMode:1);//反
 }
 void menu_tdzf1(void){
 	u8 modes[8]={0,1,1,1,1,1,1,1};
@@ -1045,8 +1044,8 @@ void menu_gybjInf(void){
 	OLED_ShowString(0,0, (u8 *)"J20RC",16,1);
 	u8 hfcgIndex[]={kai,fa,tuan,dui};
 	OLED_ShowChineseWords(40,0,hfcgIndex,4,1);
-	OLED_ShowString(0,16, (u8 *)"2020.12.01",16,1);
-	OLED_ShowString(0,32, (u8 *)"V2.2",16,1);
+	OLED_ShowString(0,16, (u8 *)FM_TIME,16,1);
+	OLED_ShowString(0,32, (u8 *)FM_VERSION,16,1);
 }//三级菜单：J20RC开发团队-V2.0
 //用户可编辑的菜单页面
 u16 menus[43] = {
