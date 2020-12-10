@@ -5,8 +5,12 @@
 强烈推荐Star(￣▽￣)／
 我们开源团队会持续优化整个项目喔~<br>
 项目使用STM32标准库/HAL库来开发一套通用的航模遥控器和接收机，软硬件完全开源，还附带教程哦~
-- STM32F0接收机：https://github.com/J20RC/STM32F0_Receiver
-- STM32F1接收机：https://github.com/J20RC/STM32F1_Receiver
+- STM32F0接收机<br>
+Github：https://github.com/J20RC/STM32F0_Receiver<br>
+码云(Gitee)：https://gitee.com/J20RC/STM32F0_Receiver<br>
+- STM32F1接收机<br>
+Github：https://github.com/J20RC/STM32F1_Receiver<br>
+码云(Gitee)：https://gitee.com/J20RC/STM32F1_Receiver<br>
 ## 拥抱开源，我们期待你的加入！
  - QQ群：1091996634，密码：J20
 
@@ -73,5 +77,6 @@ Bilibili视频：https://www.bilibili.com/video/BV1wy4y1k718
  * 大米粥（B站up主）;
  * P a S S ||;
  * 佚名;
+ * 小吴;
 
 
