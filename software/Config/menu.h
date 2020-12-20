@@ -108,7 +108,7 @@ typedef enum// 菜单索引
 	dan,weiZhi,an,jianPan,yin,xiao,jiQi,hua,mian,chuan,kou,shiTi,dian,ya,
 	nao,zhongDian,shiChang,changDu,pian,hao,qu,shiQu,hu,zi,jianCha,qing,
 	jiang,huiLai,zhongXin,baoKuo,kuo,duan,jiXu,xu,moRen,ren,tuan,dui,cai,ben,
-	chengGong,shouJi,che,chuanBoat,
+	chengGong,shouJi,che,chuanBoat,gao,di,
 	
 	HZ_NUM,//汉字个数
 }HZ_INDEX;
@@ -127,7 +127,7 @@ extern volatile u8 nowMenuIndex;
 extern volatile u8 lastMenuIndex;
 	
 void OLED_display(void);
-void mainWindow(void);//主界面
+void homeWindow(void);//主界面
 void showSwState(void);
 
 void menu_tdwt(void);//一级菜单：通道微调

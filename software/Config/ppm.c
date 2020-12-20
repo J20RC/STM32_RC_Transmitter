@@ -40,7 +40,8 @@ void PPM_Init(void)
     
     PPM_GPIO_Configuration(); //GPIO初始化
     NVIC_Configuration(); //中断初始化
-    TIM_Cmd(TIM4, ENABLE); //使能TIM4
+	if(setData.PPM_Out == ON) TIM_Cmd(TIM4, ENABLE); //使能TIM4
+	else TIM_Cmd(TIM4, DISABLE); //不使能TIM4
     PPM = 0;//前500us输出低电平
 }
 

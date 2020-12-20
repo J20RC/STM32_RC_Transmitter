@@ -30,6 +30,7 @@ void OLED_Display_On(void);
 void OLED_Display_Off(void);	   							   		    
 void OLED_Init(void);
 void OLED_Clear(void);
+void OLED_Clear_GRAM(void);
 void OLED_Refresh_Gram(void);
 void OLED_DrawPoint(u8 x,u8 y,u8 t);
 void OLED_DrawPlusSign(u8 x,u8 y);

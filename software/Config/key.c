@@ -191,7 +191,8 @@ void TIM3_IRQHandler(void)   //TIM3中断服务函数
 			#endif
 //			if(status!=KEY_NULL) printf("%d,%d\r\n",i,status);
 		}
-		
+		nowTime++;//20ms更新一次系统滴答时钟
+		clockTime++;//闹钟更新
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);  //清除TIMx更新中断标志 
 	}
 }

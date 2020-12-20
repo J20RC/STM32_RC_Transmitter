@@ -26,9 +26,9 @@ extern "C" {
 #define ON			1
 #define OFF			0
 #define FM_VERSION	"2.2"
-#define FM_TIME		"2020.12.10"
+#define FM_TIME		"2020.12.20"
 
-#define PPM_Pin         GPIO_Pin_13
+#define PPM_Pin         GPIO_Pin_13 //PPMÊä³ö½Å
 #define PPM_GPIO_Port   GPIOC        
 #define PPM             PCout(13)
 

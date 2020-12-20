@@ -22,6 +22,8 @@
 //[5]0 1 2 3 ... 127	
 //[6]0 1 2 3 ... 127	
 //[7]0 1 2 3 ... 127 
+
+u8 OLED_GRAM[128][8];//定义数组，先预存储在ram中，再一起写进OLED
 /**********************************************
 //IIC Start
 **********************************************/
@@ -63,7 +65,7 @@ void Write_IIC_Byte(unsigned char IIC_Byte)
 	OLED_SCLK_Clr();
 	for(i=0;i<8;i++)		
 	{
-			m=da;
+		m=da;
 		//	OLED_SCLK_Clr();
 		m=m&0x80;
 		if(m==0x80)
@@ -72,9 +74,7 @@ void Write_IIC_Byte(unsigned char IIC_Byte)
 			da=da<<1;
 		OLED_SCLK_Set();
 		OLED_SCLK_Clr();
-		}
-
-
+	}
 }
 /**********************************************
 // IIC Write Command
@@ -112,10 +112,7 @@ void OLED_WR_Byte(unsigned dat,unsigned cmd)
 	else {
 		Write_IIC_Command(dat);
 	}
-
-
 }
-
 
 /********************************************
 // fill_Picture
@@ -129,12 +126,11 @@ void fill_picture(unsigned char fill_Data)
 		OLED_WR_Byte(0x00,0);		//low column start address
 		OLED_WR_Byte(0x10,0);		//high column start address
 		for(n=0;n<128;n++)
-			{
-				OLED_WR_Byte(fill_Data,1);
-			}
+		{
+			OLED_WR_Byte(fill_Data,1);
+		}
 	}
 }
-
 
 //坐标设置
 void OLED_Set_Pos(unsigned char x, unsigned char y) 
@@ -168,8 +164,20 @@ void OLED_Clear(void)
 		for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA); 
 	} //更新显示
 }
-//更新显存到OLED		
-u8 OLED_GRAM[128][8];
+//重置数组OLED_GRAM，使全部为0
+void OLED_Clear_GRAM(void)
+{
+	u8 x,y;
+	for(x=0;x<128;x++)
+	{
+		for(y=0;y<8;y++)
+		{
+			OLED_GRAM[x][y]=0;
+		}
+	}
+}
+
+//更新显存到OLED
 void OLED_Refresh_Gram(void)
 {
 	u8 i,n;		    
@@ -216,8 +224,7 @@ void OLED_Fill(u8 x1,u8 y1,u8 x2,u8 y2,u8 dot)
 	for(x=x1;x<=x2;x++)
 	{
 		for(y=y1;y<=y2;y++)OLED_DrawPoint(x,y,dot);
-	}													    
-	OLED_Refresh_Gram();//更新显示
+	}
 }
 
 //在指定位置显示一个字符,包括部分字符

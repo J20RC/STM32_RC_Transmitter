@@ -223,14 +223,14 @@ void NRF24L01_RX_Mode(void)
 /*=======================================================
 * 函  数：void NRF24L01_TX_Mode(void)
 * 功  能：NRF24L01发射模式配置
-* 参  数：无
+* 参  数：power:发射功率 //0x0f=0dBm;0x0d=-6dBm;0xb=-12dBm;0x09=-18dBm;功率越大，dBm越大
 * 返回值：无
 * 备  注：设置TX地址,写TX数据宽度,设置RX自动应答的地址,
 		  填充TX发送数据,选择RF频道,波特率和LNA HCURR
 		  PWR_UP,CRC使能，CE为高大于10us,则启动发送。
 =======================================================*/ 
  
-void NRF24L01_TX_Mode(void)
+void NRF24L01_TX_Mode(u8 power)
 {														 
 	NRF24L01_CE=0;	    
   	NRF24L01_Write_Buf(NRF_WRITE_REG+TX_ADDR,(u8*)TX_ADDRESS,TX_ADR_WIDTH);//写TX节点地址 
@@ -240,25 +240,20 @@ void NRF24L01_TX_Mode(void)
   	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_RXADDR,0x01); //使能通道0的接收地址  
   	NRF24L01_Write_Reg(NRF_WRITE_REG+SETUP_RETR,0x1a);//设置自动重发间隔时间:500us + 86us;最大自动重发次数:10次
   	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_CH,40);       //设置RF通道为40
-  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,0x0f);  //设置TX发射参数,0db增益,2Mbps,低噪声增益开启   
+  	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,power);  //设置TX发射参数,0db增益,2Mbps,低噪声增益开启   
   	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG,0x0e);    //配置基本工作模式的参数;PWR_UP,EN_CRC,16BIT_CRC,接收模式,开启所有中断
 	NRF24L01_CE=1;//CE为高,10us后启动发送
 }
 
-/**
-  * 函数功能: 该函数NRF24L01进入低功耗模式
-  * 输入参数: 无
-  * 返 回 值: 无
-  * 说    明：无
-  *           
-  */
+/*
+  * 函数功能: NRF24L01进入低功耗模式
+*/
 void NRF24L01_LowPower_Mode(void)
 {
-	NRF24L01_CE=0;		 
-	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG, 0x00);		//配置工作模式:掉电模式
+	NRF24L01_CE=0;//不使能NRF
+	NRF24L01_Write_Reg(NRF_WRITE_REG+CONFIG, 0x0c);		//配置工作模式:掉电模式
 }
-
-
+	
 u8 sendDataPacket(void)
 {
 	u8 chPacket[32];//发送的数据包

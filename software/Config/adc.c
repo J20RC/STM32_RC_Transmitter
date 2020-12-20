@@ -128,7 +128,7 @@ void GPIOA_Init(void)
 }
 
 //≥ı ºªØADC															   
-void  Adc_Init(void)
+void  ADC_Pin_Init(void)
 { 	
 	GPIOA_Init();
 	ADC_InitTypeDef ADC_InitStructure;

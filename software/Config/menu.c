@@ -47,6 +47,12 @@ unsigned char iconSignalOff[22] = {
 unsigned char iconClock[22] = {
 	0XEF,0XB0,0XDF,0XF0,0XBD,0XE0,0X7D,0XF0,0X7D,0XF0,
 	0X01,0XF0,0X7F,0XF0,0X7F,0XF0,0XBF,0XE0,0XDF,0XF0,0XEF,0XB0,};
+unsigned char iconAlarm[24] = {
+	0X00,0XC0,0X1F,0XC0,0X3F,0XC0,0X7F,0XC0,0X7F,0XE0,0XFF,0XF0,0XFF,0XF0,0X7F,0XE0,
+	0X7F,0XC0,0X3F,0XC0,0X1F,0XC0,0X00,0XC0,};
+unsigned char iconAlarmOff[24] = {
+	0X00,0XD0,0X1F,0XA0,0X3F,0X40,0X7E,0X80,0X7D,0X60,0XFA,0XF0,0XF5,0XF0,0X6B,0XE0,
+	0X57,0XC0,0X2F,0XC0,0X5F,0XC0,0X80,0XC0,};
 unsigned char iconSw1000[24] = {
 	0X3F,0XFF,0X00,0X7F,0XF9,0X80,0XFF,0XF0,0XC0,0XFF,0XE0,0X40,0XFF,0XE0,0X40,0XFF,
 	0XF0,0XC0,0X7F,0XF9,0X80,0X3F,0XFF,0X00,};
@@ -80,17 +86,6 @@ unsigned char iconBoat[96] = {
 	0X03,0XFC,0X07,0XFC,0X01,0XFC,0X07,0XFC,0X07,0XFC,0X07,0XFC,0X07,0XFC,0X07,0XF4,
 	0X07,0XFE,0X07,0XF4,0X07,0XF0,0X01,0XFE,0X01,0XFE,0X01,0XF0,0X00,0X00,0X00,0X00,
 	};
-unsigned char clockFill[86] = {
-0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
-0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X10,0X80,0X00,0X00,
-0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
-0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X10,0X80,0X00,0X00,0X00,0X00,
-0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
-0X00,0X00,0X00,0X00,0X00,0X00,};
-unsigned char leftFill[42] = {
-0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X80,0X00,0X00,0X00,0X00,0X00,
-0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X80,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
-0X00,0X00,0X00,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0X80,};
 
 void main2menuList(u8 hz1,u8 hz2,u8 hz3,u8 hz4);
 void menuList2tdwt(void);
@@ -100,7 +95,7 @@ void menuList2tdys(void);
 Key_index_struct Key_table[MENU_NUM]=
 {
 	//当前, 下, 上, 确定, 返回, home
-  {home, home, home, tdwt, home, home,(*mainWindow)},//主页面：home
+  {home, home, home, tdwt, home, home,(*homeWindow)},//主页面：home
 	
 	{tdwt, tdzf, gybj, tdwt1, home, home,(*menu_tdwt)},//一级菜单：通道微调
 	{tdzf, hksz, tdwt, tdzf1, home, home,(*menu_tdzf)},//一级菜单：通道正反
@@ -219,23 +214,23 @@ void OLED_display(void){
 	{
 		if(lastMenuIndex!=xcjz14) homeGoIndex = lastMenuIndex;
 		else homeGoIndex = xcjz;
-		OLED_Fill(0,0,127,63,0);//清空
+		OLED_Clear_GRAM();//清空
 	}
-	if(nowMenuIndex!=home && lastMenuIndex==home) {nowMenuIndex = homeGoIndex;OLED_Fill(0,0,127,63,0);}//清空，实现快速跳转
+	if(nowMenuIndex!=home && lastMenuIndex==home) {nowMenuIndex = homeGoIndex;OLED_Clear_GRAM();}//清空，实现快速跳转
 	if(nowMenuIndex>=tdwt && nowMenuIndex<=gybj && (lastMenuIndex<tdwt | lastMenuIndex>gybj)) main2menuList(sheZhi,zhi,cai,dan);//切换窗口
 	if(nowMenuIndex>=tdwt1 && nowMenuIndex<=tdwt8 && (lastMenuIndex<tdwt1 | lastMenuIndex>tdwt8))menuList2tdwt();//切换窗口
 	if(nowMenuIndex>=tdzf1 && nowMenuIndex<=tdzf8 && (lastMenuIndex<tdzf1 | lastMenuIndex>tdzf8))menuList2tdzf();//切换窗口
-	if(nowMenuIndex>=sjyhk && nowMenuIndex<=jfyhk && (lastMenuIndex<sjyhk | lastMenuIndex>jfyhk))OLED_Fill(0,0,127,63,0);//清空
-	if(nowMenuIndex>=xjjs && nowMenuIndex<=txmm && (lastMenuIndex<xjjs | lastMenuIndex>txmm))OLED_Fill(0,0,127,63,0);//清空
-	if(nowMenuIndex>=ppmsc && nowMenuIndex<=fsgl && (lastMenuIndex<ppmsc | lastMenuIndex>fsgl))OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex>=sjyhk && nowMenuIndex<=jfyhk && (lastMenuIndex<sjyhk | lastMenuIndex>jfyhk))OLED_Clear_GRAM();//清空
+	if(nowMenuIndex>=xjjs && nowMenuIndex<=txmm && (lastMenuIndex<xjjs | lastMenuIndex>txmm))OLED_Clear_GRAM();//清空
+	if(nowMenuIndex>=ppmsc && nowMenuIndex<=fsgl && (lastMenuIndex<ppmsc | lastMenuIndex>fsgl))OLED_Clear_GRAM();//清空
 	if(nowMenuIndex>=tdys1 && nowMenuIndex<=tdys8 && (lastMenuIndex<tdys1 | lastMenuIndex>tdys8))menuList2tdys();//切换窗口
-	if(nowMenuIndex==dljs18 && lastMenuIndex!=dljs18) OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex==dljs18 && lastMenuIndex!=dljs18) OLED_Clear_GRAM();//清空
 	if(nowMenuIndex>=cysz && nowMenuIndex<=hfcc && (lastMenuIndex<cysz | lastMenuIndex>hfcc)) main2menuList(xi,tongYi,sheZhi,zhi);//切换窗口
-	if(nowMenuIndex>=wtdw && nowMenuIndex<=kjhm && (lastMenuIndex<wtdw | lastMenuIndex>kjhm))OLED_Fill(0,0,127,63,0);//清空
-	if(nowMenuIndex>=dyjz && nowMenuIndex<=jsbj && (lastMenuIndex<dyjz | lastMenuIndex>jsbj))OLED_Fill(0,0,127,63,0);//清空
-	if(nowMenuIndex>=nzbj && nowMenuIndex<=kjzj && (lastMenuIndex<nzbj | lastMenuIndex>kjzj))OLED_Fill(0,0,127,63,0);//清空
-	if(nowMenuIndex>=ymph && nowMenuIndex<=skbh && (lastMenuIndex<ymph | lastMenuIndex>skbh))OLED_Fill(0,0,127,63,0);//清空
-	if(nowMenuIndex==xcjz14 && lastMenuIndex!=xcjz14) OLED_Fill(0,0,127,63,0);//清空
+	if(nowMenuIndex>=wtdw && nowMenuIndex<=kjhm && (lastMenuIndex<wtdw | lastMenuIndex>kjhm))OLED_Clear_GRAM();//清空
+	if(nowMenuIndex>=dyjz && nowMenuIndex<=jsbj && (lastMenuIndex<dyjz | lastMenuIndex>jsbj))OLED_Clear_GRAM();//清空
+	if(nowMenuIndex>=nzbj && nowMenuIndex<=kjzj && (lastMenuIndex<nzbj | lastMenuIndex>kjzj))OLED_Clear_GRAM();//清空
+	if(nowMenuIndex>=ymph && nowMenuIndex<=skbh && (lastMenuIndex<ymph | lastMenuIndex>skbh))OLED_Clear_GRAM();//清空
+	if(nowMenuIndex==xcjz14 && lastMenuIndex!=xcjz14) OLED_Clear_GRAM();//清空
 //	printf("key:%d, last:%d, now:%d\r\n",menuEvent[1],lastMenuIndex,nowMenuIndex);
 	if(nowMenuIndex!=lastMenuIndex)
 	{
@@ -255,7 +250,7 @@ void showSwState(void)
 	}
 }
 
-void mainWindow(void)
+void homeWindow(void)
 {
 	u16 thrNum;
 	int loca;
@@ -263,11 +258,10 @@ void mainWindow(void)
 	OLED_DrawPointBMP(0,0,iconJ20,54,15,1);//J20图标
 	if(setData.NRF_Mode==OFF) OLED_DrawPointBMP(51,1,iconSignalOff,15,12,1);//信号图标
 	else OLED_DrawPointBMP(51,1,iconSignal100,15,12,1);//信号图标
-	OLED_DrawPointBMP(68,1,iconClock,15,12,1);//闹钟图标
-
-	OLED_DrawPointBMP(85,1,clockFill,43,12,0);//背景填充
-	drawClockTime();//时间显示00:00:00
+	if(setData.clockMode==ON){OLED_DrawPointBMP(68,1,iconAlarm,16,12,1);}//闹钟图标
+	else{OLED_DrawPointBMP(68,1,iconAlarmOff,16,12,1);}
 	
+	drawClockTime();//时间显示00:00:00
 	showSwState();//显示后4个通道的状态
 	if(setData.modelType==0) OLED_DrawPointBMP(11,39,iconPlane,48,16,1);//模型图标
 	else if(setData.modelType==1) OLED_DrawPointBMP(11,39,iconCar,48,16,1);//模型图标
@@ -280,8 +274,12 @@ void mainWindow(void)
 	OLED_ShowString(70,38, (u8 *)"R",16,1);//接收机
 	OLED_ShowString(80,38, (u8 *)"12.6V",16,1);//显示电池电压
 	
-	OLED_DrawPointBMP(0,15,leftFill,6,49,0);//背景填充
-	OLED_DrawPointBMP(123,15,leftFill,6,49,0);//背景填充
+	OLED_Fill(0,15,4,63,1);//左侧框
+	OLED_DrawPoint(1,39,0);
+	OLED_DrawPoint(3,39,0);
+	OLED_Fill(123,15,127,63,1);//右侧框
+	OLED_DrawPoint(124,39,0);
+	OLED_DrawPoint(126,39,0);
 	OLED_Fill(7,59,62,63,1);//底侧左框-4
 	OLED_Fill(65,59,120,63,1);//底侧右框-1
 	
@@ -455,7 +453,7 @@ void menu_gybj(void){
 //一级菜单-二级菜单 通道微调窗口 切换
 void menuList2tdwt(void)
 {
-	OLED_Fill(0,0,127,63,0);//清空
+	OLED_Clear_GRAM();//清空
 	OLED_Fill(63,0,64,63,1);//中间竖线
 }
 /*mode[]：各个CH的显示模式数组
@@ -547,7 +545,7 @@ void menu_tdwt8(void){
 //一级菜单-二级菜单 通道微调窗口 切换
 void menuList2tdzf(void)
 {
-	OLED_Fill(0,0,127,63,0);//清空
+	OLED_Clear_GRAM();//清空
 	OLED_Fill(63,0,64,63,1);//中间竖线
 }
 /*mode[]：各个CH的显示模式数组
@@ -557,36 +555,36 @@ void tdzfWindow(u8 mode[], u8 listIndex)
 {
 	OLED_ShowString(1,0, (u8 *)"CH1",16,mode[0]);
 	
-	if(setData.chReverse[0]==ON)OLED_DrawPointBMP(30,0,onSign,16,14,listIndex==1?!menuMode:1);//正
-	else OLED_DrawPointBMP(30,0,offSign,16,14,listIndex==1?!menuMode:1);///反
+	if(setData.chReverse[0]==ON)OLED_DrawPointBMP(30,1,onSign,16,14,listIndex==1?!menuMode:1);//正
+	else OLED_DrawPointBMP(30,1,offSign,16,14,listIndex==1?!menuMode:1);///反
 	
 	OLED_ShowString(1,16, (u8 *)"CH2",16,mode[1]);
-	if(setData.chReverse[1]==ON)OLED_DrawPointBMP(30,16,onSign,16,14,listIndex==2?!menuMode:1);///正
-	else OLED_DrawPointBMP(30,16,offSign,16,14,listIndex==2?!menuMode:1);//反
+	if(setData.chReverse[1]==ON)OLED_DrawPointBMP(30,17,onSign,16,14,listIndex==2?!menuMode:1);///正
+	else OLED_DrawPointBMP(30,17,offSign,16,14,listIndex==2?!menuMode:1);//反
 	
 	OLED_ShowString(1,32, (u8 *)"CH3",16,mode[2]);
-	if(setData.chReverse[2]==ON)OLED_DrawPointBMP(30,32,onSign,16,14,listIndex==3?!menuMode:1);///正
-	else OLED_DrawPointBMP(30,32,offSign,16,14,listIndex==3?!menuMode:1);//反
+	if(setData.chReverse[2]==ON)OLED_DrawPointBMP(30,33,onSign,16,14,listIndex==3?!menuMode:1);///正
+	else OLED_DrawPointBMP(30,33,offSign,16,14,listIndex==3?!menuMode:1);//反
 	
 	OLED_ShowString(1,48, (u8 *)"CH4",16,mode[3]);
-	if(setData.chReverse[3]==ON)OLED_DrawPointBMP(30,48,onSign,16,14,listIndex==4?!menuMode:1);///正
-	else OLED_DrawPointBMP(30,48,offSign,16,14,listIndex==4?!menuMode:1);//反
+	if(setData.chReverse[3]==ON)OLED_DrawPointBMP(30,49,onSign,16,14,listIndex==4?!menuMode:1);///正
+	else OLED_DrawPointBMP(30,49,offSign,16,14,listIndex==4?!menuMode:1);//反
 	
 	OLED_ShowString(66,0, (u8 *)"CH5",16,mode[4]);
-	if(setData.chReverse[4]==ON)OLED_DrawPointBMP(94,0,onSign,16,14,listIndex==5?!menuMode:1);///正
-	else OLED_DrawPointBMP(94,0,offSign,16,14,listIndex==5?!menuMode:1);//反
+	if(setData.chReverse[4]==ON)OLED_DrawPointBMP(94,1,onSign,16,14,listIndex==5?!menuMode:1);///正
+	else OLED_DrawPointBMP(94,1,offSign,16,14,listIndex==5?!menuMode:1);//反
 	
 	OLED_ShowString(66,16, (u8 *)"CH6",16,mode[5]);
-	if(setData.chReverse[5]==ON)OLED_DrawPointBMP(94,16,onSign,16,14,listIndex==6?!menuMode:1);//正
-	else OLED_DrawPointBMP(94,16,offSign,16,14,listIndex==6?!menuMode:1);//反
+	if(setData.chReverse[5]==ON)OLED_DrawPointBMP(94,17,onSign,16,14,listIndex==6?!menuMode:1);//正
+	else OLED_DrawPointBMP(94,17,offSign,16,14,listIndex==6?!menuMode:1);//反
 	
 	OLED_ShowString(66,32, (u8 *)"CH7",16,mode[6]);
-	if(setData.chReverse[6]==ON)OLED_DrawPointBMP(94,32,onSign,16,14,listIndex==7?!menuMode:1);//正
-	else OLED_DrawPointBMP(94,32,offSign,16,14,listIndex==7?!menuMode:1);//反
+	if(setData.chReverse[6]==ON)OLED_DrawPointBMP(94,33,onSign,16,14,listIndex==7?!menuMode:1);//正
+	else OLED_DrawPointBMP(94,33,offSign,16,14,listIndex==7?!menuMode:1);//反
 	
 	OLED_ShowString(66,48, (u8 *)"CH8",16,mode[7]);
-	if(setData.chReverse[7]==ON)OLED_DrawPointBMP(94,48,onSign,16,14,listIndex==8?!menuMode:1);//正
-	else OLED_DrawPointBMP(94,48,offSign,16,14,listIndex==8?!menuMode:1);//反
+	if(setData.chReverse[7]==ON)OLED_DrawPointBMP(94,49,onSign,16,14,listIndex==8?!menuMode:1);//正
+	else OLED_DrawPointBMP(94,49,offSign,16,14,listIndex==8?!menuMode:1);//反
 }
 void menu_tdzf1(void){
 	u8 modes[8]={0,1,1,1,1,1,1,1};
@@ -721,24 +719,51 @@ void scszWindow(u8 listIndex,u8 mode[])
 	OLED_ShowString(0,16,(u8 *)"1.PPM",16,mode[0]);
 	u8 line2Index[]={shu,chu};
 	OLED_ShowChineseWords(40,16,line2Index,2,mode[0]);
+	if(setData.PPM_Out == ON) 
+	{
+		OLED_DrawPointBMP(88,17,onSign,16,14,listIndex==0?!menuMode:1);//打开标志
+		PPM_ON();//开启PPM输出
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,17,offSign,16,14,listIndex==0?!menuMode:1);//关闭标志
+		PPM_OFF();//关闭PPM输出
+	}
 	//第三行
 	OLED_ShowString(0,32,(u8 *)"2.",16,mode[1]);
 	u8 line3Index[]={wu,xian,fa,sheMen};
 	OLED_ShowChineseWords(16,32,line3Index,4,mode[1]);
 	if(setData.NRF_Mode == ON) 
 	{
-		OLED_DrawPointBMP(88,32,onSign,16,14,listIndex==1?!menuMode:1);//打开标志
-		NRF24L01_TX_Mode();//发射模式
+		OLED_DrawPointBMP(88,33,onSign,16,14,listIndex==1?!menuMode:1);//打开标志
+		NRF24L01_TX_Mode(setData.NRF_Power);//发射模式
 	}
 	else 
 	{
-		OLED_DrawPointBMP(88,32,offSign,16,14,listIndex==1?!menuMode:1);//关闭标志
+		OLED_DrawPointBMP(88,33,offSign,16,14,listIndex==1?!menuMode:1);//关闭标志
 		NRF24L01_LowPower_Mode();//掉电模式
 	}
 	//第四行
 	OLED_ShowString(0,48,(u8 *)"3.",16,mode[2]);
 	u8 line4Index[]={fa,sheMen,gong,lv};
 	OLED_ShowChineseWords(16,48,line4Index,4,mode[2]);
+	switch (setData.NRF_Power)
+    {
+    	case 0x0f:
+			OLED_ShowChinese(88,48,gao,16,listIndex==2?!menuMode:1);
+			if(setData.NRF_Mode == ON) {NRF24L01_TX_Mode(setData.NRF_Power);}//发射功率：高
+    		break;
+    	case 0x0d:
+			OLED_ShowChinese(88,48,zhongXin,16,listIndex==2?!menuMode:1);
+			if(setData.NRF_Mode == ON) {NRF24L01_TX_Mode(setData.NRF_Power);}//发射功率：中
+    		break;
+		case 0x0b:
+			OLED_ShowChinese(88,48,di,16,listIndex==2?!menuMode:1);
+			if(setData.NRF_Mode == ON) {NRF24L01_TX_Mode(setData.NRF_Power);}//发射功率：低
+    		break;
+    	default:
+    		break;
+    }
 }
 void menu_ppmsc(void){
 	u8 modes[3]={0,1,1};
@@ -756,7 +781,7 @@ void menu_fsgl(void){
 //一级菜单-二级菜单 通道映射窗口 切换
 void menuList2tdys(void)
 {
-	OLED_Fill(0,0,127,63,0);//清空
+	OLED_Clear_GRAM();//清空
 	OLED_Fill(63,0,64,63,1);//中间竖线
 }
 
@@ -913,41 +938,78 @@ void menu_wtdw(void){
 	u8 modes[3] = {0,1,1};
 	line3Window(hzIndex, modes);
 	OLED_ShowNum(88,16,setData.PWMadjustUnit,1,16,!menuMode);
+	if(setData.keySound == ON) 
+	{
+		OLED_DrawPointBMP(88,33,onSign,16,14,1);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,33,offSign,16,14,1);//关闭标志
+	}
+	OLED_ShowNum(88,48,setData.onImage,1,16,1);
 }//三级菜单：微调单位
 void menu_ajyx(void){
 	u8 hzIndex[16]={changYong,yong,sheZhi,zhi,weiTiao,tiao,dan,weiZhi,an,jianPan,yin,xiao,kai,jiQi,hua,mian};
 	u8 modes[3] = {1,0,1};
 	line3Window(hzIndex, modes);
+	OLED_ShowNum(88,16,setData.PWMadjustUnit,1,16,1);
+	if(setData.keySound == ON) 
+	{
+		OLED_DrawPointBMP(88,33,onSign,16,14,!menuMode);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,33,offSign,16,14,!menuMode);//关闭标志
+	}
+	OLED_ShowNum(88,48,setData.onImage,1,16,1);
 }//三级菜单：按键音效
 void menu_kjhm(void){
 	u8 hzIndex[16]={changYong,yong,sheZhi,zhi,weiTiao,tiao,dan,weiZhi,an,jianPan,yin,xiao,kai,jiQi,hua,mian};
 	u8 modes[3] = {1,1,0};
 	line3Window(hzIndex, modes);
+	OLED_ShowNum(88,16,setData.PWMadjustUnit,1,16,1);
+	if(setData.keySound == ON) 
+	{
+		OLED_DrawPointBMP(88,33,onSign,16,14,1);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,33,offSign,16,14,1);//关闭标志
+	}
+	OLED_ShowNum(88,48,setData.onImage,1,16,!menuMode);
 }//三级菜单：开机画面
 
 void menu_dyjz(void){
 	u8 hzIndex[16]={dian,ya,sheZhi,zhi,dian,ya,jiaoZhun,zhun,baoJing,jing,dian,ya,jie,shouDao,baoJing,jing};
 	u8 modes[3] = {0,1,1};
 	line3Window(hzIndex, modes);
-	sprintf((char *)batVoltStr,"%2.2fV",batVolt);
+	sprintf((char *)batVoltStr,"%1.2fV",batVolt);
 	OLED_ShowString(88,16, (u8 *)batVoltStr,16,!menuMode);
-	sprintf((char *)batVoltStr,"%2.2fV",setData.warnBatVolt);
+	sprintf((char *)batVoltStr,"%1.2fV",setData.warnBatVolt);
 	OLED_ShowString(88,32, (u8 *)batVoltStr,16,1);
-	sprintf((char *)batVoltStr,"%2.2fV",setData.warnBatVolt);//飞机的电池报警
+	sprintf((char *)batVoltStr,"%2.1fV",setData.RecWarnBatVolt);//飞机的电池报警
 	OLED_ShowString(88,48, (u8 *)batVoltStr,16,1);
 }//三级菜单：电压校准
 void menu_bjdy(void){
 	u8 hzIndex[16]={dian,ya,sheZhi,zhi,dian,ya,jiaoZhun,zhun,baoJing,jing,dian,ya,jie,shouDao,baoJing,jing};
 	u8 modes[3] = {1,0,1};
 	line3Window(hzIndex, modes);
-	sprintf((char *)batVoltStr,"%2.2fV",setData.warnBatVolt);
+	sprintf((char *)batVoltStr,"%1.2fV",batVolt);
+	OLED_ShowString(88,16, (u8 *)batVoltStr,16,1);
+	sprintf((char *)batVoltStr,"%1.2fV",setData.warnBatVolt);
 	OLED_ShowString(88,32, (u8 *)batVoltStr,16,!menuMode);
+	sprintf((char *)batVoltStr,"%2.1fV",setData.RecWarnBatVolt);//飞机的电池报警
+	OLED_ShowString(88,48, (u8 *)batVoltStr,16,1);
 }//三级菜单：报警电压
 void menu_jsbj(void){
 	u8 hzIndex[16]={dian,ya,sheZhi,zhi,dian,ya,jiaoZhun,zhun,baoJing,jing,dian,ya,jie,shouDao,baoJing,jing};
 	u8 modes[3] = {1,1,0};
 	line3Window(hzIndex, modes);
-	sprintf((char *)batVoltStr,"%2.2fV",setData.warnBatVolt);//飞机的电池报警
+	sprintf((char *)batVoltStr,"%1.2fV",batVolt);
+	OLED_ShowString(88,16, (u8 *)batVoltStr,16,1);
+	sprintf((char *)batVoltStr,"%1.2fV",setData.warnBatVolt);
+	OLED_ShowString(88,32, (u8 *)batVoltStr,16,1);
+	sprintf((char *)batVoltStr,"%2.1fV",setData.RecWarnBatVolt);//飞机的电池报警
 	OLED_ShowString(88,48, (u8 *)batVoltStr,16,!menuMode);
 }//三级菜单：接收报警
 	
@@ -955,16 +1017,70 @@ void menu_nzbj(void){
 	u8 hzIndex[16]={nao,zhongDian,sheZhi,zhi,nao,zhongDian,baoJing,jing,nao,zhongDian,shiChang,changDu,kai,jiQi,zi,jianCha};
 	u8 modes[3] = {0,1,1};
 	line3Window(hzIndex, modes);
+	if(setData.clockMode == ON) 
+	{
+		OLED_DrawPointBMP(88,17,onSign,16,14,!menuMode);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,17,offSign,16,14,!menuMode);//关闭标志
+	}
+	sprintf((char *)timeStr,"%02dmin",setData.clockTime);
+	OLED_ShowString(88,32, (u8 *)timeStr,16,1);//闹钟定时时长min
+	if(setData.clockCheck == ON) 
+	{
+		OLED_DrawPointBMP(88,49,onSign,16,14,1);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,49,offSign,16,14,1);//关闭标志
+	}
 }//三级菜单：闹钟报警
 void menu_nzsc(void){
 	u8 hzIndex[16]={nao,zhongDian,sheZhi,zhi,nao,zhongDian,baoJing,jing,nao,zhongDian,shiChang,changDu,kai,jiQi,zi,jianCha};
 	u8 modes[3] = {1,0,1};
 	line3Window(hzIndex, modes);
+	if(setData.clockMode == ON) 
+	{
+		OLED_DrawPointBMP(88,17,onSign,16,14,1);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,17,offSign,16,14,1);//关闭标志
+	}
+	sprintf((char *)timeStr,"%02dmin",setData.clockTime);
+	OLED_ShowString(88,32, (u8 *)timeStr,16,!menuMode);//闹钟定时时长min
+	if(setData.clockCheck == ON) 
+	{
+		OLED_DrawPointBMP(88,49,onSign,16,14,1);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,49,offSign,16,14,1);//关闭标志
+	}
 }//三级菜单：闹钟时长
 void menu_kjzj(void){
 	u8 hzIndex[16]={nao,zhongDian,sheZhi,zhi,nao,zhongDian,baoJing,jing,nao,zhongDian,shiChang,changDu,kai,jiQi,zi,jianCha};
 	u8 modes[3] = {1,1,0};
 	line3Window(hzIndex, modes);
+	if(setData.clockMode == ON) 
+	{
+		OLED_DrawPointBMP(88,17,onSign,16,14,1);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,17,offSign,16,14,1);//关闭标志
+	}
+	sprintf((char *)timeStr,"%02dmin",setData.clockTime);
+	OLED_ShowString(88,32, (u8 *)timeStr,16,1);//闹钟定时时长min
+	if(setData.clockCheck == ON) 
+	{
+		OLED_DrawPointBMP(88,49,onSign,16,14,!menuMode);//打开标志
+	}
+	else 
+	{
+		OLED_DrawPointBMP(88,49,offSign,16,14,!menuMode);//关闭标志
+	}
 }//三级菜单：开机自检
 	
 void menu_ymph(void){
@@ -974,20 +1090,32 @@ void menu_ymph(void){
 	if(setData.throttlePreference)OLED_ShowChinese(88,16,zuo,16,!menuMode);//左
 	else OLED_ShowChinese(88,16,youShou,16,!menuMode);//右
 	OLED_ShowChinese(104,16,shouJi,16,!menuMode);//手
+	sprintf((char *)timeStr,"%03d%%",setData.throttleProtect);
+	OLED_ShowString(88,48, (u8 *)timeStr,16,1);//油门保护值0%
 }//三级菜单：油门偏好
 void menu_ymqx(void){
 	u8 hzIndex[16]={youMen,men,sheZhi,zhi,youMen,men,pian,hao,youMen,men,qu,xian,shiQu,kong,baoCun,hu};
 	u8 modes[3] = {1,0,1};
 	line3Window(hzIndex, modes);
+	if(setData.throttlePreference)OLED_ShowChinese(88,16,zuo,16,1);//左
+	else OLED_ShowChinese(88,16,youShou,16,1);//右
+	OLED_ShowChinese(104,16,shouJi,16,1);//手
+	sprintf((char *)timeStr,"%03d%%",setData.throttleProtect);
+	OLED_ShowString(88,48, (u8 *)timeStr,16,1);//油门保护值0%
 }//三级菜单：油门曲线
 void menu_skbh(void){
 	u8 hzIndex[16]={youMen,men,sheZhi,zhi,youMen,men,pian,hao,youMen,men,qu,xian,shiQu,kong,baoCun,hu};
 	u8 modes[3] = {1,1,0};
 	line3Window(hzIndex, modes);
+	if(setData.throttlePreference)OLED_ShowChinese(88,16,zuo,16,1);//左
+	else OLED_ShowChinese(88,16,youShou,16,1);//右
+	OLED_ShowChinese(104,16,shouJi,16,1);//手
+	sprintf((char *)timeStr,"%03d%%",setData.throttleProtect);
+	OLED_ShowString(88,48, (u8 *)timeStr,16,!menuMode);//油门保护值0%
 }//三级菜单：失控保护
 
 void menu_xcjzTip(void){
-	OLED_Fill(0,0,127,63,0);//清空
+	OLED_Clear_GRAM();//清空
 	OLED_ShowString(0,0, (u8 *)"1.",16,1);
 	u8 qjyghzIndex[] = {qing,jiang,yao,gan,huiLai,zhongXin};
 	OLED_ShowChineseWords(16,0,qjyghzIndex,6,1);
@@ -1025,7 +1153,7 @@ void menu_xcjz14(void){
 }//三级菜单：通道1-4显示
 
 void menu_hfccTip(void){
-	OLED_Fill(0,0,127,63,0);//清空
+	OLED_Clear_GRAM();//清空
 	u8 jhfmrszIndex[]={jiang,huiFu,fuXing,moRen,ren,sheZhi,zhi};
 	OLED_ShowChineseWords(0,16,jhfmrszIndex,7,1);
 	OLED_ShowChinese(0,32,an,16,1);
@@ -1034,13 +1162,13 @@ void menu_hfccTip(void){
 	OLED_ShowChineseWords(56,32,jxIndex,2,1);
 }//三级菜单：将恢复默认
 void menu_hfcg(void){
-	OLED_Fill(0,0,127,63,0);//清空
+	OLED_Clear_GRAM();//清空
 	u8 hfcgIndex[]={huiFu,fuXing,chengGong,gong};
 	OLED_ShowChineseWords(32,24,hfcgIndex,4,1);
 }//三级菜单：恢复成功
 
 void menu_gybjInf(void){
-	OLED_Fill(0,0,127,63,0);//清空
+	OLED_Clear_GRAM();//清空
 	OLED_ShowString(0,0, (u8 *)"J20RC",16,1);
 	u8 hfcgIndex[]={kai,fa,tuan,dui};
 	OLED_ShowChineseWords(40,0,hfcgIndex,4,1);

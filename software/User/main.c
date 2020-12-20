@@ -7,113 +7,155 @@ J20航模遥控器遥控器端
 */
 #include "main.h"
 
+/*函数预定义*/
 void keyEventHandle(void);
 void menuEventHandle(void);
-	
+
+/*变量定义*/
 extern unsigned char logo[];
-u16 lastThrPWM = 0;//上一时刻的油门大小
+extern unsigned char iconClock[];
+extern unsigned char iconAlarm[];
 u16 loca;//存放坐标
-u16 updateFlag;//窗口更新标志
 u16 thrNum;//油门换算后的大小
-float lastBatVolt=0.00;//上一时刻的电池电压
 extern char batVoltStr[8];//电池电压字符串
 extern char timeStr[9];//时间字符串
-u16 count=0;
-int main()
+u16 loopCount = 0;//循环次数计数
+u16 clockCount = 0;
+
+/*只在程序开始时运行一次的代码*/
+void setup(void)
 {
 	delay_init();//初始化延时函数
-	SysTick_Config(900000);//0.1s系统滴答时钟
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //设置NVIC中断分组2，2位抢占优先级和2位子优先级
 	usart_init(115200);//初始化串口1，波特率为115200
 	TIM2_Init(1999,71);//1MHz，每10ms进行ADC采样一次
 	TIM3_Init(19999,71);//1MHz，每20ms检测按键一次；
 	DMA1_Init();	//DMA初始化
-	Adc_Init();		//ADC初始化
-	set_Init();	//读取用户数据
+	ADC_Pin_Init();		//ADC初始化
+	SET_Init();	//读取用户数据
 	RTC_Init();		//RTC初始化
 	BEEPER_Init();	//BEEPER初始化
 	KEY_Init();		//KEY初始化
 	NRF24L01_Init();//NRF24L01初始化
 	PPM_Init();//PPM引脚初始化
 	
+	beeperOnce(20);//蜂鸣器响一下
 	OLED_Init();	//初始化OLED
 	OLED_Clear();
-	OLED_DrawPointBMP(9,0,logo,110,56,1);//显示logo
+	OLED_DrawPointBMP(0,0,logo,128,64,setData.onImage);//显示logo
 	OLED_Refresh_Gram();//刷新显存
-	onSound();
 	while(NRF24L01_Check())
 	{
  		delay_ms(100);
-		Beeper = !Beeper;//蜂鸣器1Hz报警，表示无线模块故障
+		Beeper = !Beeper;//蜂鸣器5Hz报警，表示无线模块故障
 	}
-	if(setData.NRF_Mode == ON)  NRF24L01_TX_Mode();//发射模式
-	else NRF24L01_LowPower_Mode();//掉电模式
-	
+	Beeper = 0;//蜂鸣器停止响
 	delay_ms(1000);
-	OLED_Fill(0,0,127,63,0);//清空
-	mainWindow();//显示主界面
-	OLED_Refresh_Gram();//刷新显存
-	while (1){
-		if(count%500==0 && nowMenuIndex==home)//检测电池电压
+	OLED_Clear_GRAM();//清空
+	
+	if(setData.clockCheck == ON)//油门开机自检
+	{
+		if(PWMvalue[2]>1200)
 		{
-			if(batVoltSignal==1) onSound();//蜂鸣器间断鸣叫，报警
+			u8 hzIndex[4] = {youMen,men,baoJing,jing};
+			OLED_ShowChineseWords(30,24,hzIndex,4,1);
+			OLED_ShowString(94,24,(u8 *)"!",16,1);
+			OLED_Refresh_Gram();//写入显存
+		}
+		while(PWMvalue[2]>1200){}
+		OLED_Clear_GRAM();//清空
+	}
+	if(setData.NRF_Mode == ON)  NRF24L01_TX_Mode(setData.NRF_Power);//发射模式
+	else NRF24L01_LowPower_Mode();//掉电模式
+	homeWindow();//显示主界面
+	OLED_Refresh_Gram();//刷新显存
+}
+
+/*不断循环执行的代码*/
+void loop(void)
+{
+	if(clockTime>setData.clockTime*60*50 && setData.clockMode == ON)
+	{
+		if(clockCount%5==0)
+		{
+			beeperOnce(20);
+			if(nowMenuIndex==home)
+			{
+				OLED_DrawPointBMP(68,1,iconClock,15,12,1);//时间图标
+				OLED_Refresh_Gram();//写入显存
+			}
+		}
+		else{delay_ms(20);}
+		if(clockCount%10==0 && nowMenuIndex==home){
+			OLED_DrawPointBMP(68,1,iconAlarm,16,12,1);//报警图标
+			drawClockTime();//显示时间00:00:00
+			OLED_Refresh_Gram();//写入显存
+		}
+		clockCount++;
+		if(clockCount>100)//闹钟响2s
+		{
+			clockTime = 0;//闹钟时间清零
+			clockCount = 0;
+		}
+	}
+	if(loopCount%100==0 && nowMenuIndex==home)//更新油门、后四个通道
+	{
+		drawClockTime();//显示时间00:00:00
+		showSwState();//显示后四个通道状态
+		thrNum = (int)(PWMvalue[2]-1000)/22;//更新油门
+		if(setData.throttlePreference)//左手油门
+		{
+			OLED_Fill(2,62-thrNum,2,62,0);//下部分写1
+			OLED_Fill(2,16,2,62-thrNum,1);//上部分写0
+		}
+		else{//右手油门
+			OLED_Fill(125,62-thrNum,125,62,0);//下部分写1
+			OLED_Fill(125,16,125,62-thrNum,1);//上部分写0
+		}
+		if(loopCount%1000==0)//检测电池电压
+		{
+			if(batVoltSignal==1) beeperOnce(10);//蜂鸣器间断鸣叫，报警
 			sprintf((char *)batVoltStr,"%1.2fV",batVolt);
 			OLED_ShowString(80,19, (u8 *)batVoltStr,16,1);//显示电池电压
-			OLED_Refresh_Gram();//刷新显存
 		}
-		if(count%100==0 && nowMenuIndex==home)//显示时间
+		OLED_Refresh_Gram();//刷新显存
+	}
+	if(keyEvent>0)//微调更新事件
+	{
+		keyDownSound();
+		keyEventHandle();
+	}
+	if(nowMenuIndex==xcjz14)//行程校准
+	{
+		menu_xcjz14();
+		OLED_Refresh_Gram();//刷新显存
+		for(int i=0;i<4;i++)
 		{
-			drawClockTime();//显示时间00:00:00
-			showSwState();//显示后四个通道状态
-			OLED_Refresh_Gram();//刷新显存
+			if(chResult[i]>setData.chUpper[i]) setData.chUpper[i]=chResult[i];
+			if(chResult[i]<setData.chLower[i]) setData.chLower[i]=chResult[i];
 		}
-		if(count%20 == 0 && nowMenuIndex==home)//油门更新事件
-		{
-			if(abs(PWMvalue[2]-lastThrPWM)/10>0) updateFlag = 1;
-			lastThrPWM = PWMvalue[2];//1000量程=100%
-			if(updateFlag)
-			{
-				thrNum = (int)(PWMvalue[2]-1000)/22;//更新油门
-				if(setData.throttlePreference)//左手油门
-				{
-					OLED_Fill(2,62-thrNum,2,62,0);//下部分写1
-					OLED_Fill(2,16,2,62-thrNum,1);//上部分写0
-				}
-				else{//右手油门
-					OLED_Fill(125,62-thrNum,125,62,0);//下部分写1
-					OLED_Fill(125,16,125,62-thrNum,1);//上部分写0
-				}
-				OLED_Refresh_Gram();//刷新显存
-				updateFlag = 0;
-			}
-		}
-		if(keyEvent>0)//微调更新事件
-		{
-			keyDownSound();
-			keyEventHandle();
-		}
-		if(nowMenuIndex==xcjz14)//行程校准
-		{
-			menu_xcjz14();
-			OLED_Refresh_Gram();//刷新显存
-			for(int i=0;i<4;i++)
-			{
-				if(chResult[i]>setData.chUpper[i]) setData.chUpper[i]=chResult[i];
-				if(chResult[i]<setData.chLower[i]) setData.chLower[i]=chResult[i];
-			}
-		}
-		if(nowMenuIndex==dljs18)//舵量监视
-		{
-			menu_dljs18();
-			OLED_Refresh_Gram();//刷新显存
-		}
-		if(menuEvent[0])//菜单事件
-		{
-			keyDownSound();
-			menuEventHandle();
-		}
-		lastMenuIndex = nowMenuIndex;
-		count++;
+	}
+	if(nowMenuIndex==dljs18)//舵量监视
+	{
+		menu_dljs18();
+		OLED_Refresh_Gram();//刷新显存
+	}
+	if(menuEvent[0])//菜单事件
+	{
+		keyDownSound();
+		menuEventHandle();
+	}
+	lastMenuIndex = nowMenuIndex;
+	loopCount++;
+}
+
+/*主函数*/
+int main()
+{
+	setup();
+	while(1)
+	{
+		loop();
 	}
 }
 
@@ -193,8 +235,6 @@ void menuEventHandle(void)
 		if(setData.PWMadjustValue[i]>300-setData.PWMadjustUnit) setData.PWMadjustValue[i]=300-setData.PWMadjustUnit;
 		if(setData.PWMadjustValue[i]<setData.PWMadjustUnit-300) setData.PWMadjustValue[i]=setData.PWMadjustUnit-300;
 	}
-	if(setData.PWMadjustUnit>8) setData.PWMadjustUnit = 8;//限制微调单位范围
-	if(setData.PWMadjustUnit<1) setData.PWMadjustUnit = 2;
 	if(menuEvent[1]==NUM_up)
 	{
 		if(nowMenuIndex==tdwt1){setData.PWMadjustValue[0] += setData.PWMadjustUnit;menu_tdwt1();}
@@ -216,9 +256,38 @@ void menuEventHandle(void)
 		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
 		if(nowMenuIndex==dyjz) {setData.batVoltAdjust += 1;menu_dyjz();}
 		if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.01;menu_bjdy();}
-		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit += 1;menu_wtdw();}
+		if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt += 0.1;menu_jsbj();}
+		if(nowMenuIndex==wtdw) 
+		{
+			setData.PWMadjustUnit += 1;
+			if(setData.PWMadjustUnit>9) {setData.PWMadjustUnit = 9;}//限制微调单位范围
+			menu_wtdw();
+		}
 		if(nowMenuIndex==xzmx) {setData.modelType += 1;if(setData.modelType>2) {setData.modelType=0;}menu_xzmx();}
 		if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
+		if(nowMenuIndex==ppmsc) {setData.PPM_Out =!setData.PPM_Out;menu_ppmsc();}
+		if(nowMenuIndex==ajyx) {setData.keySound =!setData.keySound;menu_ajyx();}
+		if(nowMenuIndex==kjhm) {setData.onImage =!setData.onImage;menu_kjhm();}
+		if(nowMenuIndex==nzbj) {setData.clockMode =!setData.clockMode;menu_nzbj();}
+		if(nowMenuIndex==nzsc) 
+		{
+			setData.clockTime += 1;
+			if(setData.clockTime>60) {setData.clockTime=60;}//限制闹钟时长
+			menu_nzsc();
+		}
+		if(nowMenuIndex==kjzj) {setData.clockCheck =!setData.clockCheck;menu_kjzj();}
+		if(nowMenuIndex==skbh) 
+		{
+			setData.throttleProtect += 5;
+			if(setData.throttleProtect>100) {setData.throttleProtect = 100;}//限制油门保护值
+			menu_skbh();
+		}
+		if(nowMenuIndex==fsgl)
+		{
+			setData.NRF_Power += 2;
+			if(setData.NRF_Power>0x0f) {setData.NRF_Power=0x0f;}//限制功率11,13,15
+			menu_fsgl();
+		}
 	}
 	if(menuEvent[1]==NUM_down)
 	{
@@ -241,9 +310,38 @@ void menuEventHandle(void)
 		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
 		if(nowMenuIndex==dyjz) {setData.batVoltAdjust -= 1;menu_dyjz();}
 		if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.01;menu_bjdy();}
-		if(nowMenuIndex==wtdw) {setData.PWMadjustUnit -= 1;menu_wtdw();}
+		if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt -= 0.1;menu_jsbj();}
+		if(nowMenuIndex==wtdw) 
+		{
+			setData.PWMadjustUnit -= 1;
+			if(setData.PWMadjustUnit<1) {setData.PWMadjustUnit = 1;}//限制微调单位范围
+			menu_wtdw();
+		}
 		if(nowMenuIndex==xzmx) {if(setData.modelType==0){setData.modelType=2;}else {setData.modelType -= 1;}menu_xzmx();}
 		if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
+		if(nowMenuIndex==ppmsc) {setData.PPM_Out =!setData.PPM_Out;menu_ppmsc();}
+		if(nowMenuIndex==ajyx) {setData.keySound =!setData.keySound;menu_ajyx();}
+		if(nowMenuIndex==kjhm) {setData.onImage =!setData.onImage;menu_kjhm();}
+		if(nowMenuIndex==nzbj) {setData.clockMode =!setData.clockMode;menu_nzbj();}
+		if(nowMenuIndex==nzsc) 
+		{
+			setData.clockTime -= 1;
+			if(setData.clockTime<1) {setData.clockTime=1;}//限制闹钟时长
+			menu_nzsc();
+		}
+		if(nowMenuIndex==kjzj) {setData.clockCheck =!setData.clockCheck;menu_kjzj();}
+		if(nowMenuIndex==skbh) 
+		{
+			if(setData.throttleProtect<5) {setData.throttleProtect = 5;}//限制油门保护值
+			setData.throttleProtect -= 5;
+			menu_skbh();
+		}
+		if(nowMenuIndex==fsgl)
+		{
+			setData.NRF_Power -= 2;
+			if(setData.NRF_Power<0x0b) {setData.NRF_Power=0x0b;}//限制功率11,13,15
+			menu_fsgl();
+		}
 	}
 	if(menuEvent[1]==MENU_enter)//旋转编码器短按后，改变菜单显示
 	{
@@ -269,6 +367,15 @@ void menuEventHandle(void)
 		if(nowMenuIndex==wtdw) {menu_wtdw();}
 		if(nowMenuIndex==xzmx) {menu_xzmx();}
 		if(nowMenuIndex==wxfs) {menu_wxfs();}
+		if(nowMenuIndex==ppmsc) {menu_ppmsc();}
+		if(nowMenuIndex==ajyx) {menu_ajyx();}
+		if(nowMenuIndex==kjhm) {menu_kjhm();}
+		if(nowMenuIndex==nzbj) {menu_nzbj();}
+		if(nowMenuIndex==nzsc) {menu_nzsc();}
+		if(nowMenuIndex==kjzj) {menu_kjzj();}
+		if(nowMenuIndex==jsbj) {menu_jsbj();}
+		if(nowMenuIndex==skbh) {menu_skbh();}
+		if(nowMenuIndex==fsgl) {menu_fsgl();}
 	}
 	if(nowMenuIndex!=lastMenuIndex)
 	{

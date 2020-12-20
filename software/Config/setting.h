@@ -28,13 +28,15 @@ typedef struct _set_Config// 用户设置结构体
 	u8 clockTime;//闹钟时间5min
 	u8 clockCheck;//开机是否自检一下油门
 	u8 throttleProtect;//油门保护值0%
+	u8 PPM_Out;//是否PPM输出
+	u8 NRF_Power;//NRF发射功率 
 }set_Config;
 #pragma pack()
 
 
 extern volatile set_Config setData;
 extern volatile u32 setDataSize;
-void set_Init(void);
+void SET_Init(void);
 void resetData(void);
 
 #endif

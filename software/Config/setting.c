@@ -25,10 +25,12 @@ void resetData(void)
 	setData.RecWarnBatVolt = 11.8;//接收机的报警电压
 	setData.clockMode = OFF;//闹钟是否报警
 	setData.clockTime = 5;//闹钟时间5min
-	setData.clockCheck = ON;//开机是否自检一下油门
+	setData.clockCheck = OFF;//开机是否自检一下油门
 	setData.throttleProtect = 0;//油门保护值0%
+	setData.PPM_Out = OFF;//是否PPM输出
+	setData.NRF_Power = 0x0f;//0x0f=0dBm;0x0d=-6dBm;0xb=-12dBm;0x09=-18dBm;功率越大，dBm越大
 }
-void set_Init(void)
+void SET_Init(void)
 {
 	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//从FLASH中读取结构体
 	if(setData.writeFlag!=0x1111){
