@@ -21,20 +21,20 @@ void resetData(void)
 	setData.modelType = 0;//模型类型：翼0，车1，船2
 	setData.NRF_Mode = ON;//无线发射，默认启动
 	setData.keySound = ON;//按键声音，默认启动
-	setData.onImage = 1;//开机画面，0反白,1正常
+	setData.onImage = 0;//开机画面，0反白,1正常，默认反白
 	setData.RecWarnBatVolt = 11.8;//接收机的报警电压
-	setData.clockMode = OFF;//闹钟是否报警
-	setData.clockTime = 5;//闹钟时间5min
-	setData.clockCheck = OFF;//开机是否自检一下油门
-	setData.throttleProtect = 0;//油门保护值0%
-	setData.PPM_Out = OFF;//是否PPM输出
+	setData.clockMode = OFF;//闹钟是否报警，默认关闭
+	setData.clockTime = 5;//闹钟时间，默认5min
+	setData.clockCheck = OFF;//开机是否自检一下油门，默认关闭
+	setData.throttleProtect = 0;//油门保护值，默认0%
+	setData.PPM_Out = OFF;//PPM输出，默认关闭
 	setData.NRF_Power = 0x0f;//0x0f=0dBm;0x0d=-6dBm;0xb=-12dBm;0x09=-18dBm;功率越大，dBm越大
 }
 void SET_Init(void)
 {
 	STMFLASH_Read(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//从FLASH中读取结构体
-	if(setData.writeFlag!=0x1111){
-		setData.writeFlag=0x1111;//是否第一次写入
+	if(setData.writeFlag!=FM_FLAG){//是否为最新版本
+		setData.writeFlag=FM_FLAG;
 		resetData();
 		STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//写入FLASH
 	}

@@ -95,7 +95,7 @@ void menuList2tdys(void);
 Key_index_struct Key_table[MENU_NUM]=
 {
 	//当前, 下, 上, 确定, 返回, home
-  {home, home, home, tdwt, home, home,(*homeWindow)},//主页面：home
+  {home, dljs18, dljs18, tdwt, home, home,(*homeWindow)},//主页面：home
 	
 	{tdwt, tdzf, gybj, tdwt1, home, home,(*menu_tdwt)},//一级菜单：通道微调
 	{tdzf, hksz, tdwt, tdzf1, home, home,(*menu_tdzf)},//一级菜单：通道正反
@@ -148,7 +148,7 @@ Key_index_struct Key_table[MENU_NUM]=
 	{tdys7,tdys8,tdys6,tdys7,tdys,home,(*menu_tdys7)},//二级菜单：通道映射7
 	{tdys8,tdys1,tdys7,tdys8,tdys,home,(*menu_tdys8)},//二级菜单：通道映射8
 	
-	{dljs18,dljs18,dljs18,dljs,dljs,home,(*menu_dljs18)},//二级菜单：舵量监视1-8
+	{dljs18,home,home,dljs,dljs,home,(*menu_dljs18)},//二级菜单：舵量监视1-8
 	
 	{cysz,dysz,hfcc,wtdw,xtsz,home,(*menu_cysz)},//二级菜单：常用设置
 	{dysz,nzsz,cysz,dyjz,xtsz,home,(*menu_dysz)},//二级菜单：电压设置
@@ -212,11 +212,11 @@ void OLED_display(void){
 	}
 	if(nowMenuIndex==home && lastMenuIndex!=home) 
 	{
-		if(lastMenuIndex!=xcjz14) homeGoIndex = lastMenuIndex;
-		else homeGoIndex = xcjz;
+		if(lastMenuIndex!=xcjz14 && lastMenuIndex!=dljs18) homeGoIndex = lastMenuIndex;
+		if(lastMenuIndex==xcjz14) homeGoIndex = xcjz;
 		OLED_Clear_GRAM();//清空
 	}
-	if(nowMenuIndex!=home && lastMenuIndex==home) {nowMenuIndex = homeGoIndex;OLED_Clear_GRAM();}//清空，实现快速跳转
+	if(nowMenuIndex!=home && lastMenuIndex==home && menuEvent[1]==MENU_enter) {nowMenuIndex = homeGoIndex;OLED_Clear_GRAM();}//清空，实现快速跳转
 	if(nowMenuIndex>=tdwt && nowMenuIndex<=gybj && (lastMenuIndex<tdwt | lastMenuIndex>gybj)) main2menuList(sheZhi,zhi,cai,dan);//切换窗口
 	if(nowMenuIndex>=tdwt1 && nowMenuIndex<=tdwt8 && (lastMenuIndex<tdwt1 | lastMenuIndex>tdwt8))menuList2tdwt();//切换窗口
 	if(nowMenuIndex>=tdzf1 && nowMenuIndex<=tdzf8 && (lastMenuIndex<tdzf1 | lastMenuIndex>tdzf8))menuList2tdzf();//切换窗口
@@ -1163,6 +1163,8 @@ void menu_hfccTip(void){
 }//三级菜单：将恢复默认
 void menu_hfcg(void){
 	OLED_Clear_GRAM();//清空
+	resetData();//重置数据
+	STMFLASH_Write(FLASH_SAVE_ADDR,(u16 *)&setData,setDataSize);//写入FLASH
 	u8 hfcgIndex[]={huiFu,fuXing,chengGong,gong};
 	OLED_ShowChineseWords(32,24,hfcgIndex,4,1);
 }//三级菜单：恢复成功

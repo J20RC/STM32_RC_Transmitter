@@ -255,7 +255,7 @@ void menuEventHandle(void)
 		if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
 		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
 		if(nowMenuIndex==dyjz) {setData.batVoltAdjust += 1;menu_dyjz();}
-		if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.01;menu_bjdy();}
+		if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.1;menu_bjdy();}
 		if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt += 0.1;menu_jsbj();}
 		if(nowMenuIndex==wtdw) 
 		{
@@ -309,7 +309,7 @@ void menuEventHandle(void)
 		if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
 		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
 		if(nowMenuIndex==dyjz) {setData.batVoltAdjust -= 1;menu_dyjz();}
-		if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.01;menu_bjdy();}
+		if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.1;menu_bjdy();}
 		if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt -= 0.1;menu_jsbj();}
 		if(nowMenuIndex==wtdw) 
 		{
