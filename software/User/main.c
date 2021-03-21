@@ -238,144 +238,147 @@ void menuEventHandle(void)
 	if(menuEvent[1]==NUM_up)
 	{
 		if(nowMenuIndex==tdwt1){setData.PWMadjustValue[0] += setData.PWMadjustUnit;menu_tdwt1();}
-		if(nowMenuIndex==tdwt2){setData.PWMadjustValue[1] += setData.PWMadjustUnit;menu_tdwt2();}
-		if(nowMenuIndex==tdwt3){setData.PWMadjustValue[2] += setData.PWMadjustUnit;menu_tdwt3();}
-		if(nowMenuIndex==tdwt4){setData.PWMadjustValue[3] += setData.PWMadjustUnit;menu_tdwt4();}
-		if(nowMenuIndex==tdwt5){setData.PWMadjustValue[4] += setData.PWMadjustUnit;menu_tdwt5();}
-		if(nowMenuIndex==tdwt6){setData.PWMadjustValue[5] += setData.PWMadjustUnit;menu_tdwt6();}
-		if(nowMenuIndex==tdwt7){setData.PWMadjustValue[6] += setData.PWMadjustUnit;menu_tdwt7();}
-		if(nowMenuIndex==tdwt8){setData.PWMadjustValue[7] += setData.PWMadjustUnit;menu_tdwt8();}
-		if(nowMenuIndex==tdzf1){setData.chReverse[0] = !setData.chReverse[0];menu_tdzf1();}
-		if(nowMenuIndex==tdzf2){setData.chReverse[1] = !setData.chReverse[1];menu_tdzf2();}
-		if(nowMenuIndex==tdzf3){setData.chReverse[2] = !setData.chReverse[2];menu_tdzf3();}
-		if(nowMenuIndex==tdzf4){setData.chReverse[3] = !setData.chReverse[3];menu_tdzf4();}
-		if(nowMenuIndex==tdzf5){setData.chReverse[4] = !setData.chReverse[4];menu_tdzf5();}
-		if(nowMenuIndex==tdzf6){setData.chReverse[5] = !setData.chReverse[5];menu_tdzf6();}
-		if(nowMenuIndex==tdzf7){setData.chReverse[6] = !setData.chReverse[6];menu_tdzf7();}
-		if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
-		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
-		if(nowMenuIndex==dyjz) {setData.batVoltAdjust += 1;menu_dyjz();}
-		if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.1;menu_bjdy();}
-		if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt += 0.1;menu_jsbj();}
-		if(nowMenuIndex==wtdw) 
+		else if(nowMenuIndex==tdwt2){setData.PWMadjustValue[1] += setData.PWMadjustUnit;menu_tdwt2();}
+		else if(nowMenuIndex==tdwt3){setData.PWMadjustValue[2] += setData.PWMadjustUnit;menu_tdwt3();}
+		else if(nowMenuIndex==tdwt4){setData.PWMadjustValue[3] += setData.PWMadjustUnit;menu_tdwt4();}
+		else if(nowMenuIndex==tdwt5){setData.PWMadjustValue[4] += setData.PWMadjustUnit;menu_tdwt5();}
+		else if(nowMenuIndex==tdwt6){setData.PWMadjustValue[5] += setData.PWMadjustUnit;menu_tdwt6();}
+		else if(nowMenuIndex==tdwt7){setData.PWMadjustValue[6] += setData.PWMadjustUnit;menu_tdwt7();}
+		else if(nowMenuIndex==tdwt8){setData.PWMadjustValue[7] += setData.PWMadjustUnit;menu_tdwt8();}
+		else if(nowMenuIndex==tdzf1){setData.chReverse[0] = !setData.chReverse[0];menu_tdzf1();}
+		else if(nowMenuIndex==tdzf2){setData.chReverse[1] = !setData.chReverse[1];menu_tdzf2();}
+		else if(nowMenuIndex==tdzf3){setData.chReverse[2] = !setData.chReverse[2];menu_tdzf3();}
+		else if(nowMenuIndex==tdzf4){setData.chReverse[3] = !setData.chReverse[3];menu_tdzf4();}
+		else if(nowMenuIndex==tdzf5){setData.chReverse[4] = !setData.chReverse[4];menu_tdzf5();}
+		else if(nowMenuIndex==tdzf6){setData.chReverse[5] = !setData.chReverse[5];menu_tdzf6();}
+		else if(nowMenuIndex==tdzf7){setData.chReverse[6] = !setData.chReverse[6];menu_tdzf7();}
+		else if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
+		else if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
+		else if(nowMenuIndex==dyjz) {setData.batVoltAdjust += 1;menu_dyjz();}
+		else if(nowMenuIndex==bjdy) {setData.warnBatVolt += 0.1;menu_bjdy();}
+		else if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt += 0.1;menu_jsbj();}
+		else if(nowMenuIndex==wtdw) 
 		{
 			setData.PWMadjustUnit += 1;
 			if(setData.PWMadjustUnit>9) {setData.PWMadjustUnit = 9;}//限制微调单位范围
 			menu_wtdw();
 		}
-		if(nowMenuIndex==xzmx) {setData.modelType += 1;if(setData.modelType>2) {setData.modelType=0;}menu_xzmx();}
-		if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
-		if(nowMenuIndex==ppmsc) {setData.PPM_Out =!setData.PPM_Out;menu_ppmsc();}
-		if(nowMenuIndex==ajyx) {setData.keySound =!setData.keySound;menu_ajyx();}
-		if(nowMenuIndex==kjhm) {setData.onImage =!setData.onImage;menu_kjhm();}
-		if(nowMenuIndex==nzbj) {setData.clockMode =!setData.clockMode;menu_nzbj();}
-		if(nowMenuIndex==nzsc) 
+		else if(nowMenuIndex==xzmx) {setData.modelType += 1;if(setData.modelType>2) {setData.modelType=0;}menu_xzmx();}
+		else if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
+		else if(nowMenuIndex==ppmsc) {setData.PPM_Out =!setData.PPM_Out;menu_ppmsc();}
+		else if(nowMenuIndex==ajyx) {setData.keySound =!setData.keySound;menu_ajyx();}
+		else if(nowMenuIndex==kjhm) {setData.onImage =!setData.onImage;menu_kjhm();}
+		else if(nowMenuIndex==nzbj) {setData.clockMode =!setData.clockMode;menu_nzbj();}
+		else if(nowMenuIndex==nzsc) 
 		{
 			setData.clockTime += 1;
 			if(setData.clockTime>60) {setData.clockTime=60;}//限制闹钟时长
 			menu_nzsc();
 		}
-		if(nowMenuIndex==kjzj) {setData.clockCheck =!setData.clockCheck;menu_kjzj();}
-		if(nowMenuIndex==skbh) 
+		else if(nowMenuIndex==kjzj) {setData.clockCheck =!setData.clockCheck;menu_kjzj();}
+		else if(nowMenuIndex==skbh) 
 		{
 			setData.throttleProtect += 5;
 			if(setData.throttleProtect>100) {setData.throttleProtect = 100;}//限制油门保护值
 			menu_skbh();
 		}
-		if(nowMenuIndex==fsgl)
+		else if(nowMenuIndex==fsgl)
 		{
 			setData.NRF_Power += 2;
 			if(setData.NRF_Power>0x0f) {setData.NRF_Power=0x0f;}//限制功率11,13,15
 			menu_fsgl();
 		}
+		else {}
 	}
 	if(menuEvent[1]==NUM_down)
 	{
 		if(nowMenuIndex==tdwt1){setData.PWMadjustValue[0] -= setData.PWMadjustUnit;menu_tdwt1();}
-		if(nowMenuIndex==tdwt2){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;menu_tdwt2();}
-		if(nowMenuIndex==tdwt3){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;menu_tdwt3();}
-		if(nowMenuIndex==tdwt4){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;menu_tdwt4();}
-		if(nowMenuIndex==tdwt5){setData.PWMadjustValue[4] -= setData.PWMadjustUnit;menu_tdwt5();}
-		if(nowMenuIndex==tdwt6){setData.PWMadjustValue[5] -= setData.PWMadjustUnit;menu_tdwt6();}
-		if(nowMenuIndex==tdwt7){setData.PWMadjustValue[6] -= setData.PWMadjustUnit;menu_tdwt7();}
-		if(nowMenuIndex==tdwt8){setData.PWMadjustValue[7] -= setData.PWMadjustUnit;menu_tdwt8();}
-		if(nowMenuIndex==tdzf1){setData.chReverse[0] = !setData.chReverse[0];menu_tdzf1();}
-		if(nowMenuIndex==tdzf2){setData.chReverse[1] = !setData.chReverse[1];menu_tdzf2();}
-		if(nowMenuIndex==tdzf3){setData.chReverse[2] = !setData.chReverse[2];menu_tdzf3();}
-		if(nowMenuIndex==tdzf4){setData.chReverse[3] = !setData.chReverse[3];menu_tdzf4();}
-		if(nowMenuIndex==tdzf5){setData.chReverse[4] = !setData.chReverse[4];menu_tdzf5();}
-		if(nowMenuIndex==tdzf6){setData.chReverse[5] = !setData.chReverse[5];menu_tdzf6();}
-		if(nowMenuIndex==tdzf7){setData.chReverse[6] = !setData.chReverse[6];menu_tdzf7();}
-		if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
-		if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
-		if(nowMenuIndex==dyjz) {setData.batVoltAdjust -= 1;menu_dyjz();}
-		if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.1;menu_bjdy();}
-		if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt -= 0.1;menu_jsbj();}
-		if(nowMenuIndex==wtdw) 
+		else if(nowMenuIndex==tdwt2){setData.PWMadjustValue[1] -= setData.PWMadjustUnit;menu_tdwt2();}
+		else if(nowMenuIndex==tdwt3){setData.PWMadjustValue[2] -= setData.PWMadjustUnit;menu_tdwt3();}
+		else if(nowMenuIndex==tdwt4){setData.PWMadjustValue[3] -= setData.PWMadjustUnit;menu_tdwt4();}
+		else if(nowMenuIndex==tdwt5){setData.PWMadjustValue[4] -= setData.PWMadjustUnit;menu_tdwt5();}
+		else if(nowMenuIndex==tdwt6){setData.PWMadjustValue[5] -= setData.PWMadjustUnit;menu_tdwt6();}
+		else if(nowMenuIndex==tdwt7){setData.PWMadjustValue[6] -= setData.PWMadjustUnit;menu_tdwt7();}
+		else if(nowMenuIndex==tdwt8){setData.PWMadjustValue[7] -= setData.PWMadjustUnit;menu_tdwt8();}
+		else if(nowMenuIndex==tdzf1){setData.chReverse[0] = !setData.chReverse[0];menu_tdzf1();}
+		else if(nowMenuIndex==tdzf2){setData.chReverse[1] = !setData.chReverse[1];menu_tdzf2();}
+		else if(nowMenuIndex==tdzf3){setData.chReverse[2] = !setData.chReverse[2];menu_tdzf3();}
+		else if(nowMenuIndex==tdzf4){setData.chReverse[3] = !setData.chReverse[3];menu_tdzf4();}
+		else if(nowMenuIndex==tdzf5){setData.chReverse[4] = !setData.chReverse[4];menu_tdzf5();}
+		else if(nowMenuIndex==tdzf6){setData.chReverse[5] = !setData.chReverse[5];menu_tdzf6();}
+		else if(nowMenuIndex==tdzf7){setData.chReverse[6] = !setData.chReverse[6];menu_tdzf7();}
+		else if(nowMenuIndex==tdzf8){setData.chReverse[7] = !setData.chReverse[7];menu_tdzf8();}
+		else if(nowMenuIndex==ymph) {setData.throttlePreference = !setData.throttlePreference;menu_ymph();}
+		else if(nowMenuIndex==dyjz) {setData.batVoltAdjust -= 1;menu_dyjz();}
+		else if(nowMenuIndex==bjdy) {setData.warnBatVolt -= 0.1;menu_bjdy();}
+		else if(nowMenuIndex==jsbj) {setData.RecWarnBatVolt -= 0.1;menu_jsbj();}
+		else if(nowMenuIndex==wtdw) 
 		{
 			setData.PWMadjustUnit -= 1;
 			if(setData.PWMadjustUnit<1) {setData.PWMadjustUnit = 1;}//限制微调单位范围
 			menu_wtdw();
 		}
-		if(nowMenuIndex==xzmx) {if(setData.modelType==0){setData.modelType=2;}else {setData.modelType -= 1;}menu_xzmx();}
-		if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
-		if(nowMenuIndex==ppmsc) {setData.PPM_Out =!setData.PPM_Out;menu_ppmsc();}
-		if(nowMenuIndex==ajyx) {setData.keySound =!setData.keySound;menu_ajyx();}
-		if(nowMenuIndex==kjhm) {setData.onImage =!setData.onImage;menu_kjhm();}
-		if(nowMenuIndex==nzbj) {setData.clockMode =!setData.clockMode;menu_nzbj();}
-		if(nowMenuIndex==nzsc) 
+		else if(nowMenuIndex==xzmx) {if(setData.modelType==0){setData.modelType=2;}else {setData.modelType -= 1;}menu_xzmx();}
+		else if(nowMenuIndex==wxfs) {setData.NRF_Mode =!setData.NRF_Mode;menu_wxfs();}
+		else if(nowMenuIndex==ppmsc) {setData.PPM_Out =!setData.PPM_Out;menu_ppmsc();}
+		else if(nowMenuIndex==ajyx) {setData.keySound =!setData.keySound;menu_ajyx();}
+		else if(nowMenuIndex==kjhm) {setData.onImage =!setData.onImage;menu_kjhm();}
+		else if(nowMenuIndex==nzbj) {setData.clockMode =!setData.clockMode;menu_nzbj();}
+		else if(nowMenuIndex==nzsc) 
 		{
 			setData.clockTime -= 1;
 			if(setData.clockTime<1) {setData.clockTime=1;}//限制闹钟时长
 			menu_nzsc();
 		}
-		if(nowMenuIndex==kjzj) {setData.clockCheck =!setData.clockCheck;menu_kjzj();}
-		if(nowMenuIndex==skbh) 
+		else if(nowMenuIndex==kjzj) {setData.clockCheck =!setData.clockCheck;menu_kjzj();}
+		else if(nowMenuIndex==skbh) 
 		{
 			if(setData.throttleProtect<5) {setData.throttleProtect = 5;}//限制油门保护值
 			setData.throttleProtect -= 5;
 			menu_skbh();
 		}
-		if(nowMenuIndex==fsgl)
+		else if(nowMenuIndex==fsgl)
 		{
 			setData.NRF_Power -= 2;
 			if(setData.NRF_Power<0x0b) {setData.NRF_Power=0x0b;}//限制功率11,13,15
 			menu_fsgl();
 		}
+		else {}
 	}
 	if(menuEvent[1]==MENU_enter)//旋转编码器短按后，改变菜单显示
 	{
 		if(nowMenuIndex==tdwt1){menu_tdwt1();}
-		if(nowMenuIndex==tdwt2){menu_tdwt2();}
-		if(nowMenuIndex==tdwt3){menu_tdwt3();}
-		if(nowMenuIndex==tdwt4){menu_tdwt4();}
-		if(nowMenuIndex==tdwt5){menu_tdwt5();}
-		if(nowMenuIndex==tdwt6){menu_tdwt6();}
-		if(nowMenuIndex==tdwt7){menu_tdwt7();}
-		if(nowMenuIndex==tdwt8){menu_tdwt8();}
-		if(nowMenuIndex==tdzf1){menu_tdzf1();}
-		if(nowMenuIndex==tdzf2){menu_tdzf2();}
-		if(nowMenuIndex==tdzf3){menu_tdzf3();}
-		if(nowMenuIndex==tdzf4){menu_tdzf4();}
-		if(nowMenuIndex==tdzf5){menu_tdzf5();}
-		if(nowMenuIndex==tdzf6){menu_tdzf6();}
-		if(nowMenuIndex==tdzf7){menu_tdzf7();}
-		if(nowMenuIndex==tdzf8){menu_tdzf8();}
-		if(nowMenuIndex==ymph) {menu_ymph();}
-		if(nowMenuIndex==dyjz) {menu_dyjz();}
-		if(nowMenuIndex==bjdy) {menu_bjdy();}
-		if(nowMenuIndex==wtdw) {menu_wtdw();}
-		if(nowMenuIndex==xzmx) {menu_xzmx();}
-		if(nowMenuIndex==wxfs) {menu_wxfs();}
-		if(nowMenuIndex==ppmsc) {menu_ppmsc();}
-		if(nowMenuIndex==ajyx) {menu_ajyx();}
-		if(nowMenuIndex==kjhm) {menu_kjhm();}
-		if(nowMenuIndex==nzbj) {menu_nzbj();}
-		if(nowMenuIndex==nzsc) {menu_nzsc();}
-		if(nowMenuIndex==kjzj) {menu_kjzj();}
-		if(nowMenuIndex==jsbj) {menu_jsbj();}
-		if(nowMenuIndex==skbh) {menu_skbh();}
-		if(nowMenuIndex==fsgl) {menu_fsgl();}
+		else if(nowMenuIndex==tdwt2){menu_tdwt2();}
+		else if(nowMenuIndex==tdwt3){menu_tdwt3();}
+		else if(nowMenuIndex==tdwt4){menu_tdwt4();}
+		else if(nowMenuIndex==tdwt5){menu_tdwt5();}
+		else if(nowMenuIndex==tdwt6){menu_tdwt6();}
+		else if(nowMenuIndex==tdwt7){menu_tdwt7();}
+		else if(nowMenuIndex==tdwt8){menu_tdwt8();}
+		else if(nowMenuIndex==tdzf1){menu_tdzf1();}
+		else if(nowMenuIndex==tdzf2){menu_tdzf2();}
+		else if(nowMenuIndex==tdzf3){menu_tdzf3();}
+		else if(nowMenuIndex==tdzf4){menu_tdzf4();}
+		else if(nowMenuIndex==tdzf5){menu_tdzf5();}
+		else if(nowMenuIndex==tdzf6){menu_tdzf6();}
+		else if(nowMenuIndex==tdzf7){menu_tdzf7();}
+		else if(nowMenuIndex==tdzf8){menu_tdzf8();}
+		else if(nowMenuIndex==ymph) {menu_ymph();}
+		else if(nowMenuIndex==dyjz) {menu_dyjz();}
+		else if(nowMenuIndex==bjdy) {menu_bjdy();}
+		else if(nowMenuIndex==wtdw) {menu_wtdw();}
+		else if(nowMenuIndex==xzmx) {menu_xzmx();}
+		else if(nowMenuIndex==wxfs) {menu_wxfs();}
+		else if(nowMenuIndex==ppmsc) {menu_ppmsc();}
+		else if(nowMenuIndex==ajyx) {menu_ajyx();}
+		else if(nowMenuIndex==kjhm) {menu_kjhm();}
+		else if(nowMenuIndex==nzbj) {menu_nzbj();}
+		else if(nowMenuIndex==nzsc) {menu_nzsc();}
+		else if(nowMenuIndex==kjzj) {menu_kjzj();}
+		else if(nowMenuIndex==jsbj) {menu_jsbj();}
+		else if(nowMenuIndex==skbh) {menu_skbh();}
+		else if(nowMenuIndex==fsgl) {menu_fsgl();}
+		else {}
 	}
 	if(nowMenuIndex!=lastMenuIndex)
 	{

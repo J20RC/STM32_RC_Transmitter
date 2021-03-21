@@ -22,7 +22,7 @@
   </DaveTm>
 
   <Target>
-    <TargetName>J20TransmitterBase</TargetName>
+    <TargetName>J20RC_BASE</TargetName>
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>

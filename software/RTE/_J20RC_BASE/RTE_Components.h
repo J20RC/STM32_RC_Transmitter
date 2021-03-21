@@ -3,8 +3,8 @@
  * Auto generated Run-Time-Environment Component Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'J20TransmitterBase' 
- * Target:  'J20TransmitterBase' 
+ * Project: 'J20RC_BASE' 
+ * Target:  'J20RC_BASE' 
  */
 
 #ifndef RTE_COMPONENTS_H
